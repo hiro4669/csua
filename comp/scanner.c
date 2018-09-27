@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include "keyword.h"
 
-//#include "y.tab.h"
 #include "scantest.h"
 
 
@@ -135,7 +134,6 @@ retry:
                     pushback();                    
                     double d_value;
                     sscanf(yytext, "%lf", &d_value);
-//                    printf("double_value = %lf\n", d_value);
                     yylval.dv = d_value;
                     return DOUBLE_LITERAL;                    
                 } else {// error
@@ -146,7 +144,6 @@ retry:
                 pushback();
                 int i_value;
                 sscanf(yytext, "%d", &i_value);
-//                printf("int_value = %d\n", i_value);
                 yylval.iv = i_value;
                 return INT_LITERAL;
             }            
@@ -282,8 +279,6 @@ retry:
     pushback();    
     struct OPE *op = in_word_set(yytext, strlen(yytext));
     if (op != NULL) {
-  //      printf("not null -> %d\n", op->type);
-//        printf("not null -> %s\n", op->name);
         return op->type;
     } 
     

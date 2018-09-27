@@ -1,7 +1,6 @@
 TARGET = scant
 CC = /usr/bin/gcc
 CFLAGS = -g -DDEBUG
-#OBJS = scanner.o keyword.o y.tab.o
 OBJS = scanner.o keyword.o 
 EXEC = scantest.o
 
