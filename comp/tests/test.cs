@@ -1,0 +1,16 @@
+123456710;
+1+2;
+if;
+else;
+elsif;
+while;
+for;
+return;
+break;
+continue;
+true;
+false;
+boolean;
+int;
+double;
+string;
