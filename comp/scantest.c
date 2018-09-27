@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "scantest.h"
-//#include "y.tab.h"
+#include "y.tab.h"
 
 int main(void) {
     

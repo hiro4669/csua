@@ -5,8 +5,8 @@
 #include <ctype.h>
 #include "keyword.h"
 
-//#include "y.tab.h"
-#include "scantest.h"
+#include "y.tab.h"
+
 
 
 #define ISASCII(c) isascii((unsigned char)(c))
