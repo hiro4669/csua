@@ -6,8 +6,11 @@ EXEC = scantest.o
 
 YACC = csua.y
 
-all: $(OBJS) $(EXEC)
-	$(CC) -o $(TARGET) $^
+prst: $(OBJS) parsetest.o
+	$(CC) -o $@ $^
+
+scant: $(OBJS) scantest.o
+	$(CC) -o $@ $^
 
 
 keyword.c: keyword.key
@@ -20,4 +23,4 @@ y.tab.c: $(YACC)
 	$(CC) -c $(CFLAGS) $*.c
 
 clean:
-	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output
+	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output prst

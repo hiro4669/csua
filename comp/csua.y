@@ -4,8 +4,8 @@
 %}
 %union{
     int iv;
-	double dv;
-	char *name;
+    double dv;
+    char *name;
 }
 
 %token LP
@@ -65,7 +65,7 @@ translation_unit
 	: statement
 	;
 statement
-	: IDENTIFIER LP RP
+	: IDENTIFIER LP RP SEMICOLON
 	;
 %%
 int

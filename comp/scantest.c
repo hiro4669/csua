@@ -17,7 +17,7 @@ int main(void) {
         
     while(1) {
         t_type = yylex();
-//        printf("t_type = %d\n", t_type);
+
         switch(t_type) {
             case INT_LITERAL: {
                 printf("INT_LITERAL: %d\n", yylval.iv);
