@@ -143,12 +143,12 @@ int main(void) {
                 printf("CONTINUE\n");
                 break;
             }
-            case TRUE: {
-                printf("TRUE\n");
+            case TRUE_T: {
+                printf("TRUE_T\n");
                 break;
             }
-            case FALSE: {
-                printf("FALSE\n");
+            case FALSE_T: {
+                printf("FALSE_T\n");
                 break;
             }
             case BOOLEAN_T: {
