@@ -1,10 +1,14 @@
 TARGET = scant
 CC = /usr/bin/gcc
 CFLAGS = -g -DDEBUG
+MEMORY = ../memory/memory.o ../memory/storage.o
 OBJS = y.tab.o scanner.o keyword.o
 EXEC = scantest.o
 
 YACC = csua.y
+
+memt: $(MEMORY) memtest.o
+	$(CC) -o $@ $^
 
 prst: $(OBJS) parsetest.o
 	$(CC) -o $@ $^
