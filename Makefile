@@ -6,4 +6,5 @@ all:
 
 clean:
 	$(MAKE) clean -C comp/
+	$(MAKE) clean -C memory/
 	
