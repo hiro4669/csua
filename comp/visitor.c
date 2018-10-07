@@ -30,6 +30,29 @@ static void leave_intexpr(Expression* expr) {
     fprintf(stderr, "leave intexpr\n");
 }
 
+static void enter_doubleexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter doubleexpr : %f\n", expr->u.double_value);
+    increment();
+}
+static void leave_doubleexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave doubleexpr\n");            
+}
+
+static void enter_identexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter identifierexpr : %s\n", expr->u.identifier.name);
+    increment();
+}
+static void leave_identexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave identifierexpr\n");            
+}
+
+
 static void enter_addexpr(Expression* expr) {
     print_depth();
     fprintf(stderr, "enter addexpr : +\n");
@@ -174,6 +197,62 @@ static void leave_lorexpr(Expression* expr) {
     fprintf(stderr, "leave lorexpr\n");
 }
 
+static void enter_incexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter incexpr : ++ \n");
+    increment();   
+}
+static void leave_incexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave incexpr\n");
+}
+
+static void enter_decexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter decexpr : -- \n");
+    increment();   
+}
+static void leave_decexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave decexpr\n");
+}
+
+static void enter_minusexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter minusexpr : - \n");
+    increment();   
+}
+static void leave_minusexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave minusexpr\n");
+}
+
+static void enter_lognotexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter lognotexpr : ! \n");
+    increment();  
+}
+static void leave_lognotexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave lognotexpr\n");
+}
+
+static void enter_assignexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter assignexpr : = \n");
+    increment(); 
+}
+static void leave_assignexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave assignexpr\n");
+}
+
+
 
 Visitor* create_treeview_visitor() {
     visit_expr* enter_expr_list;
@@ -184,6 +263,8 @@ Visitor* create_treeview_visitor() {
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
 
     enter_expr_list[INT_EXPRESSION]         = enter_intexpr;
+    enter_expr_list[DOUBLE_EXPRESSION]      = enter_doubleexpr;
+    enter_expr_list[IDENTIFIER_EXPRESSION]  = enter_identexpr;
     
     enter_expr_list[ADD_EXPRESSION]         = enter_addexpr;
     enter_expr_list[SUB_EXPRESSION]         = enter_subexpr;
@@ -198,13 +279,17 @@ Visitor* create_treeview_visitor() {
     enter_expr_list[NE_EXPRESSION]          = enter_neexpr;
     enter_expr_list[LOGICAL_AND_EXPRESSION] = enter_landexpr;
     enter_expr_list[LOGICAL_OR_EXPRESSION]  = enter_lorexpr;
-    
-    
-    
+    enter_expr_list[INCREMENT_EXPRESSION]   = enter_incexpr;
+    enter_expr_list[DECREMENT_EXPRESSION]   = enter_decexpr;
+    enter_expr_list[MINUS_EXPRESSION]       = enter_minusexpr;
+    enter_expr_list[LOGICAL_NOT_EXPRESSION] = enter_lognotexpr;
+    enter_expr_list[ASSIGN_EXPRESSION]      = enter_assignexpr;
     
     
     
     leave_expr_list[INT_EXPRESSION]         = leave_intexpr;
+    leave_expr_list[DOUBLE_EXPRESSION]      = leave_doubleexpr;
+    leave_expr_list[IDENTIFIER_EXPRESSION]  = leave_identexpr;
     
     leave_expr_list[ADD_EXPRESSION]         = leave_addexpr;
     leave_expr_list[SUB_EXPRESSION]         = leave_subexpr;
@@ -219,6 +304,12 @@ Visitor* create_treeview_visitor() {
     leave_expr_list[NE_EXPRESSION]          = leave_neexpr;
     leave_expr_list[LOGICAL_AND_EXPRESSION] = leave_landexpr;
     leave_expr_list[LOGICAL_OR_EXPRESSION]  = leave_lorexpr;
+    leave_expr_list[INCREMENT_EXPRESSION]   = leave_incexpr;
+    leave_expr_list[DECREMENT_EXPRESSION]   = leave_decexpr;
+    leave_expr_list[DECREMENT_EXPRESSION]   = leave_decexpr;
+    leave_expr_list[MINUS_EXPRESSION]       = leave_minusexpr;
+    leave_expr_list[LOGICAL_NOT_EXPRESSION] = leave_lognotexpr;
+    leave_expr_list[ASSIGN_EXPRESSION]      = leave_assignexpr;
     
     
 

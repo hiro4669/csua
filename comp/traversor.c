@@ -22,11 +22,32 @@ void traverse_expr(Expression* expr, Visitor* visitor) {
 
 static void traverse_expr_children(Expression* expr, Visitor *visitor) {
     switch(expr->kind) {
+        case IDENTIFIER_EXPRESSION:
+        case DOUBLE_EXPRESSION:
         case INT_EXPRESSION: {
             break;
         }
+
+        case INCREMENT_EXPRESSION:
+        case DECREMENT_EXPRESSION: {
+            traverse_expr(expr->u.inc_dec, visitor);
+            break;
+        }
+        case MINUS_EXPRESSION: {
+            traverse_expr(expr->u.minus_expression, visitor);
+            break;
+        }
+        case LOGICAL_NOT_EXPRESSION: {
+            traverse_expr(expr->u.logical_not_expression, visitor);
+            break;
+        }
+        case ASSIGN_EXPRESSION: {
+            traverse_expr(expr->u.assignment_expression.left, visitor);
+            traverse_expr(expr->u.assignment_expression.right, visitor);
+            break;
+        }
         case LOGICAL_AND_EXPRESSION:
-        case LOGICAL_NOT_EXPRESSION:            
+        case LOGICAL_OR_EXPRESSION:            
         case LT_EXPRESSION:
         case LE_EXPRESSION:
         case GT_EXPRESSION:

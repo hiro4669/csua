@@ -14,10 +14,21 @@ int main(void) {
     Expression* mul_expr = cs_create_binary_expression(MUL_EXPRESSION, left2, right2);
     
     Expression* add_expr = cs_create_binary_expression(ADD_EXPRESSION, left, mul_expr);
-    printf("treetest\n");
+    
+    Expression* ident_expr = cs_create_identifier_expression("abc");
+    
+    Expression* inc_expr = cs_create_inc_dec_expression(right, INCREMENT_EXPRESSION);
+    Expression* minus_expr = cs_create_minus_expression(right);
+    
+    Expression* assign_expr = cs_create_assignment_expression(ident_expr, ASSIGN, right2);
+    
     
     Visitor* visitor = create_treeview_visitor();
     traverse_expr(add_expr, visitor);
+    traverse_expr(ident_expr, visitor);    
+    traverse_expr(inc_expr, visitor);
+    traverse_expr(minus_expr, visitor);
+    traverse_expr(assign_expr, visitor);
     
     delete_visitor(visitor);
     
