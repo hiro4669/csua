@@ -19,6 +19,18 @@ void print_depth() {
     }
 }
 
+static void enter_boolexpr(Expression* expr) {
+    print_depth();
+    fprintf(stderr, "enter boolexpr : %d\n", expr->u.boolean_value);
+    increment();
+}
+static void leave_boolexpr(Expression* expr) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave boolexpr\n");
+}
+
+
 static void enter_intexpr(Expression* expr) {
     print_depth();
     fprintf(stderr, "enter intexpr : %d\n", expr->u.int_value);
@@ -272,6 +284,7 @@ Visitor* create_treeview_visitor() {
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
 
+    enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
     enter_expr_list[DOUBLE_EXPRESSION]        = enter_doubleexpr;
     enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;
@@ -297,7 +310,7 @@ Visitor* create_treeview_visitor() {
     enter_expr_list[FUNCTION_CALL_EXPRESSION] = enter_funccallexpr;
     
     
-    
+    leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
     leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;
