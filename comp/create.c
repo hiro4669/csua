@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "csua.h"
 #include "../memory/MEM.h"
 
@@ -16,9 +17,16 @@ static void init_storage() {
     }
 }
 
-static Expression* cs_create_expression(ExpressionKind ekind) {
+static void* cs_malloc(size_t size) {
     init_storage();
-    Expression *expr = (Expression*)MEM_storage_malloc(storage, sizeof(Expression));    
+    return MEM_storage_malloc(storage, size);
+}
+
+static Expression* cs_create_expression(ExpressionKind ekind) {
+//    init_storage();
+//    Expression *expr = (Expression*)MEM_storage_malloc(storage, sizeof(Expression));    
+    Expression* expr = (Expression*)cs_malloc(sizeof(Expression));
+    
     expr->kind = ekind;
     return expr;
 }
@@ -109,6 +117,9 @@ Expression* cs_create_assignment_expression(Expression *left, AssignmentOperator
 }
         
         
-        
-        
-
+char* cs_create_identifier(const char* str) {
+    char* new_char;
+    new_char = (char*)cs_malloc(strlen(str) + 1);
+    strcpy(new_char, str);
+    return new_char;
+}

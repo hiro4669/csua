@@ -267,7 +267,6 @@ retry:
         case '.': {
             return DOT;
         }
-
         case EOF: {
             return EOF;
         }
@@ -288,7 +287,8 @@ retry:
         return op->type;
     } 
     
-    yylval.name = yytext;
+//    yylval.name = yytext;
+    yylval.name = cs_create_identifier(yytext);
     return IDENTIFIER;
     
 

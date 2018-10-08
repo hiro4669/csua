@@ -14,3 +14,4 @@ boolean;
 int;
 double;
 string;
+print();

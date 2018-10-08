@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "csua.h"
 #include "y.tab.h"
 
 int main(void) {

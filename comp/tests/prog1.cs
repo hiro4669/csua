@@ -1,16 +1,15 @@
 #print();
 # for primary expression
-#1;
-#10.9;
-true;
-false;
-true + false;
+#10;
+#true;
+#false;
+#a + (1 + 2);
 #(true);
 #var;
 
 # for postfix_expression
-#var++;
-#var--;
+#var1++;
+#var2--;
 #print();
 
 # for unary_expression
@@ -29,14 +28,16 @@ true + false;
 # for rational_expression
 #10 > var + 1;
 #10 >= var + 1;
+#10 < var + 1;
+#10 <= var + 1;
 
 # for equality_expression
-#a == 10;
-#b != 11;
+a == 10;
+b != 11;
 
 # for logical and or
-#a && b;
-#c || d;
+a && b;
+c || d;
 
 # for assignment
 #a = 1;

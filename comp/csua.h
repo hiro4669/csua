@@ -122,6 +122,7 @@ Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, E
 Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator aope, Expression* operand);
 void delete_storage();
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
+char* cs_create_identifier(const char* str);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();

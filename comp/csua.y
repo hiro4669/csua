@@ -41,9 +41,9 @@
 %token EXCLAMATION
 %token DOT
 
-%token INT_LITERAL
-%token DOUBLE_LITERAL
-%token IDENTIFIER
+%token <iv>   INT_LITERAL
+%token <dv>   DOUBLE_LITERAL
+%token <name> IDENTIFIER
 
 
 %token IF
@@ -110,60 +110,60 @@ assignment_operator
 
 logical_or_expression
         : logical_and_expression
-        | logical_or_expression LOGICAL_OR logical_and_expression { printf("LOR\n"); }
+        | logical_or_expression LOGICAL_OR logical_and_expression { $$ = cs_create_binary_expression(LOGICAL_OR_EXPRESSION, $1, $3);  }
         ;
 logical_and_expression
         : equality_expression
-        | logical_and_expression LOGICAL_AND equality_expression  { printf("LAND\n"); }
+        | logical_and_expression LOGICAL_AND equality_expression  { $$ = cs_create_binary_expression(LOGICAL_AND_EXPRESSION, $1, $3);  }
         ;
 
 equality_expression
         : relational_expression
-        | equality_expression EQ relational_expression { printf("EQ\n"); }
-        | equality_expression NE relational_expression { printf("NE\n"); }
+        | equality_expression EQ relational_expression { $$ = cs_create_binary_expression(EQ_EXPRESSION, $1, $3);  }
+        | equality_expression NE relational_expression { $$ = cs_create_binary_expression(NE_EXPRESSION, $1, $3);  }
         ;
 
 relational_expression
         : additive_expression
-        | relational_expression GT additive_expression { printf("gt\n"); }
-        | relational_expression GE additive_expression { printf("ge\n"); }
-        | relational_expression LT additive_expression { printf("lt\n"); }
-        | relational_expression LE additive_expression { printf("ge\n"); }
+        | relational_expression GT additive_expression { $$ = cs_create_binary_expression(GT_EXPRESSION, $1, $3); }
+        | relational_expression GE additive_expression { $$ = cs_create_binary_expression(GE_EXPRESSION, $1, $3); }
+        | relational_expression LT additive_expression { $$ = cs_create_binary_expression(LT_EXPRESSION, $1, $3); }
+        | relational_expression LE additive_expression { $$ = cs_create_binary_expression(LE_EXPRESSION, $1, $3); }
         ;
 
 additive_expression
         : multiplicative_expression
-        | additive_expression ADD multiplicative_expression  { printf("add\n"); $$ = cs_create_binary_expression(ADD_EXPRESSION, $1, $3); }
-        | additive_expression SUB multiplicative_expression  { printf("sub\n"); }
+        | additive_expression ADD multiplicative_expression  { $$ = cs_create_binary_expression(ADD_EXPRESSION, $1, $3); }
+        | additive_expression SUB multiplicative_expression  { $$ = cs_create_binary_expression(SUB_EXPRESSION, $1, $3); }
         ;
 
 multiplicative_expression
         : unary_expression
-        | multiplicative_expression MUL unary_expression { printf("mul\n"); }
-        | multiplicative_expression DIV unary_expression { printf("div\n"); }
-        | multiplicative_expression MOD unary_expression { printf("mod\n"); }
+        | multiplicative_expression MUL unary_expression { $$ = cs_create_binary_expression(MUL_EXPRESSION, $1, $3); }
+        | multiplicative_expression DIV unary_expression { $$ = cs_create_binary_expression(DIV_EXPRESSION, $1, $3); }
+        | multiplicative_expression MOD unary_expression { $$ = cs_create_binary_expression(MOD_EXPRESSION, $1, $3); }
         ;
 
 unary_expression
         : postfix_expression   
-        | SUB unary_expression          { printf("unary sub\n"); }
-        | EXCLAMATION unary_expression  { printf("unary exclamation\n"); }
+        | SUB unary_expression          { $$ = cs_create_minus_expression($2); }
+        | EXCLAMATION unary_expression  { $$ = cs_create_logical_not_expression($2); }
         ;
 
 postfix_expression
         : primary_expression
-        | postfix_expression LP RP     { printf("function call\n"); }
-        | postfix_expression INCREMENT { printf("increment\n"); }
-        | postfix_expression DECREMENT { printf("decrement\n"); }
+        | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
+        | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
+        | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
         ;
 
 primary_expression
-	: LP expression RP { printf("LP expr RP\n"); }
-	| IDENTIFIER  { printf("IDENTIFIER\n"); }
-	| INT_LITERAL { printf("INT_LITERAL\n");}
-	| DOUBLE_LITERAL { printf("DOUBLE_LITERAL\n");}
-	| TRUE_T      { printf("TRUE_T\n"); $$ = cs_create_boolean_expression(CS_TRUE);}
-	| FALSE_T     { printf("FALSE_T\n"); $$ = cs_create_boolean_expression(CS_FALSE);}
+	: LP expression RP { $$ = $2;}
+	| IDENTIFIER       { $$ = cs_create_identifier_expression($1); }
+	| INT_LITERAL      { $$ = cs_create_int_expression($1); }
+	| DOUBLE_LITERAL   { $$ = cs_create_double_expression($1); }
+	| TRUE_T           { $$ = cs_create_boolean_expression(CS_TRUE); }
+	| FALSE_T          { $$ = cs_create_boolean_expression(CS_FALSE); }
 	;
 %%
 int
