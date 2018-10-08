@@ -2,12 +2,17 @@
 #include "csua.h"
 #include "../memory/MEM.h"
 
-static MEM_Storage storage;
+static MEM_Storage storage = NULL;
 
-static void init_storage() {
+static void init_storage() {    
     if (storage == NULL) { 
+#ifdef STORAGE                
         storage = MEM_open_storage(0);
         printf("init_storage\n");
+#else
+        storage = cs_get_current_compiler()->storage;
+        
+#endif
     }
 }
 
@@ -24,9 +29,25 @@ Expression* cs_create_int_expression(int v) {
 }
 
 void delete_storage() {
+#ifdef STORAGE            
     if (storage != NULL) {
         MEM_dispose(storage);
     }
+#endif            
+}
+
+ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr) {
+    ExpressionList* p = list;
+    ExpressionList* nlist= (ExpressionList*)MEM_storage_malloc(storage, sizeof(ExpressionList));    
+    nlist->next = NULL;
+    nlist->expression = expr;    
+    if (p != NULL) {
+        while (p->next) p = p->next;
+        p->next = nlist;
+        return list;
+    } 
+    return nlist;
+    
 }
 
 Expression* cs_create_double_expression(double v) {

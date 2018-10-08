@@ -2,8 +2,9 @@
 # for primary expression
 #1;
 #10.9;
-#true;
-#false;
+true;
+false;
+true + false;
 #(true);
 #var;
 
@@ -38,7 +39,7 @@
 #c || d;
 
 # for assignment
-a = 1;
-a += 2;
-a -= 2;
+#a = 1;
+#a += 2;
+#a -= 2;
 

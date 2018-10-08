@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include "keyword.h"
 
+#include "csua.h"
 #include "y.tab.h"
 
 

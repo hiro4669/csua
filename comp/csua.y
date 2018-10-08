@@ -1,11 +1,13 @@
 %{
 #include <stdio.h>
 #define YYDEBUG 1
+#include "csua.h"    
 %}
 %union{
     int iv;
     double dv;
     char *name;
+    Expression* expression;
 }
 
 %token LP
@@ -59,6 +61,11 @@
 %token DOUBLE_T
 %token STRING_T
 
+%type <expression> expression assignment_expression logical_or_expression
+                 logical_and_expression equality_expression relational_expression
+                 additive_expression multiplicative_expression unary_expression
+                 postfix_expression primary_expression
+                 
 
 %%
 translation_unit
@@ -71,12 +78,20 @@ statement_list
         ;
 
 statement
-/*	: IDENTIFIER LP RP SEMICOLON */
-	: expression SEMICOLON
+	: expression SEMICOLON 
+        {
+    CS_Compiler* compiler = cs_get_current_compiler();
+    compiler->expr_list = cs_chain_expression_list(compiler->expr_list, $1);
+        }
 	;
 
 expression
-	: assignment_expression
+	: assignment_expression 
+         { 
+             Expression* expr = $1;
+             printf("type = %d\n", expr->kind);
+             $$ = $1;
+         }
 	;
 
 
@@ -118,7 +133,7 @@ relational_expression
 
 additive_expression
         : multiplicative_expression
-        | additive_expression ADD multiplicative_expression  { printf("add\n"); }
+        | additive_expression ADD multiplicative_expression  { printf("add\n"); $$ = cs_create_binary_expression(ADD_EXPRESSION, $1, $3); }
         | additive_expression SUB multiplicative_expression  { printf("sub\n"); }
         ;
 
@@ -147,8 +162,8 @@ primary_expression
 	| IDENTIFIER  { printf("IDENTIFIER\n"); }
 	| INT_LITERAL { printf("INT_LITERAL\n");}
 	| DOUBLE_LITERAL { printf("DOUBLE_LITERAL\n");}
-	| TRUE_T      { printf("TRUE_T\n");}
-	| FALSE_T     { printf("FALSE_T\n");}
+	| TRUE_T      { printf("TRUE_T\n"); $$ = cs_create_boolean_expression(CS_TRUE);}
+	| FALSE_T     { printf("FALSE_T\n"); $$ = cs_create_boolean_expression(CS_FALSE);}
 	;
 %%
 int

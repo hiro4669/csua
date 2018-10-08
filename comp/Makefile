@@ -2,20 +2,25 @@ TARGET = scant
 CC = /usr/bin/gcc
 CFLAGS = -g -DDEBUG
 MEMORY = ../memory/memory.o ../memory/storage.o
-OBJS = y.tab.o scanner.o keyword.o create.o visitor.o traversor.o
+OBJS = y.tab.o scanner.o keyword.o create.o visitor.o traversor.o util.o interface.o
 EXEC = scantest.o
 
 YACC = csua.y
 
+astt: $(MEMORY) $(OBJS) asttest.o
+	make -C ../memory
+	$(CC) -o $@ $^
+
 treet: $(MEMORY) $(OBJS) treetest.o
 	make -C ../memory
+	$(CC) -c $(CFLAGS) -DSTORAGE create.c
 	$(CC) -o $@ $^
 
 memt: $(MEMORY) memtest.o
 	make -C ../memory
 	$(CC) -o $@ $^
 
-prst: $(OBJS) parsetest.o
+prst: $(OBJS) parsetest.o $(MEMORY)
 	$(CC) -o $@ $^
 
 scant: $(OBJS) scantest.o
@@ -32,4 +37,4 @@ y.tab.c: $(YACC)
 	$(CC) -c $(CFLAGS) $*.c
 
 clean:
-	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output prst memt treet
+	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output prst memt treet astt

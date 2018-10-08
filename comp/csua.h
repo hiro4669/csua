@@ -7,9 +7,12 @@
 
 #ifndef _CSUA_H_
 #define _CSUA_H_
+#include <stdio.h>
+#include "../memory/MEM.h"
 
 typedef struct Expression_tag Expression;
 typedef struct Visitor_tag Visitor;
+typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef enum {
     CS_FALSE = 0,
@@ -91,6 +94,20 @@ struct Expression_tag {
 };
 
 
+/* Temporary used */
+typedef struct ExpressionList_tag {
+    Expression *expression;
+    struct ExpressionList_tag *next;
+} ExpressionList;
+
+
+struct CS_Compiler_tag {
+    MEM_Storage storage;
+    ExpressionList *expr_list;
+};
+
+
+
 /* create.c */
 //Expression* cs_create_expression(ExpressionKind ekind);
 Expression* cs_create_int_expression(int v);
@@ -104,7 +121,16 @@ Expression* cs_create_logical_not_expression(Expression* operand);
 Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, Expression* right);
 Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator aope, Expression* operand);
 void delete_storage();
+ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
 
+/* interface.c */
+CS_Compiler* CS_create_compiler();
+void CS_compile(CS_Compiler* compiler, FILE *fin);
+void CS_delete_compiler(CS_Compiler* compiler);
+
+/* util.c */
+void cs_set_current_compiler(CS_Compiler *compiler);
+CS_Compiler* cs_get_current_compiler();
 
 
 #endif /* CSUA_H */
