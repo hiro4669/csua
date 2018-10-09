@@ -255,7 +255,7 @@ static void leave_lognotexpr(Expression* expr) {
 
 static void enter_assignexpr(Expression* expr) {
     print_depth();
-    fprintf(stderr, "enter assignexpr : = \n");
+    fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
     increment(); 
 }
 static void leave_assignexpr(Expression* expr) {

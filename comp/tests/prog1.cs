@@ -32,15 +32,18 @@
 #10 <= var + 1;
 
 # for equality_expression
-a == 10;
-b != 11;
+#a == 10;
+#b != 11;
 
 # for logical and or
-a && b;
-c || d;
+#a && b;
+#c || d;
 
 # for assignment
-#a = 1;
-#a += 2;
-#a -= 2;
+a = 1;
+a += 2;
+a -= 2;
+a *= 2;
+a /= 2;
+a %= 2;
 

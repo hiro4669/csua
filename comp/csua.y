@@ -4,10 +4,11 @@
 #include "csua.h"    
 %}
 %union{
-    int iv;
-    double dv;
-    char *name;
-    Expression* expression;
+    int                iv;
+    double             dv;
+    char               *name;
+    Expression         *expression;
+    AssignmentOperator assignment_operator;
 }
 
 %token LP
@@ -66,7 +67,7 @@
                  additive_expression multiplicative_expression unary_expression
                  postfix_expression primary_expression
                  
-
+%type <assignment_operator> assignment_operator
 %%
 translation_unit
 	: statement_list
@@ -97,15 +98,18 @@ expression
 
 assignment_expression
         : logical_or_expression
-        | postfix_expression assignment_operator assignment_expression {printf("assign\n");}
+        | postfix_expression assignment_operator assignment_expression 
+        {
+          $$ = cs_create_assignment_expression($1, $2, $3);
+        }
         ;
 assignment_operator
-        : ASSIGN_T        { printf("=\n"); }
-        | ADD_ASSIGN_T    { printf("+=\n"); }
-        | SUB_ASSIGN_T    { printf("-=\n"); }
-        | MUL_ASSIGN_T    { printf("*=\n"); }
-        | DIV_ASSIGN_T    { printf("/=\n"); }
-        | MOD_ASSIGN_T    { printf("%% =\n"); }
+        : ASSIGN_T        { $$ = ASSIGN;     }
+        | ADD_ASSIGN_T    { $$ = ADD_ASSIGN; }
+        | SUB_ASSIGN_T    { $$ = SUB_ASSIGN; }
+        | MUL_ASSIGN_T    { $$ = MUL_ASSIGN; }
+        | DIV_ASSIGN_T    { $$ = DIV_ASSIGN; }
+        | MOD_ASSIGN_T    { $$ = MOD_ASSIGN; }
         ;
 
 logical_or_expression
