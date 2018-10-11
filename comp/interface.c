@@ -12,6 +12,7 @@ CS_Compiler* CS_create_compiler() {
     compiler = (CS_Compiler*)MEM_storage_malloc(storage, sizeof(CS_Compiler));
     compiler->storage = storage;
     compiler->expr_list = NULL;
+    compiler->stmt_list = NULL;
     
     cs_set_current_compiler(compiler);
     

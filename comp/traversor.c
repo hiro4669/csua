@@ -4,12 +4,14 @@
 
 #include "visitor.h"
 
-static void traverse_expr_children(Expression* expr, Visitor *visitor);
+static void traverse_expr_children(Expression* expr, Visitor* visitor);
+static void traverse_stmt_children(Statement*  stmt, Visitor* visitor);
+
 
 void traverse_expr(Expression* expr, Visitor* visitor) {
     if (expr) {
         if (visitor->enter_expr_list[expr->kind] == NULL) {
-            fprintf(stderr, "enter->type(%d) it null\n", expr->kind);
+            fprintf(stderr, "enter->type(%d) is null\n", expr->kind);
             exit(1);
         }
 
@@ -18,6 +20,34 @@ void traverse_expr(Expression* expr, Visitor* visitor) {
         visitor->leave_expr_list[expr->kind](expr);
 
     }    
+}
+
+void traverse_stmt(Statement* stmt, Visitor* visitor) {
+    if (stmt) {
+        if (visitor->enter_stmt_list[stmt->type] == NULL) {
+            fprintf(stderr, "enter->type(%d) is null\n", stmt->type);
+            exit(1);
+        }
+        visitor->enter_stmt_list[stmt->type](stmt);
+        traverse_stmt_children(stmt, visitor);
+        visitor->leave_stmt_list[stmt->type](stmt);        
+    }
+}
+
+static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
+    switch(stmt->type) {
+        case EXPRESSION_STATEMENT: {
+            traverse_expr(stmt->u.expression_s, visitor);
+          break;  
+        }
+        case DECLARATION_STATEMENT: {
+            traverse_expr(stmt->u.declaration_s->initializer, visitor);
+            break;
+        }
+        default: {
+            fprintf(stderr, "No such stmt->type %d\n", stmt->type);
+        }
+    }
 }
 
 static void traverse_expr_children(Expression* expr, Visitor *visitor) {

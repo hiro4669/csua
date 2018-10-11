@@ -8,7 +8,9 @@
     double             dv;
     char               *name;
     Expression         *expression;
+    Statement          *statement;
     AssignmentOperator assignment_operator;
+    CS_BasicType       type_specifier;
 }
 
 %token LP
@@ -68,23 +70,61 @@
                  postfix_expression primary_expression
                  
 %type <assignment_operator> assignment_operator
+%type <type_specifier> type_specifier
+%type <statement> statement declaration_statement
+
 %%
 translation_unit
-	: statement_list
+        : definition_or_statement  {printf("definition_or_statement\n");}
+        | translation_unit definition_or_statement {printf("unit definition\n");}
 	;
+definition_or_statement
+        : function_definition
+        | statement  
+        {
+           printf("match statement\n");
+           CS_Compiler* compiler = cs_get_current_compiler();
+           if (compiler) {
+               compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
+           }
+        }
+        ;
 
-statement_list
-        : statement
-        | statement_list statement
+function_definition
+        : type_specifier IDENTIFIER LP RP SEMICOLON
         ;
 
 statement
 	: expression SEMICOLON 
         {
-    CS_Compiler* compiler = cs_get_current_compiler();
-    compiler->expr_list = cs_chain_expression_list(compiler->expr_list, $1);
+    /*
+           CS_Compiler* compiler = cs_get_current_compiler();
+           if (compiler) {
+               compiler->expr_list = cs_chain_expression_list(compiler->expr_list, $1);
+           }
+     */
+            $$ = cs_create_expression_statement($1);
         }
+        | declaration_statement { /*printf("declaration_statement\n"); */}
 	;
+        
+declaration_statement
+        : type_specifier IDENTIFIER SEMICOLON 
+        { 
+            $$ = cs_create_declaration_statement($1, $2, NULL); 
+        }
+        | type_specifier IDENTIFIER ASSIGN_T expression SEMICOLON 
+        {
+            $$ = cs_create_declaration_statement($1, $2, $4); 
+        }
+        ;
+        
+        
+type_specifier
+        : BOOLEAN_T { $$ = CS_BOOLEAN_TYPE; }
+        | INT_T     { $$ = CS_INT_TYPE;     }
+        | DOUBLE_T  { $$ = CS_DOUBLE_TYPE;  }
+        ;
 
 expression
 	: assignment_expression 

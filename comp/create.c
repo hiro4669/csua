@@ -23,13 +23,12 @@ static void* cs_malloc(size_t size) {
 }
 
 static Expression* cs_create_expression(ExpressionKind ekind) {
-//    init_storage();
-//    Expression *expr = (Expression*)MEM_storage_malloc(storage, sizeof(Expression));    
-    Expression* expr = (Expression*)cs_malloc(sizeof(Expression));
-    
+    Expression* expr = (Expression*)cs_malloc(sizeof(Expression));    
     expr->kind = ekind;
     return expr;
 }
+
+
 Expression* cs_create_int_expression(int v) {
     Expression* expr = cs_create_expression(INT_EXPRESSION);
     expr->u.int_value = v;
@@ -122,4 +121,64 @@ char* cs_create_identifier(const char* str) {
     new_char = (char*)cs_malloc(strlen(str) + 1);
     strcpy(new_char, str);
     return new_char;
+}
+
+
+/* For Statement */
+static Statement* cs_create_statement(StatementType type) {
+    //Expression* expr = (Expression*)cs_malloc(sizeof(Expression));   
+    Statement* stmt = (Statement*)cs_malloc(sizeof(Statement));
+    stmt->type = type;
+    return stmt;    
+}
+
+Statement* cs_create_expression_statement(Expression* expr) {
+    Statement* stmt = cs_create_statement(EXPRESSION_STATEMENT);
+    stmt->u.expression_s = expr;
+    return stmt;
+}
+
+
+static TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
+    TypeSpecifier* ts = (TypeSpecifier*)cs_malloc(sizeof(TypeSpecifier));
+    ts->basic_type = type;
+
+    return ts;
+}
+
+static Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
+    Declaration* decl = (Declaration*)cs_malloc(sizeof(Declaration));
+    decl->type = cs_create_type_specifier(type);
+    decl->name = name;
+    decl->initializer = initializer;
+    decl->index = -1;
+    return decl;        
+}
+
+Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer) {
+    Statement* stmt = cs_create_statement(DECLARATION_STATEMENT);
+    stmt->u.declaration_s = cs_create_declaration(type, name, initializer);   
+    return stmt;    
+}
+
+
+StatementList* cs_create_statement_list(Statement* stmt) {
+    StatementList* stmt_list = (StatementList*)cs_malloc(sizeof(StatementList));
+    stmt_list->stmt = stmt;
+    stmt_list->next = NULL;
+    return stmt_list;
+}
+
+StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt) {
+    StatementList* p = NULL;
+    StatementList* nstmt_list = cs_create_statement_list(stmt);
+    if (stmt_list == NULL) {
+//        fprintf(stderr, "stmt_list is null\n");
+        return nstmt_list;
+    }   
+//    fprintf(stderr, "stmt_list is NOT null\n");
+    for (p = stmt_list; p->next; p = p->next);
+    p->next = nstmt_list;
+    
+    return stmt_list;
 }

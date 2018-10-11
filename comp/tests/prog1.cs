@@ -40,10 +40,17 @@
 #c || d;
 
 # for assignment
-a = 1;
-a += 2;
-a -= 2;
-a *= 2;
-a /= 2;
-a %= 2;
+#a = 1;
+#a += 2;
+#a -= 2;
+#a *= 2;
+#a /= 2;
+#a %= 2;
+
+# for declaration statement
+int i;
+int j = 1;
+
+a = 2;
+print();
 

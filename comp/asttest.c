@@ -14,13 +14,20 @@ int main(void) {
     Visitor* visitor = create_treeview_visitor();
 
     printf("--------------\n");
+    /*
     ExpressionList* expr_list = compiler->expr_list;
     while(expr_list) {
         printf("kind = %d\n", expr_list->expression->kind);
         traverse_expr(expr_list->expression, visitor);
-//        traverse_expr(expr_list->expression, visitor);
-        
         expr_list = expr_list->next;
+    }
+    */
+    
+    StatementList* stmt_list = compiler->stmt_list;
+    while(stmt_list) {
+        printf("type = %d\n", stmt_list->stmt->type);
+        traverse_stmt(stmt_list->stmt, visitor);
+        stmt_list = stmt_list->next;
     }
     
     

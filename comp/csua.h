@@ -14,10 +14,32 @@ typedef struct Expression_tag Expression;
 typedef struct Visitor_tag Visitor;
 typedef struct CS_Compiler_tag CS_Compiler;
 
+typedef struct TypeSpecifier_tag TypeSpecifier;
+typedef struct Statement_tag Statement;
+
 typedef enum {
     CS_FALSE = 0,
     CS_TRUE = 1    
 } CS_Boolean;
+
+
+typedef enum {
+    CS_BOOLEAN_TYPE,
+    CS_INT_TYPE,
+    CS_DOUBLE_TYPE,    
+} CS_BasicType;
+
+struct TypeSpecifier_tag {
+    CS_BasicType basic_type;
+};
+
+typedef struct {
+    char          *name;
+    TypeSpecifier *type;
+    Expression    *initializer;
+    int           index;
+    
+} Declaration;
 
 typedef enum {
     BOOLEAN_EXPRESSION = 1,
@@ -94,16 +116,40 @@ struct Expression_tag {
 };
 
 
+/*  Statement */
+
+typedef enum {
+    EXPRESSION_STATEMENT = 1,
+    DECLARATION_STATEMENT,
+    STATEMENT_TYPE_COUNT_PLUS_ONE
+} StatementType;
+
+
+struct Statement_tag {
+    StatementType type;
+    int           line_number;
+    union {
+        Expression   *expression_s;
+        Declaration  *declaration_s;
+    }u;
+
+};
+
 /* Temporary used */
 typedef struct ExpressionList_tag {
     Expression *expression;
     struct ExpressionList_tag *next;
 } ExpressionList;
 
+typedef struct StatementList_tag {
+    Statement *stmt;
+    struct StatementList_tag *next;
+} StatementList;
 
 struct CS_Compiler_tag {
     MEM_Storage storage;
-    ExpressionList *expr_list;
+    ExpressionList *expr_list; // temporary
+    StatementList  *stmt_list;
 };
 
 
@@ -123,6 +169,11 @@ Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator
 void delete_storage();
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
 char* cs_create_identifier(const char* str);
+
+Statement* cs_create_expression_statement(Expression* expr);
+Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
+StatementList* cs_create_statement_list(Statement* stmt);
+StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();

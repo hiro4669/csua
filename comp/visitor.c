@@ -275,20 +275,52 @@ static void leave_funccallexpr(Expression* expr) {
     fprintf(stderr, "leave function call\n");
 }
 
+/* For statement */
+static void enter_exprstmt(Statement* stmt) {
+    print_depth();
+    fprintf(stderr, "enter exprstmt :\n");
+    increment(); 
+}
+static void leave_exprstmt(Statement* stmt) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave exprstmt\n");
+}
+
+static void enter_declstmt(Statement* stmt) {
+    print_depth();
+    fprintf(stderr, "enter declstmt name=%s, type=%d:\n", 
+            stmt->u.declaration_s->name,
+            stmt->u.declaration_s->type->basic_type);
+            
+    increment(); 
+}
+
+static void leave_declstmt(Statement* stmt) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave declstmt\n");
+}
+
 
 Visitor* create_treeview_visitor() {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
+    visit_stmt* enter_stmt_list;
+    visit_stmt* leave_stmt_list;
     
     Visitor* visitor = MEM_malloc(sizeof(Visitor));
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
+    enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
+    leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);    
+    
+    
 
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
     enter_expr_list[DOUBLE_EXPRESSION]        = enter_doubleexpr;
-    enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;
-    
+    enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;    
     enter_expr_list[ADD_EXPRESSION]           = enter_addexpr;
     enter_expr_list[SUB_EXPRESSION]           = enter_subexpr;
     enter_expr_list[MUL_EXPRESSION]           = enter_mulexpr;
@@ -309,12 +341,15 @@ Visitor* create_treeview_visitor() {
     enter_expr_list[ASSIGN_EXPRESSION]        = enter_assignexpr;
     enter_expr_list[FUNCTION_CALL_EXPRESSION] = enter_funccallexpr;
     
+    enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
+    enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
+    
+    
     
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
-    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;
-    
+    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;    
     leave_expr_list[ADD_EXPRESSION]           = leave_addexpr;
     leave_expr_list[SUB_EXPRESSION]           = leave_subexpr;
     leave_expr_list[MUL_EXPRESSION]           = leave_mulexpr;
@@ -336,9 +371,14 @@ Visitor* create_treeview_visitor() {
     leave_expr_list[ASSIGN_EXPRESSION]        = leave_assignexpr;
     leave_expr_list[FUNCTION_CALL_EXPRESSION] = leave_funccallexpr;
     
+    leave_stmt_list[EXPRESSION_STATEMENT]     = leave_exprstmt;
+    leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
+    
 
     visitor->enter_expr_list = enter_expr_list;
     visitor->leave_expr_list = leave_expr_list;
+    visitor->enter_stmt_list = enter_stmt_list;
+    visitor->leave_stmt_list = leave_stmt_list;
             
     
     
@@ -349,5 +389,7 @@ Visitor* create_treeview_visitor() {
 void delete_visitor(Visitor* visitor) {
     MEM_free(visitor->enter_expr_list);
     MEM_free(visitor->leave_expr_list);
+    MEM_free(visitor->enter_stmt_list);
+    MEM_free(visitor->leave_stmt_list);
     MEM_free(visitor);
 }
