@@ -17,7 +17,7 @@ static void init_storage() {
     }
 }
 
-static void* cs_malloc(size_t size) {
+void* cs_malloc(size_t size) {
     init_storage();
     return MEM_storage_malloc(storage, size);
 }
@@ -114,6 +114,13 @@ Expression* cs_create_assignment_expression(Expression *left, AssignmentOperator
     expr->u.assignment_expression.right = operand;
     return expr;            
 }
+
+Expression* cs_create_cast_expression(CS_CastType ctype, Expression* operand) {
+    Expression* expr = cs_create_expression(CAST_EXPRESSION);
+    expr->u.cast_expression.ctype = ctype;
+    expr->u.cast_expression.expr = operand;
+    return expr;
+}
         
         
 char* cs_create_identifier(const char* str) {
@@ -139,7 +146,7 @@ Statement* cs_create_expression_statement(Expression* expr) {
 }
 
 
-static TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
+TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     TypeSpecifier* ts = (TypeSpecifier*)cs_malloc(sizeof(TypeSpecifier));
     ts->basic_type = type;
 
@@ -167,6 +174,13 @@ StatementList* cs_create_statement_list(Statement* stmt) {
     stmt_list->stmt = stmt;
     stmt_list->next = NULL;
     return stmt_list;
+}
+
+DeclarationList* cs_create_declaration_list(Declaration* decl) {
+    DeclarationList* list = cs_malloc(sizeof(DeclarationList));
+    list->next = NULL;
+    list->decl = decl; 
+    return list;
 }
 
 StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt) {

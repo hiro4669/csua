@@ -15,9 +15,9 @@ void traverse_expr(Expression* expr, Visitor* visitor) {
             exit(1);
         }
 
-        visitor->enter_expr_list[expr->kind](expr);
+        visitor->enter_expr_list[expr->kind](expr, visitor);
         traverse_expr_children(expr, visitor);
-        visitor->leave_expr_list[expr->kind](expr);
+        visitor->leave_expr_list[expr->kind](expr, visitor);
 
     }    
 }
@@ -28,9 +28,9 @@ void traverse_stmt(Statement* stmt, Visitor* visitor) {
             fprintf(stderr, "enter->type(%d) is null\n", stmt->type);
             exit(1);
         }
-        visitor->enter_stmt_list[stmt->type](stmt);
+        visitor->enter_stmt_list[stmt->type](stmt, visitor);
         traverse_stmt_children(stmt, visitor);
-        visitor->leave_stmt_list[stmt->type](stmt);        
+        visitor->leave_stmt_list[stmt->type](stmt, visitor);
     }
 }
 
@@ -45,7 +45,7 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
             break;
         }
         default: {
-            fprintf(stderr, "No such stmt->type %d\n", stmt->type);
+            fprintf(stderr, "No such stmt->type %d in traverse_stmt_children\n", stmt->type);
         }
     }
 }
@@ -77,6 +77,10 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             traverse_expr(expr->u.assignment_expression.right, visitor);
             break;
         }
+        case CAST_EXPRESSION: {
+            traverse_expr(expr->u.cast_expression.expr, visitor);
+            break;
+        }
         case FUNCTION_CALL_EXPRESSION: {
             traverse_expr(expr->u.function_call_expression.function, visitor);
             break;
@@ -103,6 +107,6 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             break;
         }
         default:
-            fprintf(stderr, "No such expr->kind %d\n", expr->kind);
+            fprintf(stderr, "No such expr->kind %d in traverse_expr_children\n", expr->kind);
     }
 }

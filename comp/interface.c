@@ -13,6 +13,7 @@ CS_Compiler* CS_create_compiler() {
     compiler->storage = storage;
     compiler->expr_list = NULL;
     compiler->stmt_list = NULL;
+    compiler->decl_list = NULL;
     
     cs_set_current_compiler(compiler);
     

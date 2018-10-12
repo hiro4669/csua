@@ -130,7 +130,7 @@ expression
 	: assignment_expression 
          { 
              Expression* expr = $1;
-             printf("type = %d\n", expr->kind);
+//             printf("type = %d\n", expr->kind);
              $$ = $1;
          }
 	;
