@@ -14,10 +14,15 @@ static Expression* cast_type(TypeSpecifier* ltype, Expression* expr) {
     if (ltype->basic_type == expr->type->basic_type) {
         return expr;
     } else if ((ltype->basic_type == CS_INT_TYPE) && (expr->type->basic_type == CS_DOUBLE_TYPE) ) {
-        return cs_create_cast_expression(CS_DOUBLE_TO_INT, expr);
+        Expression* cast = cs_create_cast_expression(CS_DOUBLE_TO_INT, expr);
+        cast->type = cs_create_type_specifier(CS_INT_TYPE);
+        return cast;
     } else if ((ltype->basic_type == CS_DOUBLE_TYPE) && (expr->type->basic_type == CS_INT_TYPE) ) {
-//       printf("int to double\n");
-       return cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+//       printf("int to double\n");        
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        
+        return cast;
     } else {
         fprintf(stderr, "Type Error\n");
         exit(1);
