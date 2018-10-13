@@ -27,7 +27,8 @@ typedef enum {
 typedef enum {
     CS_BOOLEAN_TYPE,
     CS_INT_TYPE,
-    CS_DOUBLE_TYPE,    
+    CS_DOUBLE_TYPE,
+    CS_BASIC_TYPE_PLUS_ONE,
 } CS_BasicType;
 
 typedef enum {

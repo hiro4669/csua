@@ -7,28 +7,15 @@
 
 
 
-static Expression* cast_type(TypeSpecifier* ltype, Expression* expr) {
-//    printf("ltype     = %d\n", ltype->basic_type);
-//    printf("expr type = %d\n", expr->type->basic_type);
-    
-    if (ltype->basic_type == expr->type->basic_type) {
-        return expr;
-    } else if ((ltype->basic_type == CS_INT_TYPE) && (expr->type->basic_type == CS_DOUBLE_TYPE) ) {
-        Expression* cast = cs_create_cast_expression(CS_DOUBLE_TO_INT, expr);
-        cast->type = cs_create_type_specifier(CS_INT_TYPE);
-        return cast;
-    } else if ((ltype->basic_type == CS_DOUBLE_TYPE) && (expr->type->basic_type == CS_INT_TYPE) ) {
-//       printf("int to double\n");        
-        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
-        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
-        
-        return cast;
-    } else {
-        fprintf(stderr, "Type Error\n");
-        exit(1);
-    }
-    return expr;
-}
+#define cs_is_type(type, cs_type) \
+  ((type)->basic_type == (cs_type))
+
+#define cs_is_int(type) \
+    (cs_is_type(type, CS_INT_TYPE))
+#define cs_is_double(type) \
+    (cs_is_type(type, CS_DOUBLE_TYPE))
+#define cs_is_boolean(type) \
+    (cs_is_type(type, CS_BOOLEAN_TYPE))
 
 
 
@@ -73,6 +60,7 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
     if (!decl) {
         decl = cs_search_decl_global(expr->u.identifier.name);
     }
+    
     if (decl) {
         expr->type = decl->type;
     } else {
@@ -81,39 +69,66 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
     }
 }
 
+static void cast_arithmetic_binary_expr(Expression* expr) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    
+    if (cs_is_int(left->type) && cs_is_int(right->type)) {
+        return;
+    } else if(cs_is_int(left->type) && cs_is_double(right->type)) {
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        cast->u.cast_expression.expr = left;
+        expr->u.binary_expression.left = cast;
+    } else if (cs_is_double(left->type) && cs_is_int(right->type)) {
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        cast->u.cast_expression.expr = right;
+        expr->u.binary_expression.right = cast;
+    } else if(cs_is_double(left->type) && cs_is_double(right->type)) {
+        return;
+    } else {
+        fprintf(stderr, "type mismatch of cast_arithmetic_binary_expr in meanvisitor\n");
+        exit(1);        
+    }        
+    
+}
+
+/* arithmetic calculation*/
 static void enter_addexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter addexpr : +\n");
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave addexpr\n");
+    cast_arithmetic_binary_expr(expr);
 }
-
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter subexpr : -\n");
 }
 static void leave_subexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave subexpr\n");
+    cast_arithmetic_binary_expr(expr);
 }
-
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter mulexpr : *\n");
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave mulexpr\n");
+    cast_arithmetic_binary_expr(expr);    
 }
-
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter divexpr : /\n");
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave divexpr\n");
+    cast_arithmetic_binary_expr(expr);    
 }
-
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter modexpr : mod \n");
 }
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave modexpr\n");
+    cast_arithmetic_binary_expr(expr);    
 }
 
 
@@ -159,11 +174,25 @@ static void leave_neexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave neexpr\n");
 }
 
+
+static void logical_type_check(Expression* expr) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    if (cs_is_boolean(left->type) && cs_is_boolean(right->type)) {
+        expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
+    } else {
+        fprintf(stderr, "type mismatch of compare_type_check in meanvisitor\n");
+        exit(1);
+    }
+}
+
+
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter landexpr : && \n");
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave landexpr\n");
+    logical_type_check(expr);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
@@ -171,13 +200,24 @@ static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lorexpr\n");
+    logical_type_check(expr);
 }
 
+
+static void incdec_typecheck(Expression* expr) {
+    Expression* idexpr = expr->u.inc_dec;
+    if (idexpr->type->basic_type != CS_INT_TYPE) {
+        fprintf(stderr, "type error in incdec_typecheck type=%d\n", idexpr->type->basic_type);
+        exit(1);
+    }
+    expr->type = idexpr->type;
+}
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter incexpr : ++ \n");
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave incexpr\n");
+    incdec_typecheck(expr);   
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
@@ -185,13 +225,20 @@ static void enter_decexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave decexpr\n");
+    incdec_typecheck(expr);    
 }
+
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter minusexpr : - \n");
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave minusexpr\n");
+    fprintf(stderr, "leave minusexpr\n");   
+    TypeSpecifier* type = expr->u.minus_expression->type;
+    if ((type->basic_type != CS_INT_TYPE) || (type->basic_type != CS_DOUBLE_TYPE)) {
+        fprintf(stderr, "type error in incdec_typecheck type=%d\n", type->basic_type);
+    }
+    expr->type = type;    
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
@@ -199,8 +246,33 @@ static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lognotexpr\n");
+    TypeSpecifier* type = expr->u.logical_not_expression->type;
+    if (type->basic_type != CS_BOOLEAN_TYPE) {
+        fprintf(stderr, "type error in logical not_typecheck type=%d\n", type->basic_type);
+    }
+    expr->type = type;    
 }
 
+
+
+
+static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr) {
+    if (ltype->basic_type == expr->type->basic_type) {
+        return expr;
+    } else if ((ltype->basic_type == CS_INT_TYPE) && (expr->type->basic_type == CS_DOUBLE_TYPE) ) {
+        Expression* cast = cs_create_cast_expression(CS_DOUBLE_TO_INT, expr);
+        cast->type = cs_create_type_specifier(CS_INT_TYPE);
+        return cast;
+    } else if ((ltype->basic_type == CS_DOUBLE_TYPE) && (expr->type->basic_type == CS_INT_TYPE) ) {
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);       
+        return cast;
+    } else {
+        fprintf(stderr, "Type Error\n");
+        exit(1);
+    }
+    return expr;
+}
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
 }
@@ -209,7 +281,8 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     Expression* left  = expr->u.assignment_expression.left;
     Expression* right = expr->u.assignment_expression.right;
      
-    expr->u.assignment_expression.right = cast_type(left->type, right);
+    expr->u.assignment_expression.right = assignment_type_check(left->type, right);
+    expr->type = left->type;
     
     
 }
@@ -240,7 +313,7 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "leave declstmt\n");
     Declaration* decl = stmt->u.declaration_s;
     if (decl->initializer != NULL) {
-        decl->initializer = cast_type(decl->type, decl->initializer);
+        decl->initializer = assignment_type_check(decl->type, decl->initializer);
     }
 }
 

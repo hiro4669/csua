@@ -48,10 +48,10 @@
 #a %= 2;
 
 # for declaration statement
-boolean i;
-double k;
-int j = 1;
+boolean i = true;
+int k = 1;
+double j = 1.2;
 
-j = 2.1;
+i || i;
 #print();
 
