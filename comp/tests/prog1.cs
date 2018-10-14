@@ -49,9 +49,13 @@
 
 # for declaration statement
 boolean i = true;
+boolean p = false;
 int k = 1;
 double j = 1.2;
 
-i || i;
+i != p;
+k == j;
+#k == i;
+#j <= k;
 #print();
 

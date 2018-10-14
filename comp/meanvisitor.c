@@ -17,6 +17,9 @@
 #define cs_is_boolean(type) \
     (cs_is_type(type, CS_BOOLEAN_TYPE))
 
+#define cs_same_type(type1, type2) \
+    ((type1)->basic_type == (type2)->basic_type)
+
 
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
@@ -131,12 +134,37 @@ static void leave_modexpr(Expression* expr, Visitor* visitor) {
     cast_arithmetic_binary_expr(expr);    
 }
 
+static void compare_type_check(Expression* expr) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    
+    if(cs_same_type(left->type, right->type)) {
+        expr->type = cs_create_type_specifier(left->type->basic_type);
+        return;
+    } else if(cs_is_int(left->type) && cs_is_double(right->type)) {
+        // cast left to double        
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.left = cast;
+    } else if (cs_is_double(left->type) && cs_is_int(right->type)) {
+        // cast right to double
+        Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, right);
+        cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.right = cast;
+    } else {
+        fprintf(stderr, "type mismatch of compare_type_check_in meanvisitor\n");
+        exit(1);
+    }
+    
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
+}
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter gtexpr : > \n");
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave gtexpr\n");
+    compare_type_check(expr);
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
@@ -144,6 +172,7 @@ static void enter_geexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave geexpr\n");
+    compare_type_check(expr);
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
@@ -151,6 +180,7 @@ static void enter_ltexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave ltexpr\n");
+    compare_type_check(expr);    
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
@@ -158,6 +188,24 @@ static void enter_leexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave leexpr\n");
+    compare_type_check(expr);
+}
+
+static void compare_equality_type_check(Expression* expr) {
+    // 
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    if ((left->type->basic_type == CS_BOOLEAN_TYPE) &&
+            (right->type->basic_type != CS_BOOLEAN_TYPE)) {        
+        fprintf(stderr, "type mismatch in compare_equality_type_check\n");        
+        exit(1);        
+    } else if ((left->type->basic_type != CS_BOOLEAN_TYPE) &&
+            (right->type->basic_type == CS_BOOLEAN_TYPE)) {
+        fprintf(stderr, "type mismatch in compare_equality_type_check\n");
+        exit(1);
+    } else {
+        compare_type_check(expr);
+    }
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
@@ -165,6 +213,7 @@ static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave eqexpr\n");
+    compare_equality_type_check(expr);
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
@@ -172,6 +221,7 @@ static void enter_neexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave neexpr\n");
+    compare_equality_type_check(expr);
 }
 
 
