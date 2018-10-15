@@ -19,6 +19,24 @@ void print_depth() {
     }
 }
 
+static char* get_type_name(CS_BasicType type) {
+    switch(type) {
+        case CS_BOOLEAN_TYPE: {
+            return "boolean";            
+        }
+        case CS_INT_TYPE: {
+            return "int";
+        }
+        case CS_DOUBLE_TYPE: {
+            return "double";            
+        }
+        default: {
+            return "untyped";
+        }
+    }
+}
+
+
 static CS_BasicType get_type(Expression* expr) {
     if (expr->type) {
         return expr->type->basic_type;
@@ -34,7 +52,7 @@ static void enter_castexpr(Expression* expr, Visitor* visitor) {
 static void leave_castexpr(Expression* expr, Visitor* visitor) { 
     decrement();
     print_depth();
-    fprintf(stderr, "leave castexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave castexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
@@ -45,7 +63,7 @@ static void enter_boolexpr(Expression* expr, Visitor* visitor) {
 static void leave_boolexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave boolexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave boolexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 
@@ -57,7 +75,7 @@ static void enter_intexpr(Expression* expr, Visitor* visitor) {
 static void leave_intexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave intexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave intexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
@@ -68,7 +86,7 @@ static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave doubleexpr(type:%d)\n", get_type(expr));            
+    fprintf(stderr, "leave doubleexpr(type:%s)\n", get_type_name(get_type(expr)));            
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
@@ -79,7 +97,7 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave identifierexpr(type:%d)\n", get_type(expr));            
+    fprintf(stderr, "leave identifierexpr(type:%s)\n", get_type_name(get_type(expr)));            
 }
 
 
@@ -91,7 +109,7 @@ static void enter_addexpr(Expression* expr, Visitor* visitor) {
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave addexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave addexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
@@ -102,7 +120,7 @@ static void enter_subexpr(Expression* expr, Visitor* visitor) {
 static void leave_subexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave subexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave subexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
@@ -113,7 +131,7 @@ static void enter_mulexpr(Expression* expr, Visitor* visitor) {
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave mulexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave mulexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
@@ -124,7 +142,7 @@ static void enter_divexpr(Expression* expr, Visitor* visitor) {
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave divexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave divexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
@@ -135,7 +153,7 @@ static void enter_modexpr(Expression* expr, Visitor* visitor) {
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave modexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave modexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 
@@ -147,7 +165,7 @@ static void enter_gtexpr(Expression* expr, Visitor* visitor) {
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave gtexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave gtexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
@@ -158,7 +176,7 @@ static void enter_geexpr(Expression* expr, Visitor* visitor) {
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave geexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave geexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
@@ -169,7 +187,7 @@ static void enter_ltexpr(Expression* expr, Visitor* visitor) {
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave ltexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave ltexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
@@ -180,7 +198,7 @@ static void enter_leexpr(Expression* expr, Visitor* visitor) {
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave leexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave leexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
@@ -191,7 +209,7 @@ static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave eqexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave eqexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
@@ -202,7 +220,7 @@ static void enter_neexpr(Expression* expr, Visitor* visitor) {
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave neexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave neexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
@@ -213,7 +231,7 @@ static void enter_landexpr(Expression* expr, Visitor* visitor) {
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave landexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave landexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
@@ -224,7 +242,7 @@ static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave lorexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave lorexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
@@ -235,7 +253,7 @@ static void enter_incexpr(Expression* expr, Visitor* visitor) {
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave incexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave incexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
@@ -246,7 +264,7 @@ static void enter_decexpr(Expression* expr, Visitor* visitor) {
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave decexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave decexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
@@ -257,7 +275,7 @@ static void enter_minusexpr(Expression* expr, Visitor* visitor) {
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave minusexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave minusexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
@@ -268,7 +286,7 @@ static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave lognotexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave lognotexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
@@ -279,7 +297,7 @@ static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave assignexpr(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave assignexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
@@ -290,7 +308,7 @@ static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave function call(type:%d)\n", get_type(expr));
+    fprintf(stderr, "leave function call(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 /* For statement */
@@ -307,9 +325,9 @@ static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
     print_depth();
-    fprintf(stderr, "enter declstmt name=%s, type=%d:\n", 
+    fprintf(stderr, "enter declstmt name=%s, type=%s:\n", 
             stmt->u.declaration_s->name,
-            stmt->u.declaration_s->type->basic_type);
+            get_type_name(stmt->u.declaration_s->type->basic_type));
             
     increment(); 
 }
