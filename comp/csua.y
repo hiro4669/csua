@@ -75,14 +75,13 @@
 
 %%
 translation_unit
-        : definition_or_statement  {printf("definition_or_statement\n");}
-        | translation_unit definition_or_statement {printf("unit definition\n");}
+        : definition_or_statement  
+        | translation_unit definition_or_statement 
 	;
 definition_or_statement
         : function_definition
         | statement  
         {
-           printf("match statement\n");
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);

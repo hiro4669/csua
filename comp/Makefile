@@ -7,6 +7,10 @@ EXEC = scantest.o
 
 YACC = csua.y
 
+meant: $(MEMORY) $(OBJS) meantest.o
+	make -C ../memory
+	$(CC) -o $@ $^
+
 astt: $(MEMORY) $(OBJS) asttest.o
 	make -C ../memory
 	$(CC) -o $@ $^
