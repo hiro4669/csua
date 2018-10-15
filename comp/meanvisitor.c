@@ -60,16 +60,29 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave identifierexpr %s\n", expr->u.identifier.name);
     Declaration* decl = cs_search_decl_in_block();
+    FunctionDeclaration* function = NULL;
     if (!decl) {
         decl = cs_search_decl_global(expr->u.identifier.name);
     }
     
     if (decl) {
         expr->type = decl->type;
-    } else {
-        fprintf(stderr, "Cannot find lefthand type in meanvisitor\n");
-        exit(1);
+        expr->u.identifier.u.declaration = decl;
+        expr->u.identifier.is_function = CS_FALSE;
+        return;
     }
+    function = cs_search_function(expr->u.identifier.name);
+    if (function) {
+        expr->type = function->type;
+        expr->u.identifier.u.function = function;
+        expr->u.identifier.is_function = CS_TRUE;
+        return;
+    }
+    
+    
+    fprintf(stderr, "Cannot find lefthand type in meanvisitor\n");
+    exit(1);
+
 }
 
 static void cast_arithmetic_binary_expr(Expression* expr) {
@@ -342,6 +355,7 @@ static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave function call\n");
+    expr->type = expr->u.function_call_expression.function->type;
 }
 
 /* For statement */

@@ -89,6 +89,11 @@ typedef struct {
 
 typedef struct {
     char *name;    
+    CS_Boolean is_function;
+    union {
+        Declaration         *declaration;
+        FunctionDeclaration *function;
+    }u;
 } IdentifierExpression;
 
 typedef struct {

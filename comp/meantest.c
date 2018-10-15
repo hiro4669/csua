@@ -15,6 +15,10 @@ int main(void) {
     Visitor* mean_visitor = (Visitor*)create_mean_visitor();
 
     printf("--------------\n");
+    FunctionDeclarationList* func_list = compiler->func_list;
+    for (; func_list; func_list = func_list->next) {
+        printf("func name = %s\n", func_list->func->name);
+    }
     
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {
