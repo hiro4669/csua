@@ -4,13 +4,14 @@
 #include "csua.h"    
 %}
 %union{
-    int                iv;
-    double             dv;
-    char               *name;
-    Expression         *expression;
-    Statement          *statement;
-    AssignmentOperator assignment_operator;
-    CS_BasicType       type_specifier;
+    int                  iv;
+    double               dv;
+    char                *name;
+    Expression          *expression;
+    Statement           *statement;
+    FunctionDeclaration *function_declaration;
+    AssignmentOperator   assignment_operator;
+    CS_BasicType         type_specifier;
 }
 
 %token LP
@@ -72,6 +73,7 @@
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
 %type <statement> statement declaration_statement
+%type <function_declaration> function_definition
 
 %%
 translation_unit
@@ -80,6 +82,12 @@ translation_unit
 	;
 definition_or_statement
         : function_definition
+        {
+           CS_Compiler* compiler = cs_get_current_compiler();
+           if (compiler) {
+               compiler->func_list = cs_chain_function_declaration_list(compiler->func_list, $1);
+           }
+        }
         | statement  
         {
            CS_Compiler* compiler = cs_get_current_compiler();
@@ -90,7 +98,9 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON
+        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);}
+    
+
         ;
 
 statement

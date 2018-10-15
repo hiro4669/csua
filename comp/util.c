@@ -22,6 +22,31 @@ DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* d
     return decl_list;
 }
 
+StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt) {
+    StatementList* p = NULL;
+    StatementList* nstmt_list = cs_create_statement_list(stmt);
+    if (stmt_list == NULL) {
+        return nstmt_list;
+    }   
+    for (p = stmt_list; p->next; p = p->next);
+    p->next = nstmt_list;
+    
+    return stmt_list;
+}
+
+
+FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationList* func_list, FunctionDeclaration* func) {
+    FunctionDeclarationList* p = NULL;
+    FunctionDeclarationList* nfunc_list = cs_create_function_declaration_list(func);
+    if (func_list == NULL) {
+        return nfunc_list;
+    }
+    for (p = func_list; p->next; p = p->next);
+    p->next = nfunc_list;
+    return func_list;
+}
+
+
 
 static Declaration* search_decls_from_list(DeclarationList* list, const char* name) {
     for(; list; list = list->next) {
@@ -39,4 +64,18 @@ Declaration* cs_search_decl_in_block() {
 Declaration* cs_search_decl_global(const char* name) {
     CS_Compiler* compiler = cs_get_current_compiler();
     return search_decls_from_list(compiler->decl_list, name);
+}
+
+static FunctionDeclaration* search_function_from_list(FunctionDeclarationList* list, const char* name) {
+    for (;list; list = list->next) {
+       if (!strcmp(list->func->name, name)) {
+           return list->func;
+       }
+    }
+    return NULL;
+}
+
+FunctionDeclaration* cs_search_function(const char* name) {
+    CS_Compiler* compiler = cs_get_current_compiler();
+    return search_function_from_list(compiler->func_list, name);
 }

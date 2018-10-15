@@ -1,2 +1,3 @@
 int print();
+double printd();
 

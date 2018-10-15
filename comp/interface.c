@@ -14,6 +14,7 @@ CS_Compiler* CS_create_compiler() {
     compiler->expr_list = NULL;
     compiler->stmt_list = NULL;
     compiler->decl_list = NULL;
+    compiler->func_list = NULL;
     
     cs_set_current_compiler(compiler);
     

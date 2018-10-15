@@ -184,16 +184,19 @@ DeclarationList* cs_create_declaration_list(Declaration* decl) {
     return list;
 }
 
-StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt) {
-    StatementList* p = NULL;
-    StatementList* nstmt_list = cs_create_statement_list(stmt);
-    if (stmt_list == NULL) {
-//        fprintf(stderr, "stmt_list is null\n");
-        return nstmt_list;
-    }   
-//    fprintf(stderr, "stmt_list is NOT null\n");
-    for (p = stmt_list; p->next; p = p->next);
-    p->next = nstmt_list;
-    
-    return stmt_list;
+
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name) {
+    FunctionDeclaration* decl = (FunctionDeclaration*)cs_malloc(sizeof(FunctionDeclaration));
+    decl->type = cs_create_type_specifier(type);
+    decl->name = name;
+    decl->index = -1;
+    return decl;
 }
+
+FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func) {
+    FunctionDeclarationList* list = cs_malloc(sizeof(FunctionDeclarationList));
+    list->next = NULL;
+    list->func = func;
+    return list;
+}
+

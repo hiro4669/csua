@@ -44,9 +44,14 @@ typedef struct {
     char          *name;
     TypeSpecifier *type;
     Expression    *initializer;
-    int           index;
-    
+    int           index;    
 } Declaration;
+
+typedef struct {
+    char          *name;
+    TypeSpecifier *type;
+    int            index;   
+} FunctionDeclaration;
 
 typedef enum {
     BOOLEAN_EXPRESSION = 1,
@@ -166,11 +171,17 @@ typedef struct DeclarationList_tag {
     struct DeclarationList_tag *next;
 } DeclarationList;
 
+typedef struct FunctionDeclarationList_tag {
+    FunctionDeclaration                *func;
+    struct FunctionDeclarationList_tag *next;
+} FunctionDeclarationList;
+
 struct CS_Compiler_tag {
     MEM_Storage      storage;
-    ExpressionList  *expr_list; // temporary
-    StatementList   *stmt_list;
-    DeclarationList *decl_list;
+    ExpressionList          *expr_list; // temporary
+    StatementList           *stmt_list;
+    DeclarationList         *decl_list;
+    FunctionDeclarationList *func_list;
 };
 
 
@@ -196,10 +207,13 @@ char* cs_create_identifier(const char* str);
 Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
 StatementList* cs_create_statement_list(Statement* stmt);
-StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
+
 
 DeclarationList* cs_create_declaration_list(Declaration* decl);
 TypeSpecifier* cs_create_type_specifier(CS_BasicType type);
+
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name);
+FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func);
 
 
 /* interface.c */
@@ -211,8 +225,11 @@ void CS_delete_compiler(CS_Compiler* compiler);
 void cs_set_current_compiler(CS_Compiler *compiler);
 CS_Compiler* cs_get_current_compiler();
 DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* decl);
+StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
+FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationList* func_list, FunctionDeclaration* func);
 Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);
+FunctionDeclaration* cs_search_function(const char* name);
 
 #endif /* CSUA_H */
 
