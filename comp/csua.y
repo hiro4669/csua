@@ -223,6 +223,11 @@ int
 yyerror(char const *str)
 {
     extern char *yytext;
+    CS_Compiler* compiler = cs_get_current_compiler();
+    if (compiler) {
+        fprintf(stderr, "line %d :", compiler->current_line);
+    }
+    
     fprintf(stderr, "parser error near %s\n", yytext);
     return 0;
 }
