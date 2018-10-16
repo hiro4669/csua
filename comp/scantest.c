@@ -173,6 +173,8 @@ int main(void) {
             }
             case EOF: {
                 printf("END OF FILE\n");
+//                printf("line = %d\n", get_current_line());
+                
                 exit(1);
                 break;
             }

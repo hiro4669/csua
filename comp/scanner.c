@@ -29,6 +29,23 @@ char *yytext;
 static uint32_t ytp = 0;
 static uint32_t yt_max = 0;
 
+
+/* for debug*/
+int current_line = 1;
+static void increment_line() {
+    CS_Compiler* compiler = cs_get_current_compiler();
+    if (compiler) {
+        compiler->current_line++;
+    } else {
+        current_line++;
+    }
+}
+
+int get_current_line() {
+    return current_line;
+}
+
+
 static void real_read() {
     if (buffer == NULL) {
         buffer = (uint8_t*)malloc(BUFSIZE);
@@ -101,6 +118,7 @@ retry:
     switch(c = read()) {
         case '#': { // skip comment
             while ((c = read()) != '\n');
+            increment_line();
 //            printf("skip\n");
             goto retry;
         }
@@ -109,6 +127,7 @@ retry:
             goto retry;
         }
         case '\n': { // ignore return and count the number
+            increment_line();
             goto retry;
         }
         case '0':

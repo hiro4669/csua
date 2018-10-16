@@ -125,6 +125,7 @@ typedef struct {
 struct Expression_tag {
     ExpressionKind kind;
     TypeSpecifier* type; 
+    int line_number;
     union {
         double                 double_value;
         int                    int_value;
@@ -187,6 +188,7 @@ struct CS_Compiler_tag {
     StatementList           *stmt_list;
     DeclarationList         *decl_list;
     FunctionDeclarationList *func_list;
+    int current_line;
 };
 
 
@@ -236,5 +238,8 @@ Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);
 FunctionDeclaration* cs_search_function(const char* name);
 
+
+/* scanner.c */
+int get_current_line();
 #endif /* CSUA_H */
 

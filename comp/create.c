@@ -4,14 +4,23 @@
 #include "../memory/MEM.h"
 
 static MEM_Storage storage = NULL;
+static CS_Compiler* compiler = NULL;
+
+static int *linenum = NULL;
+
+/* for debug */
+extern int current_line;
 
 static void init_storage() {    
     if (storage == NULL) { 
 #ifdef STORAGE                
         storage = MEM_open_storage(0);
         printf("init_storage\n");
+        linenum = &current_line;
+        
 #else
         storage = cs_get_current_compiler()->storage;
+        linenum = &cs_get_current_compiler()->current_line;
         
 #endif
     }
@@ -26,6 +35,7 @@ static Expression* cs_create_expression(ExpressionKind ekind) {
     Expression* expr = (Expression*)cs_malloc(sizeof(Expression));    
     expr->kind = ekind;
     expr->type = NULL;
+    expr->line_number = *linenum;
     return expr;
 }
 
