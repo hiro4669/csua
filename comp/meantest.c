@@ -26,19 +26,16 @@ int main(void) {
         traverse_stmt(stmt_list->stmt, (Visitor*)mean_visitor);
         stmt_list = stmt_list->next;
     }
-    printf("");
-    if (mean_visitor->check_log != NULL) {
-        printf("Log!!!");
-        show_mean_error(mean_visitor);
-    }
 
-    
-   
-    printf("--------------\n");
-    stmt_list = compiler->stmt_list;
-    while(stmt_list) {
-        traverse_stmt(stmt_list->stmt, visitor);
-        stmt_list = stmt_list->next;
+    if (mean_visitor->check_log != NULL) {
+        show_mean_error(mean_visitor);
+    } else {                       
+        printf("--------------\n");
+        stmt_list = compiler->stmt_list;
+        while(stmt_list) {
+            traverse_stmt(stmt_list->stmt, visitor);
+            stmt_list = stmt_list->next;
+        }
     }
            
     
