@@ -5,10 +5,19 @@
 #include "../memory/MEM.h"
 
 
-int main(void) {
+int main(int argc, char* argv[]) {
     
-    FILE *fin = fopen("tests/prog3.cs", "r");
-//    FILE *fin = fopen("tests/prog2.cs", "r");    
+    printf("arg len = %d\n", argc);
+
+    if (argc == 1) {
+        printf("Usage ./meant dir/filename.cs");
+        return 1;        
+    }
+    FILE *fin = fopen(argv[1], "r");
+    if (fin == NULL) {
+        printf("Cannot fine file %s\n", argv[1]);
+        return 1;
+    }
     CS_Compiler* compiler = CS_create_compiler();
     CS_compile(compiler, fin);
     
