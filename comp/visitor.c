@@ -19,6 +19,7 @@ void print_depth() {
     }
 }
 
+/*
 static char* get_type_name(CS_BasicType type) {
     switch(type) {
         case CS_BOOLEAN_TYPE: {
@@ -35,7 +36,7 @@ static char* get_type_name(CS_BasicType type) {
         }
     }
 }
-
+*/
 
 static CS_BasicType get_type(Expression* expr) {
     if (expr->type) {

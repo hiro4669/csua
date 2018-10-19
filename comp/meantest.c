@@ -12,7 +12,7 @@ int main(void) {
     CS_compile(compiler, fin);
     
     Visitor* visitor = create_treeview_visitor();
-    Visitor* mean_visitor = (Visitor*)create_mean_visitor();
+    MeanVisitor* mean_visitor = create_mean_visitor();
 
     printf("--------------\n");
     FunctionDeclarationList* func_list = compiler->func_list;
@@ -23,9 +23,16 @@ int main(void) {
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {
 //        printf("type = %d\n", stmt_list->stmt->type);
-        traverse_stmt(stmt_list->stmt, mean_visitor);
+        traverse_stmt(stmt_list->stmt, (Visitor*)mean_visitor);
         stmt_list = stmt_list->next;
     }
+    printf("");
+    if (mean_visitor->check_log != NULL) {
+        printf("Log!!!");
+        show_mean_error(mean_visitor);
+    }
+
+    
    
     printf("--------------\n");
     stmt_list = compiler->stmt_list;
@@ -37,7 +44,7 @@ int main(void) {
     
     fclose(fin);
     delete_visitor(visitor);    
-    delete_visitor(mean_visitor);
+    delete_visitor((Visitor*)mean_visitor);
     CS_delete_compiler(compiler);
     MEM_dump_memory();
     return 0;

@@ -11,6 +11,11 @@ typedef void (*visit_expr)(Expression* expr, Visitor* visitor);
 typedef void (*visit_stmt)(Statement*  stmt, Visitor* visitor);
 
 
+typedef struct MeanCheckLog_tag {
+    char                    *log_str;
+    struct MeanCheckLog_tag *next;
+} MeanCheckLogger;
+
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
@@ -24,6 +29,7 @@ struct MeanVisitor_tag {
     CS_Compiler *compiler;
     int i;
     int j;
+    MeanCheckLogger *check_log;
 };
 
 /* visitor.c */
@@ -34,7 +40,8 @@ void traverse_expr(Expression* expr, Visitor* visitor);
 void traverse_stmt(Statement*  stmt, Visitor* visitor);
 
 /* mean_visitor */
-
 MeanVisitor* create_mean_visitor();
+void show_mean_error(MeanVisitor* visitor);
+char* get_type_name(CS_BasicType type);
 
 #endif

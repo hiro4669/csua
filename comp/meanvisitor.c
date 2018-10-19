@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "visitor.h"
 #include "../memory/MEM.h"
@@ -21,6 +22,45 @@
     ((type1)->basic_type == (type2)->basic_type)
 
 
+char* get_type_name(CS_BasicType type) {
+    switch(type) {
+        case CS_BOOLEAN_TYPE: {
+            return "boolean";            
+        }
+        case CS_INT_TYPE: {
+            return "int";
+        }
+        case CS_DOUBLE_TYPE: {
+            return "double";            
+        }
+        default: {
+            return "untyped";
+        }
+    }
+}
+
+
+static void add_check_log(const char* str, Visitor* visitor) {
+    MeanCheckLogger* log = (MeanCheckLogger*)cs_malloc(sizeof(MeanCheckLogger));
+    log->next = NULL;
+    log->log_str = (char*)cs_malloc(strlen(str) + 1);
+    strcpy(log->log_str, str);
+    MeanCheckLogger* p = NULL;
+    if (((MeanVisitor*)visitor)->check_log == NULL) {
+        ((MeanVisitor*)visitor)->check_log = log;
+        return;
+    } else {
+        for (p = ((MeanVisitor*)visitor)->check_log; p->next; p = p->next);
+        p->next = log;
+    }
+}
+
+void show_mean_error(MeanVisitor* visitor) {
+    MeanCheckLogger* p;
+    for (p = visitor->check_log; p; p = p->next) {
+        fprintf(stderr, "%s\n", p->log_str);
+    }
+}
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter castexpr\n");
@@ -79,15 +119,29 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
         return;
     }
     
-    
-    fprintf(stderr, "Cannot find lefthand type in meanvisitor\n");
-    exit(1);
-
+    char message[50];
+    sprintf(message, "%d: Cannot find identifier %s", expr->line_number, expr->u.identifier.name);
+    add_check_log(message, visitor); 
 }
 
-static void cast_arithmetic_binary_expr(Expression* expr) {
+static void cast_arithmetic_binary_expr(Expression* expr, Visitor* visitor) {
     Expression* left  = expr->u.binary_expression.left;
     Expression* right = expr->u.binary_expression.right;
+    
+    if (left->type == NULL) {
+        char message[100];
+        sprintf(message, "%d: Cannot find left hand type", expr->line_number);
+        add_check_log(message, visitor);
+    }
+    if (right->type == NULL) {
+        char message[100];
+        sprintf(message, "%d: Cannot find right hand type", expr->line_number);
+        add_check_log(message, visitor);
+    }
+    if ((left->type == NULL) || (right->type == NULL)) {
+        return;
+    }
+    
     
     if (cs_is_int(left->type) && cs_is_int(right->type)) {
         return;
@@ -105,7 +159,13 @@ static void cast_arithmetic_binary_expr(Expression* expr) {
         return;
     } else {
         fprintf(stderr, "type mismatch of cast_arithmetic_binary_expr in meanvisitor\n");
-        exit(1);        
+        char message[100];
+        sprintf(message, "%d: type mismatch in arithmetic binary expression left:%s, right:%s", 
+                expr->line_number, 
+                get_type_name(left->type->basic_type),
+                get_type_name(right->type->basic_type));
+        
+        add_check_log(message, visitor);    
     }        
     
 }
@@ -116,35 +176,35 @@ static void enter_addexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave addexpr\n");
-    cast_arithmetic_binary_expr(expr);
+    cast_arithmetic_binary_expr(expr, visitor);
 }
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter subexpr : -\n");
 }
 static void leave_subexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave subexpr\n");
-    cast_arithmetic_binary_expr(expr);
+    cast_arithmetic_binary_expr(expr, visitor);
 }
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter mulexpr : *\n");
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave mulexpr\n");
-    cast_arithmetic_binary_expr(expr);    
+    cast_arithmetic_binary_expr(expr, visitor);    
 }
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter divexpr : /\n");
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave divexpr\n");
-    cast_arithmetic_binary_expr(expr);    
+    cast_arithmetic_binary_expr(expr, visitor);    
 }
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter modexpr : mod \n");
 }
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave modexpr\n");
-    cast_arithmetic_binary_expr(expr);    
+    cast_arithmetic_binary_expr(expr, visitor);    
 }
 
 static void compare_type_check(Expression* expr) {
@@ -319,7 +379,14 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 
 
 
-static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr) {
+static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr, Visitor* visitor) {
+    
+    if (ltype == NULL) {
+        char message[100];
+        sprintf(message, "%d: Cannot find left hand type", expr->line_number);
+        add_check_log(message, visitor);
+        return expr;
+    }
     if (ltype->basic_type == expr->type->basic_type) {
         return expr;
     } else if ((ltype->basic_type == CS_INT_TYPE) && (expr->type->basic_type == CS_DOUBLE_TYPE) ) {
@@ -331,8 +398,9 @@ static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr)
         cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);       
         return cast;
     } else {
-        fprintf(stderr, "Type Error\n");
-        exit(1);
+        char message[100];
+        sprintf(message, "%d: assignment type error", expr->line_number);
+        add_check_log(message, visitor);
     }
     return expr;
 }
@@ -343,8 +411,7 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave assignexpr\n");
     Expression* left  = expr->u.assignment_expression.left;
     Expression* right = expr->u.assignment_expression.right;
-     
-    expr->u.assignment_expression.right = assignment_type_check(left->type, right);
+    expr->u.assignment_expression.right = assignment_type_check(left->type, right, visitor);
     expr->type = left->type;
     
     
@@ -377,7 +444,7 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "leave declstmt\n");
     Declaration* decl = stmt->u.declaration_s;
     if (decl->initializer != NULL) {
-        decl->initializer = assignment_type_check(decl->type, decl->initializer);
+        decl->initializer = assignment_type_check(decl->type, decl->initializer, visitor);
     }
 }
 
@@ -389,6 +456,7 @@ MeanVisitor* create_mean_visitor() {
     visit_stmt* leave_stmt_list;
     
     MeanVisitor* visitor = MEM_malloc(sizeof(MeanVisitor));
+    visitor->check_log = NULL;
     visitor->compiler = cs_get_current_compiler();
     if (visitor->compiler == NULL) {
         fprintf(stderr, "Compile is NULL\n");
