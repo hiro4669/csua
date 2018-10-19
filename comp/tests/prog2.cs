@@ -1,14 +1,15 @@
 int print();
-double printd();
-
-
-int i = 1;
+int i;
 int j;
+boolean t;
+t = true;
+i = true;
+i = false;
 
-j += 1;
-j += i;
-
-
-print();
-printd();
-
+i - t;
+i != t;
+t && 1;
+t++;
+-t;
+!i;
+i = print();

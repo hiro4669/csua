@@ -164,18 +164,22 @@ static void cast_arithmetic_binary_expr(Expression* expr, Visitor* visitor) {
     }        
     
     if (cs_is_int(left->type) && cs_is_int(right->type)) {
+        expr->type = cs_create_type_specifier(CS_INT_TYPE);
         return;
     } else if(cs_is_int(left->type) && cs_is_double(right->type)) {
         Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
         cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
         cast->u.cast_expression.expr = left;
         expr->u.binary_expression.left = cast;
+        expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
     } else if (cs_is_double(left->type) && cs_is_int(right->type)) {
         Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
         cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
         cast->u.cast_expression.expr = right;
         expr->u.binary_expression.right = cast;
+        expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);        
     } else if(cs_is_double(left->type) && cs_is_double(right->type)) {
+        expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);        
         return;
     } else {
         unacceptable_type_binary_expr(expr, visitor);       
@@ -414,7 +418,7 @@ static void leave_minusexpr(Expression* expr, Visitor* visitor) {
         return;
     }
     
-    if ((type->basic_type != CS_INT_TYPE) || (type->basic_type != CS_DOUBLE_TYPE)) {
+    if ((type->basic_type != CS_INT_TYPE) && (type->basic_type != CS_DOUBLE_TYPE)) {
         sprintf(message, "%d: Operand is not INT or DOUBLE type (%s)", 
                 expr->line_number, 
                 get_type_name(type->basic_type));
