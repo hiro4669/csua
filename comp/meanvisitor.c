@@ -324,14 +324,25 @@ static void leave_neexpr(Expression* expr, Visitor* visitor) {
 }
 
 
-static void logical_type_check(Expression* expr) {
+static void logical_type_check(Expression* expr, Visitor* visitor) {
+    if (check_nulltype_binary_expr(expr, visitor)) {
+        return;
+    }
+    
     Expression* left  = expr->u.binary_expression.left;
     Expression* right = expr->u.binary_expression.right;
+    
     if (cs_is_boolean(left->type) && cs_is_boolean(right->type)) {
         expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
     } else {
-        fprintf(stderr, "type mismatch of compare_type_check in meanvisitor\n");
-        exit(1);
+        char message[100]; 
+        sprintf(message, "%d: && or || accept only boolean left:%s, right:%s", 
+            expr->line_number, 
+            get_type_name(left->type->basic_type),
+            get_type_name(right->type->basic_type));
+    
+        add_check_log(message, visitor);   
+        
     }
 }
 
@@ -341,7 +352,7 @@ static void enter_landexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave landexpr\n");
-    logical_type_check(expr);
+    logical_type_check(expr, visitor);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
@@ -349,24 +360,35 @@ static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lorexpr\n");
-    logical_type_check(expr);
+    logical_type_check(expr, visitor);
 }
 
 
-static void incdec_typecheck(Expression* expr) {
+static void incdec_typecheck(Expression* expr, Visitor* visitor) {
     Expression* idexpr = expr->u.inc_dec;
-    if (idexpr->type->basic_type != CS_INT_TYPE) {
-        fprintf(stderr, "type error in incdec_typecheck type=%d\n", idexpr->type->basic_type);
-        exit(1);
+    char message[100];    
+    if (idexpr->type == NULL) {
+        sprintf(message, "%d: Cannot find ++ or -- type", expr->line_number);
+        add_check_log(message, visitor);        
+        return;
     }
-    expr->type = idexpr->type;
+   
+    if (idexpr->type->basic_type != CS_INT_TYPE) {
+        sprintf(message, "%d: Operand is not INT type (%s)", 
+                expr->line_number, 
+                get_type_name(idexpr->type->basic_type));
+        add_check_log(message, visitor);        
+        return;
+    } else {
+        expr->type = idexpr->type;
+    }
 }
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter incexpr : ++ \n");
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave incexpr\n");
-    incdec_typecheck(expr);   
+    incdec_typecheck(expr, visitor);   
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
@@ -374,7 +396,7 @@ static void enter_decexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave decexpr\n");
-    incdec_typecheck(expr);    
+    incdec_typecheck(expr, visitor);    
 }
 
 
