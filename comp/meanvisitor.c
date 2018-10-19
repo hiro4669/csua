@@ -405,11 +405,24 @@ static void enter_minusexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave minusexpr\n");   
+
+    char message[100];
     TypeSpecifier* type = expr->u.minus_expression->type;
-    if ((type->basic_type != CS_INT_TYPE) || (type->basic_type != CS_DOUBLE_TYPE)) {
-        fprintf(stderr, "type error in incdec_typecheck type=%d\n", type->basic_type);
+    if (type == NULL) {
+        sprintf(message, "%d: Cannot find - type", expr->line_number);
+        add_check_log(message, visitor);        
+        return;
     }
-    expr->type = type;    
+    
+    if ((type->basic_type != CS_INT_TYPE) || (type->basic_type != CS_DOUBLE_TYPE)) {
+        sprintf(message, "%d: Operand is not INT or DOUBLE type (%s)", 
+                expr->line_number, 
+                get_type_name(type->basic_type));
+        add_check_log(message, visitor);        
+        return;        
+    } else {
+        expr->type = type;    
+    }
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
@@ -417,11 +430,26 @@ static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lognotexpr\n");
+
+    char message[100];
     TypeSpecifier* type = expr->u.logical_not_expression->type;
-    if (type->basic_type != CS_BOOLEAN_TYPE) {
-        fprintf(stderr, "type error in logical not_typecheck type=%d\n", type->basic_type);
+    
+    if (type == NULL) {
+        sprintf(message, "%d: Cannot find ! type", expr->line_number);
+        add_check_log(message, visitor);        
+        return;
     }
-    expr->type = type;    
+    
+    
+    if (type->basic_type != CS_BOOLEAN_TYPE) {
+        sprintf(message, "%d: Operand is not BOOLEAN type (%s)", 
+                expr->line_number, 
+                get_type_name(type->basic_type));
+        add_check_log(message, visitor);        
+        return;    
+    } else {
+        expr->type = type;    
+    }
 }
 
 
@@ -435,6 +463,14 @@ static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr,
         add_check_log(message, visitor);
         return expr;
     }
+    if (expr->type == NULL) {
+        char message[100];
+        sprintf(message, "%d: Cannot find right hand type", expr->line_number);
+        add_check_log(message, visitor);
+        return expr;
+    }
+    
+    
     if (ltype->basic_type == expr->type->basic_type) {
         return expr;
     } else if ((ltype->basic_type == CS_INT_TYPE) && (expr->type->basic_type == CS_DOUBLE_TYPE) ) {
@@ -447,7 +483,10 @@ static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr,
         return cast;
     } else {
         char message[100];
-        sprintf(message, "%d: assignment type error", expr->line_number);
+        sprintf(message, "%d: assignment type error %s = %s", 
+                expr->line_number,
+                get_type_name(ltype->basic_type),
+                get_type_name(expr->type->basic_type));
         add_check_log(message, visitor);
     }
     return expr;
