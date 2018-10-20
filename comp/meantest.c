@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
     printf("arg len = %d\n", argc);
 
     if (argc == 1) {
-        printf("Usage ./meant dir/filename.cs");
+        printf("Usage ./meant dir/filename.cs\n");
         return 1;        
     }
     FILE *fin = fopen(argv[1], "r");
