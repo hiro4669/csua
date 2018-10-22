@@ -44,7 +44,7 @@ typedef enum {
     SVM_PUSH_FUNCTION
     SVM_INVOKE,
     SVM_RETURN
-} SVN_Opcode;
+} SVM_Opcode;
 
 typedef struct {
     char *opname;
