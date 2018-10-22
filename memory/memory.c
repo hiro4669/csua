@@ -159,6 +159,13 @@ void *MEM_malloc_func(MEM_Controller controller, char* filename, int line, size_
     
 }
 
+
+char* MEM_strdup_func(MEM_Controller controller, char* filename, int line, char* src) {
+    char* dst = MEM_malloc_func(controller, filename, line, strlen(src) + 1);
+    strcpy(dst, src);
+    return dst;
+}
+
 void* MEM_realloc_func(MEM_Controller controller, char* filename, int line, void* ptr, size_t size) {
     void *new_ptr;
     void *real_ptr;

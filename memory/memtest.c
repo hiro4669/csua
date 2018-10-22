@@ -63,9 +63,16 @@ int main(void) {
     for (i = 0; i < 10; ++i) {
         ptr2[i] = 0xbb;
     }
+    
+    fprintf(stderr, "------------------------------------>>>>>>\n");
+    char* src = "Hello World";
+    char* copy = MEM_strdup(src);
+    printf("copy = %s\n", copy);
+    MEM_dump_memory();    
+    MEM_free(copy);
 	
     
-    MEM_dump_memory();
+
     MEM_dispose(pt->head);
     MEM_dispose(storage);
 	//	fprintf(stderr, "addr = %p\n", pt->head);
