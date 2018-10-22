@@ -8,6 +8,7 @@
 #ifndef _CSUA_H_
 #define _CSUA_H_
 #include <stdio.h>
+#include <stdint.h>
 #include "../memory/MEM.h"
 
 typedef struct Expression_tag Expression;
@@ -190,6 +191,38 @@ struct CS_Compiler_tag {
     FunctionDeclarationList *func_list;
     int current_line;
 };
+
+/* For Code Generation */
+
+typedef struct {
+    char          *name;
+    TypeSpecifier *type;
+} CS_Variable;
+
+typedef enum {
+    CS_CONSTANT_INT,
+    CS_CONSTANT_DOUBLE
+} CS_ConstantType;
+
+typedef struct {
+    CS_ConstantType type;
+    union {
+      int    c_int;
+      double c_double;
+    }u;    
+} CS_ConstantPool;
+
+
+typedef struct {
+    uint32_t         constant_pool_count;
+    CS_ConstantPool *constant_pool;
+    uint32_t         global_variable_count;
+    CS_Variable     *global_variable;
+    uint32_t        code_size;
+    uint8_t         *code;
+} CS_Executable;
+
+
 
 
 
