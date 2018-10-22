@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "csua.h"
+#include "visitor.h"
 
 
 
@@ -27,7 +28,41 @@ void CS_delete_compiler(CS_Compiler* compiler) {
     MEM_dispose(storage);
 }
 
-void CS_compile(CS_Compiler* compiler, FILE *fin) {
+static CS_Boolean do_mean_check(CS_Compiler* compiler) {
+    MeanVisitor* mean_visitor = create_mean_visitor();
+
+    printf("--------------\n");    
+    FunctionDeclarationList* func_list = compiler->func_list;
+    for (; func_list; func_list = func_list->next) {
+        printf("func name = %s\n", func_list->func->name);
+    }
+    
+    StatementList* stmt_list = compiler->stmt_list;
+    while(stmt_list) {
+        traverse_stmt(stmt_list->stmt, (Visitor*)mean_visitor);
+        stmt_list = stmt_list->next;
+    }
+    
+    DeclarationList* dp = NULL;
+    dp = compiler->decl_list;
+    for (int i = 0; dp; dp = dp->next, ++i) {
+        dp->decl->index = i;
+    }
+    dp = compiler->decl_list;
+    for (int i = 0; dp; dp = dp->next, ++i) {
+        printf("index = %d\n", dp->decl->index);
+    }
+    
+    if (mean_visitor->check_log != NULL) {
+        delete_visitor((Visitor*)mean_visitor);
+        return CS_FALSE;
+    } else {
+        delete_visitor((Visitor*)mean_visitor);
+        return CS_TRUE;
+    }    
+}
+
+CS_Boolean CS_compile(CS_Compiler* compiler, FILE *fin) {
     extern int yyparse(void);
     extern FILE *yyin;
     yyin = fin;
@@ -38,6 +73,8 @@ void CS_compile(CS_Compiler* compiler, FILE *fin) {
     if (yyparse()) {
         fprintf(stderr, "Parse Error");
         exit(1);
-    }    
+    }   
+    
+    return do_mean_check((compiler));
 }
 

@@ -12,4 +12,4 @@ t && 1;
 t++;
 -t;
 !i;
-i = print();
+t = print();

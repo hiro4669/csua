@@ -225,7 +225,7 @@ FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();
-void CS_compile(CS_Compiler* compiler, FILE *fin);
+CS_Boolean CS_compile(CS_Compiler* compiler, FILE *fin);
 void CS_delete_compiler(CS_Compiler* compiler);
 
 /* util.c */
