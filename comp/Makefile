@@ -7,6 +7,10 @@ EXEC = scantest.o
 
 YACC = csua.y
 
+cgent: $(MEMORY) $(OBJS) codegentest.o
+	make -C ../memory
+	$(CC) -o $@ $^
+
 meant: $(MEMORY) $(OBJS) meantest.o
 	make -C ../memory
 	$(CC) -o $@ $^
@@ -45,4 +49,4 @@ y.tab.c: $(YACC)
 	$(CC) -c $(CFLAGS) $*.c
 
 clean:
-	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output prst memt treet astt meant
+	rm -rf $(TARGET) *~ keyword.c *.o y.tab.h y.tab.c y.output prst memt treet astt meant cgent
