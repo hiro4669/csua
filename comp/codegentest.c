@@ -31,9 +31,6 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
     CodegenVisitor* cgen_visitor = create_codegen_visitor(compiler, exec);
     delete_visitor((Visitor*)cgen_visitor);
     
-    
-    
-    
     return exec;        
 }
 
@@ -44,6 +41,16 @@ static void delete_executable(CS_Executable* exec) {
     }
     MEM_free(exec->global_variable);
     MEM_free(exec);
+}
+
+static void exec_disasm(CS_Executable* exec) {
+    fprintf(stderr, "-- global variables --\n");
+    for (int i = 0; i < exec->global_variable_count; ++i) {
+        fprintf(stderr, "%s:%s ", exec->global_variable[i].name, get_type_name(exec->global_variable[i].type->basic_type));
+        if (i % 10 == 0) fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "\n");
+    
 }
 
 
@@ -71,6 +78,7 @@ int main(int argc, char* argv[]) {
     if (compile_result) {
         // Code Generate
         CS_Executable* exec = code_generate(compiler);
+        exec_disasm(exec);
         delete_executable(exec);
         
         printf("--------------\n");
