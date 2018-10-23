@@ -51,6 +51,6 @@ void show_mean_error(MeanVisitor* visitor);
 char* get_type_name(CS_BasicType type);
 
 /* codegen_visitor */
-CodegenVisitor* create_codegen_visitor();
+CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exec);
 
 #endif
