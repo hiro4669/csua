@@ -32,6 +32,12 @@ struct MeanVisitor_tag {
     MeanCheckLogger *check_log;
 };
 
+struct CodegenVisitor_tag {
+    Visitor        visitor;
+    CS_Compiler   *compiler;
+    CS_Executable *exec;
+};
+
 /* visitor.c */
 void print_depth();
 Visitor* create_treeview_visitor();
@@ -43,5 +49,8 @@ void traverse_stmt(Statement*  stmt, Visitor* visitor);
 MeanVisitor* create_mean_visitor();
 void show_mean_error(MeanVisitor* visitor);
 char* get_type_name(CS_BasicType type);
+
+/* codegen_visitor */
+CodegenVisitor* create_codegen_visitor();
 
 #endif

@@ -70,10 +70,13 @@ int main(int argc, char* argv[]) {
     CS_Compiler* compiler = CS_create_compiler();
     CS_Boolean compile_result = CS_compile(compiler, fin);
     
-    code_generate(compiler);
     
     
-    if (compile_result) {        
+    
+    if (compile_result) {
+        // Code Generate
+        code_generate(compiler);
+        
         printf("--------------\n");
         Visitor* visitor = create_treeview_visitor();    
         StatementList* stmt_list = compiler->stmt_list;

@@ -54,6 +54,7 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     }
     
     if (mean_visitor->check_log != NULL) {
+        show_mean_error(mean_visitor);
         delete_visitor((Visitor*)mean_visitor);
         return CS_FALSE;
     } else {

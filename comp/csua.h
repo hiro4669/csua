@@ -14,6 +14,7 @@
 typedef struct Expression_tag Expression;
 typedef struct Visitor_tag Visitor;
 typedef struct MeanVisitor_tag MeanVisitor;
+typedef struct CodegenVisitor_tag CodegenVisitor;
 typedef struct CS_Compiler_tag CS_Compiler;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;

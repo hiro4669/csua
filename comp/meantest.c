@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
             stmt_list = stmt_list->next;
         }
         delete_visitor(visitor);
-    }    
+    } 
     
     fclose(fin);
     CS_delete_compiler(compiler);
