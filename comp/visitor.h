@@ -36,6 +36,10 @@ struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
     CS_Executable *exec;
+    
+    uint32_t       CODE_ALLOC_SIZE;
+    uint32_t       current_code_size;
+    uint32_t       pos;
 };
 
 /* visitor.c */

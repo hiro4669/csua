@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include "csua.h"
 #include "visitor.h"
+#include "../svm/svm.h"
+
+
+
+static void gen_byte_code(CS_Executable* exec, uint8_t op) {
+    
+}
 
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
@@ -212,6 +219,10 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     CodegenVisitor* visitor = (CodegenVisitor*)MEM_malloc(sizeof(CodegenVisitor));
     visitor->compiler = compiler;
     visitor->exec = exec;
+    visitor->CODE_ALLOC_SIZE = 10; // temporary
+    visitor->current_code_size = 0;
+    visitor->pos = 0;
+    
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
