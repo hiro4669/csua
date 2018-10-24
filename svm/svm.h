@@ -45,7 +45,7 @@ typedef enum {
     SVM_LOGICAL_OR,
     SVM_LOGICAL_NOT,
     SVM_POP,
-    SVM_PUSH_FUNCTION
+    SVM_PUSH_FUNCTION,
     SVM_INVOKE,
     SVM_RETURN
 } SVM_Opcode;
@@ -58,19 +58,19 @@ typedef struct {
 
 OpcodeInfo svm_opcode_info[] = {
     {"dummy", "", 0},
-    {"push_int", "", 1},
-    {"push_double", "", 1},
-    {"push_stack_int", "", 1},
-    {"push_stack_double", "", 1},
+    {"push_int", "i", 1},
+    {"push_double", "i", 1},
+    {"push_stack_int", "i", 1},
+    {"push_stack_double", "i", 1},
 
-    {"pop_stack_int", "", -1},
-    {"pop_stack_double", "", -1},
+    {"pop_stack_int", "i", -1},
+    {"pop_stack_double", "i", -1},
     
-    {"push_static_int", "", 1},
-    {"push_static_double", "", 1},
+    {"push_static_int", "i", 1},
+    {"push_static_double", "i", 1},
     
-    {"pop_static_int", "", -1},
-    {"pop_static_double", "", -1},
+    {"pop_static_int", "i", -1},
+    {"pop_static_double", "i", -1},
     
     {"add_int", "", -1}, 
     {"add_double", "", -1},

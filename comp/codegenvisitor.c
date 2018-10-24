@@ -7,8 +7,16 @@
 
 
 
-static void gen_byte_code(CS_Executable* exec, uint8_t op) {
-    
+static void gen_byte_code(CodegenVisitor* visitor, uint8_t op) {
+    OpcodeInfo oInfo = svm_opcode_info[op];
+    printf("-->%s\n", oInfo.opname);
+}
+
+static int add_constant(CS_Executable* exec, CS_ConstantPool* cpp) {
+    exec->constant_pool = MEM_realloc(exec->constant_pool, 
+            sizeof(CS_ConstantPool) * (exec->constant_pool_count+1));
+    exec->constant_pool[exec->constant_pool_count] = *cpp;
+    return exec->constant_pool_count++;
 }
 
 
@@ -29,6 +37,14 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter intexpr : %d\n", expr->u.int_value);
+    CS_Executable* exec = ((CodegenVisitor*)visitor)->exec;
+    CS_ConstantPool cp;
+    cp.type = CS_CONSTANT_INT;
+    cp.u.c_int = expr->u.int_value;
+    int idx = add_constant(exec, &cp);
+    
+    
+    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT);
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave intexpr\n");
@@ -222,6 +238,7 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visitor->CODE_ALLOC_SIZE = 10; // temporary
     visitor->current_code_size = 0;
     visitor->pos = 0;
+    visitor->code = NULL;
     
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);

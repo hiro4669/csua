@@ -11,7 +11,6 @@ static void copy_declaration(CS_Compiler* compiler, CS_Executable* exec) {
     DeclarationList* decl_list = compiler->decl_list;
     int size;
     for (size = 0; decl_list; decl_list = decl_list->next, ++size);
-    printf("decl len = %d\n", size);
     CS_Variable* variables = (CS_Variable*)MEM_malloc(sizeof(CS_Variable) * size);
     decl_list = compiler->decl_list;
     for (int i = 0; i < size; decl_list = decl_list->next, ++i) {
@@ -27,8 +26,28 @@ static void copy_declaration(CS_Compiler* compiler, CS_Executable* exec) {
 static CS_Executable* code_generate(CS_Compiler* compiler) {
     CS_Executable* exec = (CS_Executable*)MEM_malloc(sizeof(CS_Executable));
     memset(exec, 0x0, sizeof(CS_Executable));
+    exec->code = NULL;
+    exec->code_size = 0;
+    exec->constant_pool = NULL;
+    exec->constant_pool_count = 0;
+    exec->global_variable = NULL;
+    exec->global_variable_count = 0;
+    
+    
     copy_declaration(compiler, exec); // copy variables
     CodegenVisitor* cgen_visitor = create_codegen_visitor(compiler, exec);
+    
+    StatementList* stmt_list = compiler->stmt_list;
+    while(stmt_list) {
+        printf("traverse!!\n");
+        traverse_stmt(stmt_list->stmt, (Visitor*)cgen_visitor);
+        stmt_list = stmt_list->next;
+    }
+    
+    
+    if (cgen_visitor->code) {
+        MEM_free(cgen_visitor->code);
+    }
     delete_visitor((Visitor*)cgen_visitor);
     
     return exec;        
@@ -40,6 +59,12 @@ static void delete_executable(CS_Executable* exec) {
         MEM_free(exec->global_variable[i].type);
     }
     MEM_free(exec->global_variable);
+    
+    if (exec->constant_pool != NULL) {
+        MEM_free(exec->constant_pool);
+    }
+    
+    
     MEM_free(exec);
 }
 

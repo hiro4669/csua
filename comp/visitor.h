@@ -40,6 +40,7 @@ struct CodegenVisitor_tag {
     uint32_t       CODE_ALLOC_SIZE;
     uint32_t       current_code_size;
     uint32_t       pos;
+    uint8_t        *code;
 };
 
 /* visitor.c */
