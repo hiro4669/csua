@@ -39,11 +39,13 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
     
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {
-        printf("traverse!!\n");
         traverse_stmt(stmt_list->stmt, (Visitor*)cgen_visitor);
         stmt_list = stmt_list->next;
     }
     
+    exec->code_size = cgen_visitor->pos;
+    exec->code = (uint8_t*)MEM_malloc(exec->code_size);
+    memcpy(exec->code, cgen_visitor->code, exec->code_size);
     
     if (cgen_visitor->code) {
         MEM_free(cgen_visitor->code);
@@ -64,11 +66,16 @@ static void delete_executable(CS_Executable* exec) {
         MEM_free(exec->constant_pool);
     }
     
+    if (exec->code != NULL) {
+        MEM_free(exec->code);
+    }
+    
     
     MEM_free(exec);
 }
 
 static void exec_disasm(CS_Executable* exec) {
+    fprintf(stderr, "< Disassemble Start >\n");
     fprintf(stderr, "-- global variables --\n");
     for (int i = 0; i < exec->global_variable_count; ++i) {
         fprintf(stderr, "%s:%s ", exec->global_variable[i].name, get_type_name(exec->global_variable[i].type->basic_type));
@@ -76,6 +83,13 @@ static void exec_disasm(CS_Executable* exec) {
     }
     fprintf(stderr, "\n");
     
+    fprintf(stderr, "-- code --\n");
+    for (int i = 0; i < exec->code_size; ++i) {
+        if (i % 16 == 0) fprintf(stderr, "\n");
+        fprintf(stderr, "%02x ", exec->code[i]);        
+    }
+    fprintf(stderr, "\n");
+    fprintf(stderr, "< Disassemble End >\n");
 }
 
 

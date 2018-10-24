@@ -1,15 +1,69 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "csua.h"
 #include "visitor.h"
 #include "../svm/svm.h"
 
 
+static size_t get_opsize(OpcodeInfo *op) {
+    size_t size = strlen(op->parameter);
+    size *= 2;    
+    return size;
+}
 
-static void gen_byte_code(CodegenVisitor* visitor, uint8_t op) {
+
+static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
+    va_list ap;
+    va_start(ap, op);
+    
     OpcodeInfo oInfo = svm_opcode_info[op];
     printf("-->%s\n", oInfo.opname);
+    printf("-->%s\n", oInfo.parameter);
+    
+    // pos + 1byte + operator (1byte) + operand_size
+    if ((visitor->pos + 1 + 1 + (get_opsize(&oInfo))) > visitor->current_code_size) {
+        visitor->code = MEM_realloc(visitor->code,
+                visitor->current_code_size += visitor->CODE_ALLOC_SIZE);        
+    }
+    
+    visitor->code[visitor->pos++] = op & 0xff;
+    
+    for (int i = 0; i < strlen(oInfo.parameter); ++i) {
+        printf("com = %c\n", oInfo.parameter[i]);
+        switch(oInfo.parameter[i]) {
+            case 'i': { // 2byte index
+                int operand = va_arg(ap, int);
+                visitor->code[visitor->pos++] = operand        & 0xff;
+                visitor->code[visitor->pos++] = (operand >> 8) & 0xff;                
+                break;
+            }
+            default: {
+                fprintf(stderr, "undefined parameter\n");
+                exit(1);
+                break;
+            }
+        }
+    }
+    /*
+    for (int i = 0; i < visitor->pos; ++i) {
+        printf("%02x ", visitor->code[i]);
+    }
+    printf("\n");
+    */
+    va_end(ap);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
 
 static int add_constant(CS_Executable* exec, CS_ConstantPool* cpp) {
@@ -44,7 +98,7 @@ static void enter_intexpr(Expression* expr, Visitor* visitor) {
     int idx = add_constant(exec, &cp);
     
     
-    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT, idx);
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave intexpr\n");
