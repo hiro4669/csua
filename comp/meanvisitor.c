@@ -627,6 +627,8 @@ MeanVisitor* create_mean_visitor() {
     ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
     ((Visitor*)visitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)visitor)->leave_stmt_list = leave_stmt_list;
+    ((Visitor*)visitor)->notify_expr_list = NULL;
+            
             
     
     

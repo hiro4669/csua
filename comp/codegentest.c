@@ -78,10 +78,34 @@ static void exec_disasm(CS_Executable* exec) {
     fprintf(stderr, "< Disassemble Start >\n");
     fprintf(stderr, "-- global variables --\n");
     for (int i = 0; i < exec->global_variable_count; ++i) {
-        fprintf(stderr, "%s:%s ", exec->global_variable[i].name, get_type_name(exec->global_variable[i].type->basic_type));
+        fprintf(stderr, "[%d]%s:%s ", i, exec->global_variable[i].name, 
+                get_type_name(exec->global_variable[i].type->basic_type));
         if (i % 10 == 0) fprintf(stderr, "\n");
     }
     fprintf(stderr, "\n");
+    fprintf(stderr, "-- constant pool --\n");
+    fprintf(stderr, "pool count = %d\n", exec->constant_pool_count);
+    for (int i = 0; i < exec->constant_pool_count; ++i) {
+        fprintf(stderr, "[%d]:", i);
+        switch(exec->constant_pool[i].type) {
+            case CS_CONSTANT_INT: {
+                fprintf(stderr, "%d\n", exec->constant_pool[i].u.c_int);
+                break;
+            }
+            case CS_CONSTANT_DOUBLE: {
+                fprintf(stderr, "%f\n", exec->constant_pool[i].u.c_double);
+                break;
+            }
+            default: {
+                fprintf(stderr, "undefined constant type\n in disasm");
+                exit(1);
+            }
+        }
+
+    }
+    
+    
+    
     
     fprintf(stderr, "-- code --\n");
     for (int i = 0; i < exec->code_size; ++i) {

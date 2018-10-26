@@ -73,7 +73,14 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             break;
         }
         case ASSIGN_EXPRESSION: {
-            traverse_expr(expr->u.assignment_expression.right, visitor);            
+            traverse_expr(expr->u.assignment_expression.right, visitor);
+            if (visitor->notify_expr_list) {
+                if (visitor->notify_expr_list[ASSIGN_EXPRESSION]) {
+                    visitor->notify_expr_list[ASSIGN_EXPRESSION](expr, visitor);
+                }
+            }
+            
+            
             traverse_expr(expr->u.assignment_expression.left, visitor);
             break;
         }

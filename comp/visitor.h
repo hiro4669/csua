@@ -11,6 +11,8 @@ typedef void (*visit_expr)(Expression* expr, Visitor* visitor);
 typedef void (*visit_stmt)(Statement*  stmt, Visitor* visitor);
 
 
+
+
 typedef struct MeanCheckLog_tag {
     char                    *log_str;
     struct MeanCheckLog_tag *next;
@@ -19,6 +21,8 @@ typedef struct MeanCheckLog_tag {
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
+    
+    visit_expr* notify_expr_list;
     
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
@@ -32,10 +36,18 @@ struct MeanVisitor_tag {
     MeanCheckLogger *check_log;
 };
 
+typedef enum {
+    VISIT_NORMAL,
+    VISIT_NOMAL_ASSIGN,
+} VisitState;
+
 struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
     CS_Executable *exec;
+    
+    VisitState     v_state;
+    uint32_t       store_index;
     
     uint32_t       CODE_ALLOC_SIZE;
     uint32_t       current_code_size;

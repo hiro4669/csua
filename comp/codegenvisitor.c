@@ -31,7 +31,6 @@ static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
     visitor->code[visitor->pos++] = op & 0xff;
     
     for (int i = 0; i < strlen(oInfo.parameter); ++i) {
-        printf("com = %c\n", oInfo.parameter[i]);
         switch(oInfo.parameter[i]) {
             case 'i': { // 2byte index
                 int operand = va_arg(ap, int);
@@ -115,7 +114,22 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter identifierexpr : %s\n", expr->u.identifier.name);
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave identifierexpr");            
+    fprintf(stderr, "leave identifierexpr\n");            
+    CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
+    switch (c_visitor->v_state) {
+        case VISIT_NORMAL: {
+            fprintf(stderr, "push value to stack\n");
+            break;
+        }
+        case VISIT_NOMAL_ASSIGN: {
+            fprintf(stderr, "store value to index\n");
+            break;
+        }
+        default: {
+            fprintf(stderr, "no such v_state error\n");
+            exit(1);
+        }
+    }
 }
 
 
@@ -244,6 +258,12 @@ static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave assignexpr\n");
+    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
+}
+
+static void notify_assignexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "NOTIFY assignexpr : %d \n", expr->u.assignment_expression.aope);
+    ((CodegenVisitor*)visitor)->v_state = VISIT_NOMAL_ASSIGN;    
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
@@ -281,6 +301,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
     
+    visit_expr* notify_expr_list;
+    
     if (compiler == NULL || exec == NULL) {
         fprintf(stderr, "Compiler or Executable is NULL\n");
         exit(1);
@@ -293,18 +315,23 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visitor->current_code_size = 0;
     visitor->pos = 0;
     visitor->code = NULL;
+    visitor->v_state = VISIT_NORMAL;
+    visitor->store_index = -1;
     
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
+    notify_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
+    
     enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     
     memset(enter_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     memset(leave_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
+    memset(notify_expr_list, 0, sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);    
     memset(enter_stmt_list, 0, sizeof(visit_expr) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     memset(leave_stmt_list, 0, sizeof(visit_expr) * STATEMENT_TYPE_COUNT_PLUS_ONE);
-    
+
     
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
@@ -333,6 +360,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
+    
+    notify_expr_list[ASSIGN_EXPRESSION]       = notify_assignexpr;
     
     
     
@@ -370,6 +399,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
     ((Visitor*)visitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)visitor)->leave_stmt_list = leave_stmt_list;
+
+    ((Visitor*)visitor)->notify_expr_list = notify_expr_list;
     
     
     
