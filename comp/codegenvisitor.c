@@ -34,8 +34,8 @@ static void gen_byte_code(CodegenVisitor* visitor, SVM_Opcode op, ...) {
         switch(oInfo.parameter[i]) {
             case 'i': { // 2byte index
                 int operand = va_arg(ap, int);
-                visitor->code[visitor->pos++] = operand        & 0xff;
-                visitor->code[visitor->pos++] = (operand >> 8) & 0xff;                
+                visitor->code[visitor->pos++] = (operand >> 8) & 0xff;
+                visitor->code[visitor->pos++] = operand        & 0xff;                
                 break;
             }
             default: {
@@ -123,6 +123,32 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
         }
         case VISIT_NOMAL_ASSIGN: {
             fprintf(stderr, "store value to index\n");
+            
+            if (!expr->u.identifier.is_function) {
+                fprintf(stderr, "index = %d\n", expr->u.identifier.u.declaration->index);
+                fprintf(stderr, "type = %s\n", get_type_name(expr->type->basic_type));
+                switch (expr->type->basic_type) {
+                    case CS_BOOLEAN_TYPE:
+                    case CS_INT_TYPE:    {
+                        gen_byte_code(c_visitor, SVM_POP_STATIC_INT, 
+                                expr->u.identifier.u.declaration->index);
+//                        gen_byte_code(c_visitor, SVM_POP_STATIC_INT, 10);
+
+                        break;
+                    }
+                    case CS_DOUBLE_TYPE: {
+                        fprintf(stderr, "double not implementerd in leave_identexpr codegenvisitor\n");
+                        exit(1);
+                    }
+                    default: {
+                        fprintf(stderr, "unknown type in leave_identexpr codegenvisitor\n");
+                        exit(1);
+                    }
+                }
+            } else {
+                fprintf(stderr, "%d: cannot assign value to function\n", expr->line_number);
+                exit(1);
+            }
             break;
         }
         default: {
