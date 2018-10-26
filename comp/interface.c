@@ -32,10 +32,6 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     MeanVisitor* mean_visitor = create_mean_visitor();
 
     printf("--------------\n");    
-    FunctionDeclarationList* func_list = compiler->func_list;
-    for (; func_list; func_list = func_list->next) {
-        printf("func name = %s\n", func_list->func->name);
-    }
     
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {
@@ -48,11 +44,23 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     for (int i = 0; dp; dp = dp->next, ++i) {
         dp->decl->index = i;
     }
+        
+    FunctionDeclarationList* func_list = compiler->func_list;
+    for (int i = 0; func_list; func_list = func_list->next, ++i) {
+        func_list->func->index = i;
+    }
+
+/*    
+    func_list = compiler->func_list;    
+    for (; func_list; func_list = func_list->next) {
+        printf("func name[%d] = %s\n", func_list->func->index, func_list->func->name);
+    }    
+    
     dp = compiler->decl_list;
     for (int i = 0; dp; dp = dp->next, ++i) {
         printf("index = %d\n", dp->decl->index);
     }
-    
+*/    
     if (mean_visitor->check_log != NULL) {
         show_mean_error(mean_visitor);
         delete_visitor((Visitor*)mean_visitor);
