@@ -4,7 +4,7 @@
 #include "csua.h"
 #include "visitor.h"
 #include "../memory/MEM.h"
-
+#include "../svm/svm.h"
 
 
 static void copy_declaration(CS_Compiler* compiler, CS_Executable* exec) {
@@ -74,7 +74,33 @@ static void delete_executable(CS_Executable* exec) {
     MEM_free(exec);
 }
 
+
+typedef struct {
+    char buf[128];
+    int  index;
+} DInfo;
+
+static void dump(DInfo *info) {
+    fprintf(stderr, "%s\n", info->buf);
+    info->index = 0;
+}
+
+static void add_string(DInfo *info, const char* str) {
+    int len = strlen(str);
+    strncpy(&info->buf[info->index], str, len);
+    info->buf[info->index += len] = 0;
+}
+
+static void add_uint16(DInfo *info, const uint16_t iv) {
+    char buf[6];
+    buf[0] = 0x20;
+    sprintf(&buf[1], "%04x", iv);
+    buf[5] = 0;
+    add_string(info, buf);
+}
+
 static void exec_disasm(CS_Executable* exec) {
+    
     fprintf(stderr, "< Disassemble Start >\n");
     fprintf(stderr, "-- global variables --\n");
     for (int i = 0; i < exec->global_variable_count; ++i) {
@@ -103,17 +129,55 @@ static void exec_disasm(CS_Executable* exec) {
         }
 
     }
-    
-    
-    
-    
+               
     fprintf(stderr, "-- code --\n");
     for (int i = 0; i < exec->code_size; ++i) {
         if (i % 16 == 0) fprintf(stderr, "\n");
         fprintf(stderr, "%02x ", exec->code[i]);        
     }
-    fprintf(stderr, "\n");
-    fprintf(stderr, "< Disassemble End >\n");
+    fprintf(stderr, "\n\n");
+    DInfo dinfo;
+    dinfo.index = 0;
+//    add_string(&dinfo, "abc");
+//    add_string(&dinfo, "def");
+//    add_uint16(&dinfo, 10);
+//    dump(&dinfo);
+    uint8_t* code = exec->code;
+    
+
+    for (int i = 0; i < exec->code_size; ++i) {
+        OpcodeInfo *oinfo = &svm_opcode_info[code[i]];
+        switch(code[i]) {
+            case SVM_PUSH_INT: 
+            case SVM_POP_STATIC_INT: {
+                add_string(&dinfo, oinfo->opname);
+                break;
+            }
+            default: {
+                fprintf(stderr, "unknown opcode [%02x]in disassemble\n", code[i]);
+                exit(1);
+            }
+        }
+        for (int j = 0; j < strlen(oinfo->parameter); ++j) {
+            switch(oinfo->parameter[j]) {
+                case 'i': {
+                    uint8_t uv = code[++i];
+                    uint16_t op = (uint16_t)( uv << 8 | code[++i]);
+                    add_uint16(&dinfo, op);
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "unknown parameter [%c]in disassemble\n", oinfo->parameter[j]);
+                    exit(1);
+                }
+            }
+        }
+        dump(&dinfo);
+    }
+
+
+
+    fprintf(stderr, "\n< Disassemble End >\n");
 }
 
 
