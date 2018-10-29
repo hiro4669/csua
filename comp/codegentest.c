@@ -149,7 +149,8 @@ static void exec_disasm(CS_Executable* exec) {
         OpcodeInfo *oinfo = &svm_opcode_info[code[i]];
         switch(code[i]) {
             case SVM_PUSH_INT: 
-            case SVM_POP_STATIC_INT: {
+            case SVM_POP_STATIC_INT: 
+            case SVM_POP: {
                 add_string(&dinfo, oinfo->opname);
                 break;
             }

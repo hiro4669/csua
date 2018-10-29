@@ -284,7 +284,7 @@ static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave assignexpr\n");
-    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
+//    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
 }
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
@@ -306,6 +306,26 @@ static void enter_exprstmt(Statement* stmt, Visitor* visitor) {
 }
 static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "leave exprstmt\n");
+    
+    CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
+    switch (c_visitor->v_state) {
+        case VISIT_NORMAL: {
+            gen_byte_code(c_visitor, SVM_POP);
+            break;
+        }
+        case VISIT_NOMAL_ASSIGN: {            
+            c_visitor->v_state = VISIT_NORMAL;
+            break;
+        }
+        default: {
+            fprintf(stderr, "no such visit state in leave_exprstmt\n");
+            break;
+        }
+    }
+    
+//    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
+    
+    
 }
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
