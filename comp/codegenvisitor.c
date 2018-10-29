@@ -132,8 +132,6 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                     case CS_INT_TYPE:    {
                         gen_byte_code(c_visitor, SVM_POP_STATIC_INT, 
                                 expr->u.identifier.u.declaration->index);
-//                        gen_byte_code(c_visitor, SVM_POP_STATIC_INT, 10);
-
                         break;
                     }
                     case CS_DOUBLE_TYPE: {
@@ -149,6 +147,30 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                 fprintf(stderr, "%d: cannot assign value to function\n", expr->line_number);
                 exit(1);
             }
+            
+            if (c_visitor->assign_depth > 1) { // nested assign
+                switch(expr->type->basic_type) {
+                    case CS_BOOLEAN_TYPE:
+                    case CS_INT_TYPE: {
+                        gen_byte_code(c_visitor, SVM_PUSH_STACK_INT,
+                                expr->u.identifier.u.declaration->index);
+                        break;
+                    }
+                    case CS_DOUBLE_TYPE: {
+                        
+                    }
+                    default: {
+                        fprintf(stderr, "%d: unknown type in leave_identexpr codegenvisitor\n", expr->line_number); 
+                        exit(1);
+                    }
+                }
+            }
+            
+            
+            
+            
+            
+            
             break;
         }
         default: {
@@ -281,9 +303,11 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
+    ((CodegenVisitor*)visitor)->assign_depth++;
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave assignexpr\n");
+    --((CodegenVisitor*)visitor)->assign_depth;
 //    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
 }
 
@@ -362,7 +386,7 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visitor->pos = 0;
     visitor->code = NULL;
     visitor->v_state = VISIT_NORMAL;
-    visitor->store_index = -1;
+    visitor->assign_depth = 0;
     
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);

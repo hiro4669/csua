@@ -47,7 +47,7 @@ struct CodegenVisitor_tag {
     CS_Executable *exec;
     
     VisitState     v_state;
-    uint32_t       store_index;
+    uint16_t       assign_depth;
     
     uint32_t       CODE_ALLOC_SIZE;
     uint32_t       current_code_size;
