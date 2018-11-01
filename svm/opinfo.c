@@ -51,7 +51,7 @@ OpcodeInfo svm_opcode_info[] = {
     {"logical_or", "", -1},
     {"logical_not", "", -1},
     {"pop", "", -1},    
-    {"push_function", "", 0},
+    {"push_function", "i", 0},
     {"invoke", "", -1},
     {"return", "", -1},
             

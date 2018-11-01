@@ -118,7 +118,32 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
     CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
     switch (c_visitor->v_state) {
         case VISIT_NORMAL: {
-            fprintf(stderr, "push value to stack\n");
+//            fprintf(stderr, "push value to stack\n");
+            if (expr->u.identifier.is_function) {
+//                printf("name=%s, index=%d\n", 
+//                        expr->u.identifier.u.function->name,
+//                        expr->u.identifier.u.function->index);
+                gen_byte_code(c_visitor, SVM_PUSH_FUNCTION,
+                        expr->u.identifier.u.function->index);
+            } else {
+                switch(expr->type->basic_type) {
+                    case CS_BOOLEAN_TYPE:
+                    case CS_INT_TYPE: {
+                        gen_byte_code(c_visitor, SVM_PUSH_STACK_INT,
+                                expr->u.identifier.u.declaration->index);
+                        break;
+                    }
+                    case CS_DOUBLE_TYPE: {
+                        fprintf(stderr, "double not implementerd visit_nomal in leave_identexpr codegenvisitor\n");
+                        exit(1);
+                                                
+                    }
+                    default: {
+                        fprintf(stderr, "%d: unknown type in visit_normal in leave_identexpr codegenvisitor\n", expr->line_number); 
+                        exit(1);
+                    }
+                }
+            }
             break;
         }
         case VISIT_NOMAL_ASSIGN: {
@@ -157,19 +182,16 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                         break;
                     }
                     case CS_DOUBLE_TYPE: {
-                        
+                        fprintf(stderr, "double not implementerd assign_depth in leave_identexpr codegenvisitor\n");
+                        exit(1);
+                                                
                     }
                     default: {
                         fprintf(stderr, "%d: unknown type in leave_identexpr codegenvisitor\n", expr->line_number); 
                         exit(1);
                     }
                 }
-            }
-            
-            
-            
-            
-            
+            }                                                            
             
             break;
         }
