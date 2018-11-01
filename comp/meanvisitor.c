@@ -63,42 +63,42 @@ void show_mean_error(MeanVisitor* visitor) {
 }
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter castexpr\n");
+//    fprintf(stderr, "enter castexpr\n");
 }
 static void leave_castexpr(Expression* expr, Visitor* visitor) { 
-    fprintf(stderr, "leave castexpr\n");
+//    fprintf(stderr, "leave castexpr\n");
 }
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter boolexpr : %d\n", expr->u.boolean_value);
+//    fprintf(stderr, "enter boolexpr : %d\n", expr->u.boolean_value);
 }
 static void leave_boolexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave boolexpr\n");    
+//    fprintf(stderr, "leave boolexpr\n");    
     expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
 }
 
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter intexpr : %d\n", expr->u.int_value);    
+//    fprintf(stderr, "enter intexpr : %d\n", expr->u.int_value);    
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave intexpr\n");
+//    fprintf(stderr, "leave intexpr\n");
     expr->type = cs_create_type_specifier(CS_INT_TYPE);
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter doubleexpr : %f\n", expr->u.double_value);
+//    fprintf(stderr, "enter doubleexpr : %f\n", expr->u.double_value);
 }
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave doubleexpr\n");            
+//    fprintf(stderr, "leave doubleexpr\n");            
     expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter identifierexpr\n");
+//    fprintf(stderr, "enter identifierexpr\n");
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave identifierexpr %s\n", expr->u.identifier.name);
+//    fprintf(stderr, "leave identifierexpr %s\n", expr->u.identifier.name);
     Declaration* decl = cs_search_decl_in_block();
     FunctionDeclaration* function = NULL;
     if (!decl) {
@@ -189,38 +189,38 @@ static void cast_arithmetic_binary_expr(Expression* expr, Visitor* visitor) {
 
 /* arithmetic calculation*/
 static void enter_addexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter addexpr : +\n");
+//    fprintf(stderr, "enter addexpr : +\n");
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave addexpr\n");
+//    fprintf(stderr, "leave addexpr\n");
     cast_arithmetic_binary_expr(expr, visitor);
 }
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter subexpr : -\n");
+//    fprintf(stderr, "enter subexpr : -\n");
 }
 static void leave_subexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave subexpr\n");
+//    fprintf(stderr, "leave subexpr\n");
     cast_arithmetic_binary_expr(expr, visitor);
 }
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter mulexpr : *\n");
+//    fprintf(stderr, "enter mulexpr : *\n");
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave mulexpr\n");
+//    fprintf(stderr, "leave mulexpr\n");
     cast_arithmetic_binary_expr(expr, visitor);    
 }
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter divexpr : /\n");
+//    fprintf(stderr, "enter divexpr : /\n");
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave divexpr\n");
+//    fprintf(stderr, "leave divexpr\n");
     cast_arithmetic_binary_expr(expr, visitor);    
 }
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter modexpr : mod \n");
+//    fprintf(stderr, "enter modexpr : mod \n");
 }
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave modexpr\n");
+//    fprintf(stderr, "leave modexpr\n");
     cast_arithmetic_binary_expr(expr, visitor);    
 }
 
@@ -253,34 +253,34 @@ static void compare_type_check(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter gtexpr : > \n");
+//    fprintf(stderr, "enter gtexpr : > \n");
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave gtexpr\n");
+//    fprintf(stderr, "leave gtexpr\n");
     compare_type_check(expr, visitor);
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter geexpr : >= \n");
+//    fprintf(stderr, "enter geexpr : >= \n");
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave geexpr\n");
+//    fprintf(stderr, "leave geexpr\n");
     compare_type_check(expr, visitor);
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter ltexpr : < \n");
+//    fprintf(stderr, "enter ltexpr : < \n");
 }
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave ltexpr\n");
+//    fprintf(stderr, "leave ltexpr\n");
     compare_type_check(expr, visitor);
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter leexpr : <= \n");
+//    fprintf(stderr, "enter leexpr : <= \n");
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave leexpr\n");
+//    fprintf(stderr, "leave leexpr\n");
     compare_type_check(expr, visitor);
 }
 
@@ -312,18 +312,18 @@ static void compare_equality_type_check(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter eqexpr : == \n");
+//    fprintf(stderr, "enter eqexpr : == \n");
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave eqexpr\n");
+//    fprintf(stderr, "leave eqexpr\n");
     compare_equality_type_check(expr, visitor);
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter neexpr : != \n");
+//    fprintf(stderr, "enter neexpr : != \n");
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave neexpr\n");
+//    fprintf(stderr, "leave neexpr\n");
     compare_equality_type_check(expr, visitor);
 }
 
@@ -352,18 +352,18 @@ static void logical_type_check(Expression* expr, Visitor* visitor) {
 
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter landexpr : && \n");
+//    fprintf(stderr, "enter landexpr : && \n");
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave landexpr\n");
+//    fprintf(stderr, "leave landexpr\n");
     logical_type_check(expr, visitor);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter lorexpr : || \n");
+//    fprintf(stderr, "enter lorexpr : || \n");
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave lorexpr\n");
+//    fprintf(stderr, "leave lorexpr\n");
     logical_type_check(expr, visitor);
 }
 
@@ -388,27 +388,27 @@ static void incdec_typecheck(Expression* expr, Visitor* visitor) {
     }
 }
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter incexpr : ++ \n");
+//    fprintf(stderr, "enter incexpr : ++ \n");
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave incexpr\n");
+//    fprintf(stderr, "leave incexpr\n");
     incdec_typecheck(expr, visitor);   
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter decexpr : -- \n");
+//    fprintf(stderr, "enter decexpr : -- \n");
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave decexpr\n");
+//    fprintf(stderr, "leave decexpr\n");
     incdec_typecheck(expr, visitor);    
 }
 
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter minusexpr : - \n");
+//    fprintf(stderr, "enter minusexpr : - \n");
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave minusexpr\n");   
+//    fprintf(stderr, "leave minusexpr\n");   
 
     char message[100];
     TypeSpecifier* type = expr->u.minus_expression->type;
@@ -430,10 +430,10 @@ static void leave_minusexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter lognotexpr : ! \n");
+//    fprintf(stderr, "enter lognotexpr : ! \n");
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave lognotexpr\n");
+//    fprintf(stderr, "leave lognotexpr\n");
 
     char message[100];
     TypeSpecifier* type = expr->u.logical_not_expression->type;
@@ -496,10 +496,10 @@ static Expression* assignment_type_check(TypeSpecifier* ltype, Expression* expr,
     return expr;
 }
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
+//    fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave assignexpr\n");
+//    fprintf(stderr, "leave assignexpr\n");
     Expression* left  = expr->u.assignment_expression.left;
     Expression* right = expr->u.assignment_expression.right;
     expr->u.assignment_expression.right = assignment_type_check(left->type, right, visitor);
@@ -509,30 +509,30 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter function call :\n");
+//    fprintf(stderr, "enter function call :\n");
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave function call\n");
+//    fprintf(stderr, "leave function call\n");
     expr->type = expr->u.function_call_expression.function->type;
 }
 
 /* For statement */
 static void enter_exprstmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "enter exprstmt :\n");
+//    fprintf(stderr, "enter exprstmt :\n");
 }
 static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "leave exprstmt\n");
+//    fprintf(stderr, "leave exprstmt\n");
 }
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
     CS_Compiler* compiler = ((MeanVisitor*)visitor)->compiler;
     compiler->decl_list = cs_chain_declaration(compiler->decl_list, stmt->u.declaration_s);
-    fprintf(stderr, "enter declstmt\n");    
+//    fprintf(stderr, "enter declstmt\n");    
     
 }
 
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "leave declstmt\n");
+//    fprintf(stderr, "leave declstmt\n");
     Declaration* decl = stmt->u.declaration_s;
     if (decl->initializer != NULL) {
         decl->initializer = assignment_type_check(decl->type, decl->initializer, visitor);

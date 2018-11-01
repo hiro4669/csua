@@ -189,8 +189,6 @@ static void exec_disasm(CS_Executable* exec) {
 
 int main(int argc, char* argv[]) {
     
-    printf("arg len = %d\n", argc);
-
     if (argc == 1) {
         printf("Usage ./meant dir/filename.cs\n");
         return 1;        
@@ -212,7 +210,7 @@ int main(int argc, char* argv[]) {
         exec_disasm(exec);
         delete_executable(exec);
         
-        printf("--------------\n");
+        fprintf(stderr, "\n--- Tree View ---\n");
         Visitor* visitor = create_treeview_visitor();    
         StatementList* stmt_list = compiler->stmt_list;
         while(stmt_list) {
