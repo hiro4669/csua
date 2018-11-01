@@ -343,6 +343,7 @@ static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave function call\n");
+    gen_byte_code((CodegenVisitor*)visitor, SVM_INVOKE);
 }
 
 /* For statement */
