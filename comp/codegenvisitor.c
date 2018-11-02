@@ -90,17 +90,16 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter intexpr : %d\n", expr->u.int_value);
+
+}
+static void leave_intexpr(Expression* expr, Visitor* visitor) {
+//    fprintf(stderr, "leave intexpr\n");
     CS_Executable* exec = ((CodegenVisitor*)visitor)->exec;
     CS_ConstantPool cp;
     cp.type = CS_CONSTANT_INT;
     cp.u.c_int = expr->u.int_value;
     int idx = add_constant(exec, &cp);
-    
-    
-    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT, idx);
-}
-static void leave_intexpr(Expression* expr, Visitor* visitor) {
-//    fprintf(stderr, "leave intexpr\n");
+    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT, idx);    
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
@@ -208,6 +207,21 @@ static void enter_addexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave addexpr\n");
+    switch(expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_addexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+        
+    }
 }
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
