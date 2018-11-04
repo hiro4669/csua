@@ -376,6 +376,7 @@ static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
         }
         case VISIT_NOMAL_ASSIGN: {            
             c_visitor->v_state = VISIT_NORMAL;
+            c_visitor->assign_depth = 0;
             break;
         }
         default: {
