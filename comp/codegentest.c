@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <sys/types.h>
 #include "csua.h"
 #include "visitor.h"
 #include "../memory/MEM.h"
@@ -97,6 +99,76 @@ static void add_uint16(DInfo *info, const uint16_t iv) {
     sprintf(&buf[1], "%04x", iv);
     buf[5] = 0;
     add_string(info, buf);
+}
+
+
+static void write_char(char c, FILE* fp) {
+    fwrite(&c, 1, 1, fp);
+}
+
+static void write_reverse(const void* pv, size_t size, FILE* fp) {
+    char* p = (char*)pv;
+    for (int i = size - 1; i >= 0; --i) {
+        write_char(p[i], fp);
+    }
+}
+
+static void write_int(const uint32_t v, FILE* fp) {
+    write_reverse(&v, sizeof(uint32_t), fp);
+}
+
+static void write_double(const double dv, FILE *fp) {
+    write_reverse(&dv, sizeof(double), fp);    
+}
+
+static void write_bytes(uint8_t *p, int len, FILE* fp) {
+    fwrite(p, 1, len, fp);
+}
+
+static void serialize(CS_Executable* exec) {
+    FILE *fp;
+    
+    if ((fp = fopen("a.csb", "wb")) == NULL) {
+        fprintf(stderr, "Error\n");
+        exit(1);
+    }
+    write_char('C', fp);
+    write_char('A', fp);    
+    write_char('P', fp);
+    write_char('H', fp);
+    write_char('E', fp);    
+    write_char('S', fp);
+    write_char('U', fp);
+    write_char('A', fp);
+    
+//    printf("global len = %d\n", exec->global_variable_count);
+    write_int(exec->constant_pool_count, fp);
+    for (int i = 0; i < exec->constant_pool_count; ++i) {
+        switch(exec->constant_pool[i].type) {
+            case CS_CONSTANT_INT: {
+                write_char(SVM_INT, fp);
+                write_int(exec->constant_pool[i].u.c_int, fp);
+                break;
+            }
+            case CS_CONSTANT_DOUBLE: {
+                write_char(SVM_DOUBLE, fp);
+                write_double(exec->constant_pool[0].u.c_double, fp);
+                break;
+            }
+            default: {
+                fprintf(stderr, "undefined constant type\n in disasm");
+                exit(1);
+            }
+        }
+
+    }
+    
+    
+    
+    write_int(exec->global_variable_count, fp);
+    write_int(exec->code_size, fp);
+    write_bytes(exec->code, exec->code_size, fp);
+    fclose(fp);
 }
 
 static void exec_disasm(CS_Executable* exec) {
@@ -209,6 +281,7 @@ int main(int argc, char* argv[]) {
         // Code Generate
         CS_Executable* exec = code_generate(compiler);
         exec_disasm(exec);
+        serialize(exec);
         delete_executable(exec);
         
         fprintf(stderr, "\n--- Tree View ---\n");
