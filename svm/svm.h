@@ -50,6 +50,11 @@ typedef enum {
     SVM_RETURN
 } SVM_Opcode;
 
+typedef enum {
+    SVM_INT = 1,
+    SVM_DOUBLE,
+} SVM_Constant;
+
 typedef struct {
     char    *opname;
     char    *parameter;    
