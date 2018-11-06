@@ -1,6 +1,7 @@
 
 #ifndef _SVM_H_
 #define _SVM_H_
+#include <stdint.h>
 
 typedef enum {
     SVM_PUSH_INT = 1,

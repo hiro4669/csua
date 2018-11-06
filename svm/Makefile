@@ -1,9 +1,9 @@
 CC = /usr/bin/gcc
 
-TARGET = disasm
+TARGET = svm
 CFLAGS = -c -g -DDEBUG
 
-OBJS = disasm.o opinfo.o
+OBJS = svm.o opinfo.o
 
 all: $(TARGET)
 
@@ -14,5 +14,5 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $*.c
 
 clean:
-	rm -rf $(TARGET) *.o *~
+	rm -rf $(TARGET) *.o *~ disasm svm
 
