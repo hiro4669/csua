@@ -76,6 +76,16 @@ typedef struct {
     uint8_t s_size;
 } OpcodeInfo;
 
+typedef struct {
+    uint32_t      constant_pool_count;
+    SVM_Constant  *constant_pool;
+    uint32_t       global_variable_count;
+    SVM_Value     *global_variables;
+    uint8_t       *global_variable_types;
+    uint32_t       code_size;
+    uint8_t       *code;
+} SVM_VirtualMachine;
+
 extern OpcodeInfo svm_opcode_info[];
 
 #endif

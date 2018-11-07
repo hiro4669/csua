@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "svm.h"
+#include "../memory/MEM.h"
 
 
 static int read_int(uint8_t **p) {
@@ -91,12 +91,13 @@ static void add_rowcode(DInfo *info, uint8_t op) {
 }
 
 
-static void disasm(uint8_t *code, size_t size) {
-    uint8_t *p = code;
+static void disasm(SVM_VirtualMachine* svm) {
+//static void disasm(uint8_t *code, size_t size) {
+    uint8_t *p = svm->code;
     DInfo dinfo = {0};
     int param_len = 0;
     
-    for (int i = 0; i < size; ++i, p++) {
+    for (int i = 0; i < svm->code_size; ++i, p++) {
         OpcodeInfo *oinfo = &svm_opcode_info[*p];
         add_rowcode(&dinfo, *p);
         switch(*p) {
@@ -141,20 +142,26 @@ static void disasm(uint8_t *code, size_t size) {
 }
 
 
-static void parse(uint8_t* buf) {
+static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     uint8_t* pos = buf;
     parse_header(&pos);
-    int constant_pool_count = read_int(&pos);
-    printf("constant_pool_count = %d\n", constant_pool_count);
+    svm->constant_pool_count = read_int(&pos);
+    printf("constant_pool_count = %d\n", svm->constant_pool_count);
+    svm->constant_pool = (SVM_Constant*)MEM_malloc(sizeof(SVM_Constant) * svm->constant_pool_count);
+    
     uint8_t type;
-    for (int i = 0; i < constant_pool_count; ++i) {
+    for (int i = 0; i < svm->constant_pool_count; ++i) {
         switch(type = read_byte(&pos)) {
             case SVM_INT: {
                 int v = read_int(&pos);
+                svm->constant_pool[i].type = SVM_INT;
+                svm->constant_pool[i].u.c_int = v;
                 break;
             }
             case SVM_DOUBLE: {
                 double dv = read_double(&pos);
+                svm->constant_pool[i].type = SVM_DOUBLE;
+                svm->constant_pool[i].u.c_double = dv;                
                 break;
             }
             default: {
@@ -163,11 +170,15 @@ static void parse(uint8_t* buf) {
             }
         }
     }
-    int global_variable_count = read_int(&pos);
-    printf("global_variable_count = %d\n", global_variable_count);
-    for (int i = 0; i < global_variable_count; ++i) {
-        uint8_t type = read_byte(&pos);
-        switch (type) {
+    
+    svm->global_variable_count = read_int(&pos);
+    svm->global_variables = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->global_variable_count);
+    svm->global_variable_types = (uint8_t*)MEM_malloc(sizeof(uint8_t) * svm->global_variable_count);
+    printf("global_variable_count = %d\n", svm->global_variable_count);
+    for (int i = 0; i < svm->global_variable_count; ++i) {        
+//        uint8_t type = read_byte(&pos);
+        svm->global_variable_types[i] = read_byte(&pos);
+        switch (svm->global_variable_types[i]) {
             case SVM_INT: {
                 printf("INT\n");
                 break;
@@ -182,17 +193,51 @@ static void parse(uint8_t* buf) {
         }
     }
     
+    svm->code_size = read_int(&pos);
+    printf("code_size = %d\n", svm->code_size);
+    svm->code = (uint8_t*)MEM_malloc(svm->code_size);
+    memcpy(svm->code, pos, svm->code_size);
     
-    int code_size = read_int(&pos);
-    printf("code_size = %d\n", code_size);
-    disasm(pos, code_size);
+//    svm->code = pos;
+ //   disasm(pos, svm->code_size);
+ 
+}
+
+
+static SVM_VirtualMachine* svm_create() {
+    SVM_VirtualMachine* svm = (SVM_VirtualMachine*)MEM_malloc(sizeof(SVM_VirtualMachine));
+    svm->constant_pool = NULL;
+    svm->global_variables = NULL;
+    svm->global_variable_types = NULL;
+    svm->code = NULL;
+    svm->constant_pool_count = 0;
+    svm->global_variable_count = 0;
+    svm->code_size = 0;
+    return svm;
+}
+
+static void svm_delete(SVM_VirtualMachine* svm) {
+    if (!svm) return;
+    if (svm->code) {
+        MEM_free(svm->code);
+    }
+    if (svm->constant_pool) {
+        MEM_free(svm->constant_pool);
+    }
+    if (svm->global_variables) {
+        MEM_free(svm->global_variables);
+    }
+    if (svm->global_variable_types) {
+        MEM_free(svm->global_variable_types);
+    }
+    MEM_free(svm);
 }
 
 
 int main(int argc, char *argv[]) {
 
     // for test
-    bool disasm = false;
+    bool disasm_mode = false;
     
     if (argc < 2) {
         fprintf(stderr, "Usage ./svm [optino] file\n");
@@ -202,26 +247,29 @@ int main(int argc, char *argv[]) {
     if (argc == 3) {
         if (!strcmp("-d", argv[1])) {
           printf("disasm\n");  
-          disasm = true;                  
+          disasm_mode = true;                  
         } else {
             fprintf(stderr, "No such option)\n");
         }
     }
     
-    if (disasm) {
-        struct stat st;
-        stat(argv[2], &st);
-        printf("size = %d\n", (int)st.st_size);
-        uint8_t* buf = (uint8_t*)malloc(st.st_size);
-        int fp = open(argv[2], O_RDONLY); 
-        read(fp, buf, st.st_size);
-
-        parse(buf);
-        
-        close(fp);
-        free(buf);
-        return 0;
+    SVM_VirtualMachine* svm = svm_create();
+    struct stat st;
+    stat(argv[2], &st);
+    printf("size = %d\n", (int)st.st_size);
+    uint8_t* buf = (uint8_t*)malloc(st.st_size);
+    int fp = open(argv[2], O_RDONLY); 
+    read(fp, buf, st.st_size);
+    parse(buf, svm);        
+    close(fp);
+    free(buf);
+    
+    if (disasm_mode) {
+        disasm(svm);
     }
+    
+    svm_delete(svm);
+    MEM_dump_memory();
     
     
     return 0;
