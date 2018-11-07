@@ -48,16 +48,96 @@ static void parse_header(uint8_t **p) {
     printf("\n");        
 }
 
+typedef struct {
+    char s_buf[128];
+    char row_buf[32];    
+    int s_index;
+    int r_index;
+    
+} DInfo;
+
+static void dump(DInfo *info) {
+    fprintf(stderr, "%s", info->s_buf);
+    fprintf(stderr, "   %s\n", info->row_buf);
+    info->s_index = 0;
+    info->r_index = 0;
+}
+
+static void add_opname(DInfo *info, const char* str) {
+    int len = strlen(str);
+    strncpy(&info->s_buf[info->s_index], str, len);
+    info->s_index += len;
+    for (int i = 0; i < (20-len); ++i, ++info->s_index) {
+        info->s_buf[info->s_index] = ' ';
+    }        
+    info->s_buf[info->s_index] = 0;
+}
+
+static void add_padding(DInfo *info) {
+    for(int i = 0; i < 4; ++i, ++info->s_index) info->s_buf[info->s_index] = ' ';    
+}
+
+static void add_uint16(DInfo *info, const uint16_t iv) {
+    char buf[6] = {};
+    sprintf(buf, "%04x", iv);
+    strncpy(&info->s_buf[info->s_index], buf, 4);
+}
+
+static void add_rowcode(DInfo *info, uint8_t op) {
+//    printf("add row %02x\n", op);
+    sprintf(&info->row_buf[info->r_index], "%02x", op);
+    info->r_index += 2;
+    info->row_buf[info->r_index] = 0;
+}
+
 
 static void disasm(uint8_t *code, size_t size) {
     uint8_t *p = code;
-    printf("%02x \n", *code);
+    DInfo dinfo = {0};
+    int param_len = 0;
+    
     for (int i = 0; i < size; ++i, p++) {
-        if (i % 16 == 0) printf("\n");
-        printf("%02x ", *p);
-    }
-    printf("\n");
-
+        OpcodeInfo *oinfo = &svm_opcode_info[*p];
+        add_rowcode(&dinfo, *p);
+        switch(*p) {
+            case SVM_PUSH_INT:
+            case SVM_POP_STATIC_INT: 
+            case SVM_PUSH_STACK_INT:
+            case SVM_PUSH_FUNCTION:
+            case SVM_POP:
+            case SVM_ADD_INT:
+            case SVM_INVOKE: {
+//                printf("%s\n", oinfo->opname);
+                add_opname(&dinfo, oinfo->opname);
+                break;
+            }
+            default: {
+                fprintf(stderr, "unknown opcode [%02x] in disasm\n", *p);
+                exit(1);
+            }
+        }
+        param_len = strlen(oinfo->parameter);
+        for (int j = 0; j < param_len; ++j) {
+            switch(oinfo->parameter[j]) {
+                case 'i': {
+                    uint8_t uv = *(++p);
+                    uint16_t op = (uint16_t)( uv << 8 | *(++p));
+                    add_uint16(&dinfo, op);
+                    add_rowcode(&dinfo, uv);
+                    add_rowcode(&dinfo, *p);                     
+                    i += 2;
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "unknown opcode [%c] in disasm\n", oinfo->parameter[j]);
+                    exit(1);
+                }
+            }
+        }
+        if (param_len == 0) add_padding(&dinfo);
+        
+        dump(&dinfo);        
+    }    
 }
 
 
