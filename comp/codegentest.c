@@ -166,6 +166,27 @@ static void serialize(CS_Executable* exec) {
     
     
     write_int(exec->global_variable_count, fp);
+    for (int i = 0; i < exec->global_variable_count; ++i) {
+        switch(exec->global_variable[i].type->basic_type) {
+            case CS_BOOLEAN_TYPE:
+            case CS_INT_TYPE: {
+                write_char(SVM_INT, fp);
+                break;
+            }
+            case CS_DOUBLE_TYPE: {
+                write_char(SVM_DOUBLE, fp);
+                break;
+            }
+            default: {
+                fprintf(stderr, "No such type\n");
+                exit(1);
+            }
+                
+        }
+    }
+    
+    
+    
     write_int(exec->code_size, fp);
     write_bytes(exec->code, exec->code_size, fp);
     fclose(fp);

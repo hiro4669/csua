@@ -165,6 +165,24 @@ static void parse(uint8_t* buf) {
     }
     int global_variable_count = read_int(&pos);
     printf("global_variable_count = %d\n", global_variable_count);
+    for (int i = 0; i < global_variable_count; ++i) {
+        uint8_t type = read_byte(&pos);
+        switch (type) {
+            case SVM_INT: {
+                printf("INT\n");
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("DOUBLE\n");                
+                break;
+            }
+            defulat: {
+                break;
+            }
+        }
+    }
+    
+    
     int code_size = read_int(&pos);
     printf("code_size = %d\n", code_size);
     disasm(pos, code_size);

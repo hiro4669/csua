@@ -54,7 +54,21 @@ typedef enum {
 typedef enum {
     SVM_INT = 1,
     SVM_DOUBLE,
+} SVM_ConstantType;
+
+
+typedef struct {
+    SVM_ConstantType type;
+    union {
+        int c_int;
+        int c_double;
+    } u;
 } SVM_Constant;
+
+typedef union {
+    int    ival;
+    double dval;
+} SVM_Value;
 
 typedef struct {
     char    *opname;
