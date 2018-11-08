@@ -3,6 +3,8 @@
 #define _SVM_H_
 #include <stdint.h>
 
+typedef struct SVM_VirtualMachine_tag SVM_VirtualMachine;
+
 typedef enum {
     SVM_PUSH_INT = 1,
     SVM_PUSH_DOUBLE,
@@ -76,7 +78,25 @@ typedef struct {
     uint8_t s_size;
 } OpcodeInfo;
 
+typedef enum {
+    NATIVE_FUNCTION,
+    CSUA_FUNCTION
+} FunctionType;
+
+
+typedef SVM_Value (*SVM_NativeFunction)(SVM_VirtualMachine* svm, SVM_Value* values, int arg_count);
+
 typedef struct {
+    FunctionType  f_type;
+    char         *name;
+    int           arg_count;
+    union {
+        SVM_NativeFunction n_func;
+    } u;
+} SVM_Function;
+
+
+struct SVM_VirtualMachine_tag {
     uint32_t      constant_pool_count;
     SVM_Constant  *constant_pool;
     uint32_t       global_variable_count;
@@ -84,8 +104,17 @@ typedef struct {
     uint8_t       *global_variable_types;
     uint32_t       code_size;
     uint8_t       *code;
-} SVM_VirtualMachine;
+    uint32_t      function_count;
+    SVM_Function  *functions;
+};
+
 
 extern OpcodeInfo svm_opcode_info[];
 
+/* svm.c */
+void svm_add_native_function(SVM_VirtualMachine* svm, 
+        SVM_NativeFunction native_f, char* name, int arg_count);
+
+/* native.c */
+void add_native_functions(SVM_VirtualMachine* svm);
 #endif

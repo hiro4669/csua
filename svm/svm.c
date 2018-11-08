@@ -213,6 +213,8 @@ static SVM_VirtualMachine* svm_create() {
     svm->constant_pool_count = 0;
     svm->global_variable_count = 0;
     svm->code_size = 0;
+    svm->function_count = 0;
+    svm->functions = NULL;
     return svm;
 }
 
@@ -230,8 +232,22 @@ static void svm_delete(SVM_VirtualMachine* svm) {
     if (svm->global_variable_types) {
         MEM_free(svm->global_variable_types);
     }
+    if (svm->functions) {
+        MEM_free(svm->functions);
+    }
+    
     MEM_free(svm);
 }
+
+void svm_add_native_function(SVM_VirtualMachine* svm, SVM_NativeFunction native_f, char* name, int arg_count) {
+    svm->functions = (SVM_Function*)MEM_realloc(svm->functions, sizeof(SVM_Function) * (svm->function_count+1));
+    svm->functions[svm->function_count].f_type = NATIVE_FUNCTION;
+    svm->functions[svm->function_count].name = name;
+    svm->functions[svm->function_count].arg_count = arg_count;
+    svm->functions[svm->function_count].u.n_func = native_f;
+    svm->function_count++;    
+}
+
 
 
 int main(int argc, char *argv[]) {
@@ -263,6 +279,8 @@ int main(int argc, char *argv[]) {
     parse(buf, svm);        
     close(fp);
     free(buf);
+    
+    add_native_functions(svm);
     
     if (disasm_mode) {
         disasm(svm);
