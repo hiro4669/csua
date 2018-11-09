@@ -75,7 +75,7 @@ typedef union {
 typedef struct {
     char    *opname;
     char    *parameter;    
-    uint8_t s_size;
+    char    s_size;
 } OpcodeInfo;
 
 typedef enum {
@@ -104,6 +104,7 @@ struct SVM_VirtualMachine_tag {
     uint8_t       *global_variable_types;
     uint32_t       code_size;
     uint8_t       *code;
+    uint32_t      stack_size;
     uint32_t      function_count;
     SVM_Function  *functions;
 };

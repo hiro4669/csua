@@ -197,6 +197,9 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     printf("code_size = %d\n", svm->code_size);
     svm->code = (uint8_t*)MEM_malloc(svm->code_size);
     memcpy(svm->code, pos, svm->code_size);
+    pos += svm->code_size;
+    svm->stack_size = read_int(&pos);
+    printf("stack_size = %d\n", svm->stack_size);    
     
 //    svm->code = pos;
  //   disasm(pos, svm->code_size);

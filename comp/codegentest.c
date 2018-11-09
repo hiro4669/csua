@@ -125,7 +125,30 @@ static void write_bytes(uint8_t *p, int len, FILE* fp) {
     fwrite(p, 1, len, fp);
 }
 
-static void serialize(CS_Executable* exec) {
+static int count_stack_size(uint8_t* code, size_t len) {
+    int st_size = 0;
+    for(int i = 0; i < len; ++i) {
+        OpcodeInfo *oinfo = &svm_opcode_info[code[i]];
+        if (oinfo->s_size > 0) {
+            st_size += oinfo->s_size;
+        }
+        for (int j = 0; j < strlen(oinfo->parameter); ++j) {
+            switch(oinfo->parameter[j]) {
+                case 'i': {
+                    i += 2;
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "unknown parameter [%c]in disassemble\n", oinfo->parameter[j]);
+                    exit(1);
+                }
+            }
+        }        
+    }
+    return st_size;
+}
+
+static void serialize(CS_Executable* exec){
     FILE *fp;
     
     if ((fp = fopen("a.csb", "wb")) == NULL) {
@@ -189,6 +212,10 @@ static void serialize(CS_Executable* exec) {
     
     write_int(exec->code_size, fp);
     write_bytes(exec->code, exec->code_size, fp);
+    int stack_size = count_stack_size(exec->code, exec->code_size);
+//    printf("s_size = %d\n", stack_size);
+    write_int(stack_size, fp);
+    
     fclose(fp);
 }
 
