@@ -103,7 +103,7 @@ static void disasm(SVM_VirtualMachine* svm) {
         switch(*p) {
             case SVM_PUSH_INT:
             case SVM_POP_STATIC_INT: 
-            case SVM_PUSH_STACK_INT:
+            case SVM_PUSH_STATIC_INT:
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
@@ -218,6 +218,11 @@ static SVM_VirtualMachine* svm_create() {
     svm->code_size = 0;
     svm->function_count = 0;
     svm->functions = NULL;
+    svm->stack = NULL;
+    svm->stack_size = 0;
+    svm->stack_value_type = NULL;
+    svm->pc = 0;
+    svm->sp = 0;
     return svm;
 }
 
@@ -238,6 +243,12 @@ static void svm_delete(SVM_VirtualMachine* svm) {
     if (svm->functions) {
         MEM_free(svm->functions);
     }
+    if (svm->stack) {
+        MEM_free(svm->stack);
+    }
+    if (svm->stack_value_type) {
+        MEM_free(svm->stack_value_type);
+    }
     
     MEM_free(svm);
 }
@@ -252,12 +263,153 @@ void svm_add_native_function(SVM_VirtualMachine* svm, SVM_NativeFunction native_
 }
 
 
+static uint8_t fetch(SVM_VirtualMachine* svm) {
+    return svm->code[svm->pc++];
+}
+
+static uint16_t fetch2(SVM_VirtualMachine* svm) {
+    uint8_t v1 = fetch(svm);
+    return (v1 << 8) | fetch(svm);
+}
+
+static SVM_Constant* get_static(SVM_VirtualMachine* svm, uint16_t idx) {
+    return &svm->constant_pool[idx];
+}
+
+static int get_static_int(SVM_VirtualMachine* svm, uint16_t idx) {
+    return get_static(svm, idx)->u.c_int;
+}
+
+static void push_i(SVM_VirtualMachine* svm, int iv) {
+    svm->stack[svm->sp].ival = iv;
+    svm->stack_value_type[svm->sp] = SVM_INT;
+    svm->sp++;
+}
+
+static int pop_i(SVM_VirtualMachine *svm) {
+    --svm->sp;
+    return svm->stack[svm->sp].ival;
+}
+
+static void write_i(SVM_Value* head, uint32_t offset, uint32_t idx, int iv) {
+    head[offset+idx].ival = iv;
+}
+static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
+    write_i(svm->global_variables, 0, idx, iv);
+}
+
+static void init_svm(SVM_VirtualMachine* svm) {
+    svm->stack = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->stack_size);
+    svm->stack_value_type = (uint8_t*)MEM_malloc(sizeof(uint8_t) * svm->stack_size);
+    svm->pc = 0;
+    svm->sp = 0;
+    
+    
+    for (int i = 0; i < svm->global_variable_count; ++i) {
+        switch(svm->global_variable_types[i]) {
+            case SVM_INT: {
+                svm->global_variables[i].ival = 0;
+                break;
+            }
+            case SVM_DOUBLE: {
+                svm->global_variables[i].dval = 0.0;
+                break;
+            }
+            default: {
+                fprintf(stderr, "no such svm type\n");
+                exit(1);
+            }
+        }
+    }    
+}
+
+static void show_status(SVM_VirtualMachine* svm) {
+    printf("< show SVM status >\n");
+    printf("-- global variable ---\n");
+    for (int i = 0; i < svm->global_variable_count; ++i) {
+
+        switch(svm->global_variable_types[i]) {
+            case SVM_INT: {
+                printf("[%d:svm_int] = %d\n", i, svm->global_variables[i].ival);
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("[%d:svm_dbl] = %f\n", i, svm->global_variables[i].dval);
+                break;
+            }
+            default: {
+                fprintf(stderr, "no such svm type\n");
+                exit(1);
+            }
+        }
+    }
+    printf("\n--- stack ---\n");
+    for (int i = (svm->sp - 1); i >= 0; --i) {
+        switch(svm->stack_value_type[i]) {
+            case SVM_INT: {
+                printf("[%d:svm_int] = %d\n", i, svm->stack[i].ival);
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("[%d:svm_dbl] = %f\n", i, svm->stack[i].dval);
+                break;
+            }
+            default: {
+                fprintf(stderr, "no such svm type\n");
+                exit(1);
+            }
+        }
+    }
+    
+}
+
+static void svm_run(SVM_VirtualMachine* svm) {    
+    bool running = true;
+
+    uint8_t op = 0;
+    while(running) {
+        switch (op = fetch(svm)) {
+            case SVM_PUSH_INT: { // push from constant pool
+//                printf("push int\n");
+                uint16_t s_idx = fetch2(svm);
+//                printf("idx = %d\n", s_idx);
+                int v = get_static_int(svm, s_idx);
+//                printf("v   = %d\n", v);
+                push_i(svm, v);
+//                printf("sp = %d\n", svm->sp);                
+                break;
+            }
+            case SVM_POP_STATIC_INT: { // save val to global variable
+                printf("pop static int\n");
+                uint16_t s_idx = fetch2(svm); 
+                printf("idx = %d\n", s_idx);
+                int iv = pop_i(svm);
+                printf("pop int val = %d\n", iv);
+                write_global_i(svm, s_idx, iv);
+                show_status(svm);
+                
+                exit(1);
+                break;
+            }
+            default: {
+                fprintf(stderr, "unknown opcode: %02x in svm_run\n", op);
+                exit(1);                
+            }
+        }
+                              
+        running = svm->pc < svm->code_size;
+    }
+
+}
+
+
+
 
 int main(int argc, char *argv[]) {
 
     // for test
     bool disasm_mode = false;
-    
+    int file_idx = 1;
     if (argc < 2) {
         fprintf(stderr, "Usage ./svm [optino] file\n");
         exit(1);
@@ -266,6 +418,7 @@ int main(int argc, char *argv[]) {
     if (argc == 3) {
         if (!strcmp("-d", argv[1])) {
           printf("disasm\n");  
+          file_idx++;
           disasm_mode = true;                  
         } else {
             fprintf(stderr, "No such option)\n");
@@ -274,19 +427,22 @@ int main(int argc, char *argv[]) {
     
     SVM_VirtualMachine* svm = svm_create();
     struct stat st;
-    stat(argv[2], &st);
-    printf("size = %d\n", (int)st.st_size);
+    stat(argv[file_idx], &st);
     uint8_t* buf = (uint8_t*)malloc(st.st_size);
-    int fp = open(argv[2], O_RDONLY); 
+    int fp = open(argv[file_idx], O_RDONLY); 
     read(fp, buf, st.st_size);
     parse(buf, svm);        
     close(fp);
     free(buf);
     
-    add_native_functions(svm);
+
     
     if (disasm_mode) {
         disasm(svm);
+    } else {        
+        add_native_functions(svm);        
+        init_svm(svm);
+        svm_run(svm);
     }
     
     svm_delete(svm);

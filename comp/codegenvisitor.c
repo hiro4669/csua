@@ -128,7 +128,7 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                 switch(expr->type->basic_type) {
                     case CS_BOOLEAN_TYPE:
                     case CS_INT_TYPE: {
-                        gen_byte_code(c_visitor, SVM_PUSH_STACK_INT,
+                        gen_byte_code(c_visitor, SVM_PUSH_STATIC_INT,
                                 expr->u.identifier.u.declaration->index);
                         break;
                     }
@@ -176,7 +176,7 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                 switch(expr->type->basic_type) {
                     case CS_BOOLEAN_TYPE:
                     case CS_INT_TYPE: {
-                        gen_byte_code(c_visitor, SVM_PUSH_STACK_INT,
+                        gen_byte_code(c_visitor, SVM_PUSH_STATIC_INT,
                                 expr->u.identifier.u.declaration->index);
                         break;
                     }

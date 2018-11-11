@@ -103,10 +103,15 @@ struct SVM_VirtualMachine_tag {
     SVM_Value     *global_variables;
     uint8_t       *global_variable_types;
     uint32_t       code_size;
-    uint8_t       *code;
-    uint32_t      stack_size;
+    uint8_t       *code;  
     uint32_t      function_count;
     SVM_Function  *functions;
+    uint32_t       stack_size;
+    uint8_t       *stack_value_type;
+    SVM_Value     *stack;
+    uint32_t       pc;
+    uint32_t       sp;    
+    
 };
 
 
