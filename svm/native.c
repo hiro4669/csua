@@ -4,7 +4,7 @@
 
 static SVM_Value native_print(SVM_VirtualMachine* svm, SVM_Value* values, int arg_count) {
     SVM_Value v;
-    v.ival = 1;
+    v.ival = 0;
     printf("hoge\n");
     return v;    
 }

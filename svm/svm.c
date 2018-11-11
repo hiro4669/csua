@@ -401,8 +401,45 @@ static void svm_run(SVM_VirtualMachine* svm) {
             case SVM_ADD_INT: {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
-                printf("%d + %d\n", iv1, iv2);
                 push_i(svm, (iv1+iv2));
+                break;
+            }
+            case SVM_PUSH_FUNCTION: {
+                uint16_t idx = fetch2(svm);
+                push_i(svm, idx);
+                break;
+            }
+            case SVM_INVOKE: {
+                uint16_t f_idx = pop_i(svm);
+                /*
+                printf("function id = %d\n", f_idx);
+                printf("function count = %d\n", svm->function_count);
+                printf("name = %s\n", svm->functions[f_idx].name);
+                printf("sp = %d\n", svm->sp);
+                printf("arg_count = %d\n", svm->functions[f_idx].arg_count);
+                 */
+                switch (svm->functions[f_idx].f_type) {
+                    case NATIVE_FUNCTION: {
+                        SVM_Value val = svm->functions[f_idx].u.n_func(svm, 
+                                &svm->stack[svm->sp], 
+                                svm->functions[f_idx].arg_count);
+                        svm->sp -= svm->functions[f_idx].arg_count;
+                        svm->stack[svm->sp++] = val;                        
+                        break;
+                    }
+                    default: {
+                        fprintf(stderr, "no such function type in invoke\n");
+                        exit(1);
+                    }
+                }
+
+
+                break;
+            }
+            case SVM_POP: {
+//                printf("sp = %d\n", svm->sp);
+                pop_i(svm);
+//                exit(1);
                 break;
             }
             default: {
