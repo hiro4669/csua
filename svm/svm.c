@@ -294,9 +294,17 @@ static int pop_i(SVM_VirtualMachine *svm) {
 static void write_i(SVM_Value* head, uint32_t offset, uint32_t idx, int iv) {
     head[offset+idx].ival = iv;
 }
+static int read_i(SVM_Value* head, uint32_t offset, uint32_t idx) {
+    return head[offset+idx].ival;
+}
+
 static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
     write_i(svm->global_variables, 0, idx, iv);
 }
+static int read_global_i(SVM_VirtualMachine* svm, uint32_t idx) {
+    return read_i(svm->global_variables, 0, idx);
+}
+
 
 static void init_svm(SVM_VirtualMachine* svm) {
     svm->stack = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->stack_size);
@@ -370,29 +378,36 @@ static void svm_run(SVM_VirtualMachine* svm) {
     while(running) {
         switch (op = fetch(svm)) {
             case SVM_PUSH_INT: { // push from constant pool
-//                printf("push int\n");
                 uint16_t s_idx = fetch2(svm);
-//                printf("idx = %d\n", s_idx);
                 int v = get_static_int(svm, s_idx);
-//                printf("v   = %d\n", v);
                 push_i(svm, v);
-//                printf("sp = %d\n", svm->sp);                
                 break;
             }
             case SVM_POP_STATIC_INT: { // save val to global variable
-                printf("pop static int\n");
                 uint16_t s_idx = fetch2(svm); 
-                printf("idx = %d\n", s_idx);
                 int iv = pop_i(svm);
-                printf("pop int val = %d\n", iv);
                 write_global_i(svm, s_idx, iv);
-                show_status(svm);
-                
-                exit(1);
+//                show_status(svm);
+//                exit(1);
+                break;
+            }
+            case SVM_PUSH_STATIC_INT: {
+                uint16_t s_idx = fetch2(svm);
+                int iv = read_global_i(svm, s_idx);
+//                printf("iv = %d\n", iv);
+                push_i(svm, iv);
+                break;
+            }
+            case SVM_ADD_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                printf("%d + %d\n", iv1, iv2);
+                push_i(svm, (iv1+iv2));
                 break;
             }
             default: {
                 fprintf(stderr, "unknown opcode: %02x in svm_run\n", op);
+                show_status(svm);                
                 exit(1);                
             }
         }
