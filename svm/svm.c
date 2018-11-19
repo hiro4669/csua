@@ -272,12 +272,12 @@ static uint16_t fetch2(SVM_VirtualMachine* svm) {
     return (v1 << 8) | fetch(svm);
 }
 
-static SVM_Constant* get_static(SVM_VirtualMachine* svm, uint16_t idx) {
+static SVM_Constant* read_static(SVM_VirtualMachine* svm, uint16_t idx) {
     return &svm->constant_pool[idx];
 }
 
-static int get_static_int(SVM_VirtualMachine* svm, uint16_t idx) {
-    return get_static(svm, idx)->u.c_int;
+static int read_static_int(SVM_VirtualMachine* svm, uint16_t idx) {
+    return read_static(svm, idx)->u.c_int;
 }
 
 static void push_i(SVM_VirtualMachine* svm, int iv) {
@@ -379,7 +379,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
         switch (op = fetch(svm)) {
             case SVM_PUSH_INT: { // push from constant pool
                 uint16_t s_idx = fetch2(svm);
-                int v = get_static_int(svm, s_idx);
+                int v = read_static_int(svm, s_idx);
                 push_i(svm, v);
                 break;
             }
