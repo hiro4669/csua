@@ -451,6 +451,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
                               
         running = svm->pc < svm->code_size;
     }
+    show_status(svm);
 
 }
 
