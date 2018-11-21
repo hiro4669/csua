@@ -268,6 +268,10 @@ static void exec_disasm(CS_Executable* exec) {
     for (int i = 0; i < exec->code_size; ++i) {
         OpcodeInfo *oinfo = &svm_opcode_info[code[i]];
         switch(code[i]) {
+            case SVM_CAST_DOUBLE_TO_INT:
+            case SVM_CAST_INT_TO_DOUBLE:
+            case SVM_PUSH_DOUBLE:
+            case SVM_POP_STATIC_DOUBLE:
             case SVM_PUSH_INT: 
             case SVM_POP_STATIC_INT: 
             case SVM_PUSH_STATIC_INT:
