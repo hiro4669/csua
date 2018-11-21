@@ -101,6 +101,10 @@ static void disasm(SVM_VirtualMachine* svm) {
         OpcodeInfo *oinfo = &svm_opcode_info[*p];
         add_rowcode(&dinfo, *p);
         switch(*p) {
+            case SVM_CAST_DOUBLE_TO_INT:
+            case SVM_CAST_INT_TO_DOUBLE:
+            case SVM_PUSH_DOUBLE:
+            case SVM_POP_STATIC_DOUBLE:            
             case SVM_PUSH_INT:
             case SVM_POP_STATIC_INT: 
             case SVM_PUSH_STATIC_INT:
@@ -280,15 +284,30 @@ static int read_static_int(SVM_VirtualMachine* svm, uint16_t idx) {
     return read_static(svm, idx)->u.c_int;
 }
 
+static double read_static_double(SVM_VirtualMachine* svm, uint16_t idx) {
+    return read_static(svm, idx)->u.c_double;
+}
+
 static void push_i(SVM_VirtualMachine* svm, int iv) {
     svm->stack[svm->sp].ival = iv;
     svm->stack_value_type[svm->sp] = SVM_INT;
     svm->sp++;
 }
 
+static void push_d(SVM_VirtualMachine* svm, double dv) {
+    svm->stack[svm->sp].dval = dv;
+    svm->stack_value_type[svm->sp] = SVM_DOUBLE;
+    svm->sp++;
+}
+
 static int pop_i(SVM_VirtualMachine *svm) {
     --svm->sp;
     return svm->stack[svm->sp].ival;
+}
+
+static double pop_d(SVM_VirtualMachine* svm) {
+    --svm->sp;
+    return svm->stack[svm->sp].dval;
 }
 
 static void write_i(SVM_Value* head, uint32_t offset, uint32_t idx, int iv) {
@@ -383,6 +402,12 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_i(svm, v);
                 break;
             }
+            case SVM_PUSH_DOUBLE: {
+                uint16_t s_idx = fetch2(svm);
+                double dv = read_static_double(svm, s_idx);
+                push_d(svm, dv);                
+                break;
+            }
             case SVM_POP_STATIC_INT: { // save val to global variable
                 uint16_t s_idx = fetch2(svm); 
                 int iv = pop_i(svm);
@@ -402,6 +427,16 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
                 push_i(svm, (iv1+iv2));
+                break;
+            }
+            case SVM_CAST_DOUBLE_TO_INT: {
+                double dv = pop_d(svm);
+                push_i(svm, (int)dv);
+                break;
+            }
+            case SVM_CAST_INT_TO_DOUBLE: {
+                int i = pop_i(svm);
+                push_d(svm, (double)i);
                 break;
             }
             case SVM_PUSH_FUNCTION: {
