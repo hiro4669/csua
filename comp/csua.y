@@ -12,6 +12,7 @@
     FunctionDeclaration *function_declaration;
     AssignmentOperator   assignment_operator;
     CS_BasicType         type_specifier;
+    ParameterList       *parameter_list;
 }
 
 %token LP
@@ -74,6 +75,7 @@
 %type <type_specifier> type_specifier
 %type <statement> statement declaration_statement
 %type <function_declaration> function_definition
+%type <parameter_list> parameter_list
 
 %%
 translation_unit
@@ -98,10 +100,13 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);}
-    
-
+        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);}    
+        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);} 
         ;
+        
+parameter_list
+        : type_specifier IDENTIFIER   { $$ = NULL; }
+        | parameter_list COMMA type_specifier IDENTIFIER {$$ = NULL;}
 
 statement
 	: expression SEMICOLON 

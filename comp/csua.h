@@ -49,6 +49,15 @@ typedef struct {
     int           index;    
 } Declaration;
 
+typedef struct ParameterList_tag {
+    TypeSpecifier            *type;
+    char                     *name;
+    int                       line_number;
+    struct ParameterList_tag *next;
+    
+} ParameterList;
+
+
 typedef struct {
     char          *name;
     TypeSpecifier *type;
