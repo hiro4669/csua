@@ -164,6 +164,15 @@ TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     return ts;
 }
 
+ParameterList* cs_create_parameter(CS_BasicType type, char* name) {
+    ParameterList* param = (ParameterList*)cs_malloc(sizeof(ParameterList));
+    param->type = cs_create_type_specifier(type);
+    param->name = name;
+    param->line_number = *linenum;
+    param->next = NULL;
+    return param;
+}
+
 static Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
     Declaration* decl = (Declaration*)cs_malloc(sizeof(Declaration));
     decl->type = cs_create_type_specifier(type);

@@ -265,6 +265,7 @@ TypeSpecifier* cs_create_type_specifier(CS_BasicType type);
 FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name);
 FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func);
 
+ParameterList* cs_create_parameter(CS_BasicType type, char* name);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();
