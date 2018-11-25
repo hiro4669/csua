@@ -100,13 +100,13 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);}    
-        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);} 
+        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    
+        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, $4);} 
         ;
         
 parameter_list
-        : type_specifier IDENTIFIER   { $$ = NULL; }
-        | parameter_list COMMA type_specifier IDENTIFIER {$$ = NULL;}
+        : type_specifier IDENTIFIER   { $$ = cs_create_parameter($1, $2); }
+        | parameter_list COMMA type_specifier IDENTIFIER {$$ = cs_chain_parameter_list($1, $3, $4);}
 
 statement
 	: expression SEMICOLON 

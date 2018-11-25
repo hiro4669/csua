@@ -204,10 +204,11 @@ DeclarationList* cs_create_declaration_list(Declaration* decl) {
 }
 
 
-FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name) {
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name, ParameterList* param) {
     FunctionDeclaration* decl = (FunctionDeclaration*)cs_malloc(sizeof(FunctionDeclaration));
     decl->type = cs_create_type_specifier(type);
     decl->name = name;
+    decl->param = param;
     decl->index = -1;
     return decl;
 }

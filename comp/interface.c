@@ -29,9 +29,7 @@ void CS_delete_compiler(CS_Compiler* compiler) {
 }
 
 static CS_Boolean do_mean_check(CS_Compiler* compiler) {
-    MeanVisitor* mean_visitor = create_mean_visitor();
-
-    printf("--------------\n");    
+    MeanVisitor* mean_visitor = create_mean_visitor();    
     
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {

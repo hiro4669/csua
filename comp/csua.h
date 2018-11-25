@@ -61,6 +61,7 @@ typedef struct ParameterList_tag {
 typedef struct {
     char          *name;
     TypeSpecifier *type;
+    ParameterList *param;
     int            index;   
 } FunctionDeclaration;
 
@@ -262,7 +263,7 @@ StatementList* cs_create_statement_list(Statement* stmt);
 DeclarationList* cs_create_declaration_list(Declaration* decl);
 TypeSpecifier* cs_create_type_specifier(CS_BasicType type);
 
-FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name);
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name, ParameterList* param);
 FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func);
 
 ParameterList* cs_create_parameter(CS_BasicType type, char* name);
@@ -281,6 +282,7 @@ FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationL
 Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);
 FunctionDeclaration* cs_search_function(const char* name);
+ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, char* name);
 
 
 /* scanner.c */

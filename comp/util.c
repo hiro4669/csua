@@ -46,6 +46,14 @@ FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationL
     return func_list;
 }
 
+ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, char* name) {
+    ParameterList* p = NULL;
+    ParameterList* current = cs_create_parameter(type, name);
+    for (p = list; p->next; p = p->next);
+    p->next = current;
+    return list;    
+}
+
 
 
 static Declaration* search_decls_from_list(DeclarationList* list, const char* name) {
