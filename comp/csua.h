@@ -102,7 +102,8 @@ typedef enum {
 
 
 typedef struct {
-    Expression  *function;    
+    Expression   *function;    
+    ArgumentList *argument;
 } FunctionCallExpression;
 
 typedef struct {
@@ -251,7 +252,7 @@ Expression* cs_create_double_expression(double v);
 Expression* cs_create_boolean_expression(CS_Boolean v);
 Expression* cs_create_identifier_expression(char* identifier);
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec);
-Expression* cs_create_function_call_expression(Expression* function, void* args);
+Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args);
 Expression* cs_create_minus_expression(Expression* operand);
 Expression* cs_create_logical_not_expression(Expression* operand);
 Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, Expression* right);

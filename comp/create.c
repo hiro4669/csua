@@ -93,9 +93,10 @@ Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc
 }
 
 // args is argument not yet
-Expression* cs_create_function_call_expression(Expression* function, void* args) {
+Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args) {
     Expression* expr = cs_create_expression(FUNCTION_CALL_EXPRESSION);
     expr->u.function_call_expression.function = function;
+    expr->u.function_call_expression.argument = args;
     return expr;
 }
 

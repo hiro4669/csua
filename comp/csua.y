@@ -217,7 +217,7 @@ unary_expression
 
 postfix_expression
         : primary_expression
-        | postfix_expression LP argument_list RP     { $$ = cs_create_function_call_expression($1, NULL); }
+        | postfix_expression LP argument_list RP     { $$ = cs_create_function_call_expression($1, $3); }
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
