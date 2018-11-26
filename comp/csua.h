@@ -57,6 +57,12 @@ typedef struct ParameterList_tag {
     
 } ParameterList;
 
+typedef struct ArgumentList_tag {
+    Expression* expr;
+    struct ArgumentList_tag* next;
+    
+} ArgumentList;
+
 
 typedef struct {
     char          *name;
@@ -267,6 +273,7 @@ FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *nam
 FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func);
 
 ParameterList* cs_create_parameter(CS_BasicType type, char* name);
+ArgumentList* cs_create_argument(Expression* expr);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();
@@ -283,7 +290,7 @@ Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);
 FunctionDeclaration* cs_search_function(const char* name);
 ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, char* name);
-
+ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr);
 
 /* scanner.c */
 int get_current_line();

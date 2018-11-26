@@ -13,6 +13,7 @@
     AssignmentOperator   assignment_operator;
     CS_BasicType         type_specifier;
     ParameterList       *parameter_list;
+    ArgumentList        *argument_list;
 }
 
 %token LP
@@ -76,6 +77,7 @@
 %type <statement> statement declaration_statement
 %type <function_declaration> function_definition
 %type <parameter_list> parameter_list
+%type <argument_list> argument_list
 
 %%
 translation_unit
@@ -107,6 +109,11 @@ function_definition
 parameter_list
         : type_specifier IDENTIFIER   { $$ = cs_create_parameter($1, $2); }
         | parameter_list COMMA type_specifier IDENTIFIER {$$ = cs_chain_parameter_list($1, $3, $4);}
+        
+argument_list
+        : assignment_expression { $$ = cs_create_argument($1); }
+        | argument_list COMMA assignment_expression { $$ = cs_chain_argument_list($1, $3); }
+        
 
 statement
 	: expression SEMICOLON 
@@ -210,6 +217,7 @@ unary_expression
 
 postfix_expression
         : primary_expression
+        | postfix_expression LP argument_list RP     { $$ = cs_create_function_call_expression($1, NULL); }
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}

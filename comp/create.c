@@ -220,3 +220,10 @@ FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration
     return list;
 }
 
+ArgumentList* cs_create_argument(Expression* expr) {
+    ArgumentList* argument = cs_malloc(sizeof(ArgumentList));
+    argument->expr = expr;
+    argument->next = NULL;
+    return argument;
+}
+

@@ -54,6 +54,14 @@ ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, c
     return list;    
 }
 
+ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr) {
+    ArgumentList* p;
+    ArgumentList* current = cs_create_argument(expr);
+    for (p = list; p->next; p = p->next);
+    p->next = current;
+    return list;
+}
+
 
 
 static Declaration* search_decls_from_list(DeclarationList* list, const char* name) {
