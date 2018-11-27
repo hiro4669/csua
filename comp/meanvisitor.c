@@ -513,7 +513,69 @@ static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave function call\n");
+    FunctionCallExpression* f_expr = &expr->u.function_call_expression;
+    FunctionDeclaration* func_dec = NULL;
+    printf("type = %d\n", f_expr->function->kind);
+    switch (f_expr->function->kind) {
+        case IDENTIFIER_EXPRESSION: {
+//            printf("identifier!!!\n");
+//            printf("%s\n", f_expr->function->u.identifier.name);
+            func_dec = cs_search_function(f_expr->function->u.identifier.name);
+            break;
+        }
+        default: {
+            fprintf(stderr, "this type cannot be the function %d\n", f_expr->function->kind);
+            exit(1);
+        }
+    }
+    
+    if (func_dec) {
+        ParameterList* params = func_dec->param;
+        ArgumentList*  args = f_expr->argument;
+        int params_count, args_count;
+        for (params_count = 0; params; params = params->next, ++params_count);
+        for (args_count = 0;   args;   args   = args->next,   ++args_count);
+//        printf("params_count = %d\n", params_count);
+//        printf("args_count   = %d\n", args_count);        
+
+        if (params_count != args_count) {
+            fprintf(stderr, "argument count is not the same\n");
+            char message[100];
+            sprintf(message, "%d: argument count mismatch in function call require:%d, pass:%d", 
+                    expr->line_number, 
+                    params_count,
+                    args_count);        
+            add_check_log(message, visitor);  
+        }
+        
+        for (params = func_dec->param, args = f_expr->argument;
+                params;
+                params = params->next,
+                args = args->next) {
+            if (cs_same_type(params->type, args->expr->type)) {
+                //OK
+            } else if (cs_is_int(params->type) && cs_is_double(args->expr->type)) {
+                Expression* cast = cs_create_cast_expression(CS_DOUBLE_TO_INT, args->expr);
+                cast->type = cs_create_type_specifier(CS_INT_TYPE);
+                args->expr = cast;
+            } else if (cs_is_double(params->type) && cs_is_int(args->expr->type)) {
+                 Expression* cast = cs_create_cast_expression(CS_INT_TO_DOUBLE, args->expr);
+                 cast->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+                 args->expr = cast;
+            } else {
+                char message[100];
+                sprintf(message, "%d: type mismatch in function call require:%s, pass:%s", 
+                        expr->line_number, 
+                        get_type_name(params->type->basic_type),
+                        get_type_name(args->expr->type->basic_type));        
+                add_check_log(message, visitor);  
+            }            
+        }
+    }
+    
+    
     expr->type = expr->u.function_call_expression.function->type;
+       
 }
 
 /* For statement */

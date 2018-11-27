@@ -38,6 +38,20 @@ static char* get_type_name(CS_BasicType type) {
 }
 */
 
+static const char* get_cast_type_name(CS_CastType type) {
+    switch(type) {
+        case CS_INT_TO_DOUBLE: {
+            return "int_to_double";
+        }
+        case CS_DOUBLE_TO_INT: {
+            return "double_to_int";
+        }
+        default: {
+            return "unknown cast";
+        }
+    }
+}
+
 static CS_BasicType get_type(Expression* expr) {
     if (expr->type) {
         return expr->type->basic_type;
@@ -47,7 +61,7 @@ static CS_BasicType get_type(Expression* expr) {
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
     print_depth();
-    fprintf(stderr, "enter castexpr : %d\n", expr->u.cast_expression.ctype);
+    fprintf(stderr, "enter castexpr : %s\n", get_cast_type_name(expr->u.cast_expression.ctype));
     increment();
 }
 static void leave_castexpr(Expression* expr, Visitor* visitor) { 
