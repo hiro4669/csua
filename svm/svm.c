@@ -158,12 +158,14 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
         switch(type = read_byte(&pos)) {
             case SVM_INT: {
                 int v = read_int(&pos);
+                printf("constant[%d] = %d\n", i, v);
                 svm->constant_pool[i].type = SVM_INT;
                 svm->constant_pool[i].u.c_int = v;
                 break;
             }
             case SVM_DOUBLE: {
                 double dv = read_double(&pos);
+                printf("constant[%d] = %f\n", i, dv);
                 svm->constant_pool[i].type = SVM_DOUBLE;
                 svm->constant_pool[i].u.c_double = dv;                
                 break;
@@ -205,6 +207,7 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     svm->stack_size = read_int(&pos);
     printf("stack_size = %d\n", svm->stack_size);    
     
+    printf("-- end of parse --\n\n");
 //    svm->code = pos;
  //   disasm(pos, svm->code_size);
  
@@ -446,17 +449,10 @@ static void svm_run(SVM_VirtualMachine* svm) {
             }
             case SVM_INVOKE: {
                 uint16_t f_idx = pop_i(svm);
-                /*
-                printf("function id = %d\n", f_idx);
-                printf("function count = %d\n", svm->function_count);
-                printf("name = %s\n", svm->functions[f_idx].name);
-                printf("sp = %d\n", svm->sp);
-                printf("arg_count = %d\n", svm->functions[f_idx].arg_count);
-                 */
                 switch (svm->functions[f_idx].f_type) {
                     case NATIVE_FUNCTION: {
                         SVM_Value val = svm->functions[f_idx].u.n_func(svm, 
-                                &svm->stack[svm->sp], 
+                                &svm->stack[svm->sp - svm->functions[f_idx].arg_count], 
                                 svm->functions[f_idx].arg_count);
                         svm->sp -= svm->functions[f_idx].arg_count;
                         svm->stack[svm->sp++] = val;                        
@@ -467,14 +463,10 @@ static void svm_run(SVM_VirtualMachine* svm) {
                         exit(1);
                     }
                 }
-
-
                 break;
             }
             case SVM_POP: {
-//                printf("sp = %d\n", svm->sp);
                 pop_i(svm);
-//                exit(1);
                 break;
             }
             default: {
