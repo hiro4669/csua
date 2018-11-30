@@ -92,11 +92,49 @@ static void add_rowcode(DInfo *info, uint8_t op) {
 
 
 static void disasm(SVM_VirtualMachine* svm) {
-//static void disasm(uint8_t *code, size_t size) {
+    
+    printf("-- constant pool --\n");
+    printf("constant_count = %d\n", svm->constant_pool_count);
+    for (int i = 0; i < svm->constant_pool_count; ++i) {
+        printf("constant[%d] = ", i);
+        switch(svm->constant_pool[i].type) {
+            case SVM_INT: {
+                printf("%d\n", svm->constant_pool[i].u.c_int);
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("%f\n", svm->constant_pool[i].u.c_double);
+                break;
+            }
+            default: {
+                exit(1);
+            }
+        }
+    }
+    
+    printf("\n-- variables --\n");
+    printf("variable_count = %d\n", (int)svm->global_variable_count);    
+    for(int i = 0; i < svm->global_variable_count; ++i) {
+        printf("v[%d]: ", i);
+        switch(svm->global_variable_types[i]) {
+            case SVM_INT: {
+                printf("INT\n");
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("DOUBLE\n");                
+                break;
+            }
+            default: {
+                exit(1);
+            }
+        }
+    }
+    printf("\n-- code --\n");
+        
     uint8_t *p = svm->code;
     DInfo dinfo = {0};
-    int param_len = 0;
-    
+    int param_len = 0;    
     for (int i = 0; i < svm->code_size; ++i, p++) {
         OpcodeInfo *oinfo = &svm_opcode_info[*p];
         add_rowcode(&dinfo, *p);
@@ -150,7 +188,7 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     uint8_t* pos = buf;
     parse_header(&pos);
     svm->constant_pool_count = read_int(&pos);
-    printf("constant_pool_count = %d\n", svm->constant_pool_count);
+//    printf("constant_pool_count = %d\n", svm->constant_pool_count);
     svm->constant_pool = (SVM_Constant*)MEM_malloc(sizeof(SVM_Constant) * svm->constant_pool_count);
     
     uint8_t type;
@@ -158,14 +196,14 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
         switch(type = read_byte(&pos)) {
             case SVM_INT: {
                 int v = read_int(&pos);
-                printf("constant[%d] = %d\n", i, v);
+//                printf("constant[%d] = %d\n", i, v);
                 svm->constant_pool[i].type = SVM_INT;
                 svm->constant_pool[i].u.c_int = v;
                 break;
             }
             case SVM_DOUBLE: {
                 double dv = read_double(&pos);
-                printf("constant[%d] = %f\n", i, dv);
+//                printf("constant[%d] = %f\n", i, dv);
                 svm->constant_pool[i].type = SVM_DOUBLE;
                 svm->constant_pool[i].u.c_double = dv;                
                 break;
@@ -180,17 +218,17 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     svm->global_variable_count = read_int(&pos);
     svm->global_variables = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->global_variable_count);
     svm->global_variable_types = (uint8_t*)MEM_malloc(sizeof(uint8_t) * svm->global_variable_count);
-    printf("global_variable_count = %d\n", svm->global_variable_count);
+//    printf("global_variable_count = %d\n", svm->global_variable_count);
     for (int i = 0; i < svm->global_variable_count; ++i) {        
 //        uint8_t type = read_byte(&pos);
         svm->global_variable_types[i] = read_byte(&pos);
         switch (svm->global_variable_types[i]) {
             case SVM_INT: {
-                printf("INT\n");
+//                printf("INT\n");
                 break;
             }
             case SVM_DOUBLE: {
-                printf("DOUBLE\n");                
+//                printf("DOUBLE\n");                
                 break;
             }
             defulat: {
