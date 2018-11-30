@@ -173,9 +173,11 @@ static void serialize(CS_Executable* exec){
                 write_int(exec->constant_pool[i].u.c_int, fp);
                 break;
             }
-            case CS_CONSTANT_DOUBLE: {
+            case CS_CONSTANT_DOUBLE: {                
+                printf("write double\n");
+                printf("dval = %f\n", exec->constant_pool[i].u.c_double);
                 write_char(SVM_DOUBLE, fp);
-                write_double(exec->constant_pool[0].u.c_double, fp);
+                write_double(exec->constant_pool[i].u.c_double, fp);
                 break;
             }
             default: {
