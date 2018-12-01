@@ -6,7 +6,7 @@ static SVM_Value native_print(SVM_VirtualMachine* svm, SVM_Value* values, int ar
     SVM_Value v;
     v.ival = 0;
     printf("%d\n", values[0].ival);
-    printf("%d\n", values[1].ival);    
+    printf("%f\n", values[1].dval);    
     return v;    
 }
 
