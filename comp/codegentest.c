@@ -289,6 +289,8 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_MUL_DOUBLE:
             case SVM_DIV_INT:
             case SVM_DIV_DOUBLE:
+            case SVM_MOD_INT:
+            case SVM_MOD_DOUBLE:
             case SVM_INVOKE: {
                 add_string(&dinfo, oinfo->opname);
                 break;

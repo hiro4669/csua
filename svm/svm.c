@@ -5,6 +5,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <math.h>
 #include "svm.h"
 #include "../memory/MEM.h"
 
@@ -157,6 +158,8 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_MUL_DOUBLE:
             case SVM_DIV_INT:
             case SVM_DIV_DOUBLE:
+            case SVM_MOD_INT:
+            case SVM_MOD_DOUBLE:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -539,6 +542,21 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 double dv1 = pop_d(svm);
                 double dv2 = pop_d(svm);
                 push_d(svm, (dv2/dv1));
+                break;
+            }
+            case SVM_MOD_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2%iv1));
+                break;
+            }
+            case SVM_MOD_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+//                printf("d1 = %f\n", dv1);
+//                printf("d2 = %f\n", dv2);                
+//                exit(1);
+                push_d(svm, fmod(dv2, dv1));
                 break;
             }
             case SVM_CAST_DOUBLE_TO_INT: {
