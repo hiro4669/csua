@@ -151,7 +151,7 @@ static int count_stack_size(uint8_t* code, size_t len) {
 static void serialize(CS_Executable* exec){
     FILE *fp;
     
-    if ((fp = fopen("a.csb", "wb")) == NULL) {
+    if ((fp = fopen("../svm/a.csb", "wb")) == NULL) {
         fprintf(stderr, "Error\n");
         exit(1);
     }
@@ -282,6 +282,7 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
+            case SVM_ADD_DOUBLE:
             case SVM_INVOKE: {
                 add_string(&dinfo, oinfo->opname);
                 break;

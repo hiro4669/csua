@@ -150,6 +150,7 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
+            case SVM_ADD_DOUBLE:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -497,6 +498,12 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
                 push_i(svm, (iv1+iv2));
+                break;
+            }
+            case SVM_ADD_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv1+dv2));
                 break;
             }
             case SVM_CAST_DOUBLE_TO_INT: {
