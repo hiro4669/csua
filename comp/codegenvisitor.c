@@ -267,9 +267,20 @@ static void enter_mulexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter mulexpr : *\n");
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
-//    fprintf(stderr, "leave mulexpr\n");
-    fprintf(stderr, "mul not implemented\n");
-    exit(1);
+    switch(expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }     
 }
 
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
@@ -277,8 +288,20 @@ static void enter_divexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave divexpr\n");
-    fprintf(stderr, "div not implemented\n");
-    exit(1);
+    switch(expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }
 }
 
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
