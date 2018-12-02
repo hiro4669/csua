@@ -146,6 +146,7 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_PUSH_INT:
             case SVM_POP_STATIC_INT: 
             case SVM_PUSH_STATIC_INT:
+            case SVM_PUSH_STATIC_DOUBLE:
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
@@ -358,11 +359,26 @@ static int read_i(SVM_Value* head, uint32_t offset, uint32_t idx) {
     return head[offset+idx].ival;
 }
 
+static void write_d(SVM_Value* head, uint32_t offset, uint32_t idx, double dv) {
+    head[offset+idx].dval = dv;
+}
+static double read_d(SVM_Value* head, uint32_t offset, uint32_t idx) {
+    return head[offset+idx].dval;
+}
+
+
 static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
     write_i(svm->global_variables, 0, idx, iv);
 }
 static int read_global_i(SVM_VirtualMachine* svm, uint32_t idx) {
     return read_i(svm->global_variables, 0, idx);
+}
+
+static void write_global_d(SVM_VirtualMachine* svm, uint32_t idx, double dv) {
+    write_d(svm->global_variables, 0, idx, dv);
+}
+static double read_global_d(SVM_VirtualMachine* svm, uint32_t idx) {
+    return read_d(svm->global_variables, 0, idx);
 }
 
 
@@ -392,7 +408,7 @@ static void init_svm(SVM_VirtualMachine* svm) {
 }
 
 static void show_status(SVM_VirtualMachine* svm) {
-    printf("< show SVM status >\n");
+    printf("\n< show SVM status >\n");
     printf("-- global variable ---\n");
     for (int i = 0; i < svm->global_variable_count; ++i) {
 
@@ -449,11 +465,18 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_d(svm, dv);                
                 break;
             }
-            case SVM_POP_STATIC_INT: { // save val to global variable
+            case SVM_POP_STATIC_INT: { // save i_val to global variable
                 uint16_t s_idx = fetch2(svm); 
                 int iv = pop_i(svm);
                 write_global_i(svm, s_idx, iv);
 //                show_status(svm);
+//                exit(1);
+                break;
+            }
+            case SVM_POP_STATIC_DOUBLE: { // save d_val to global variable
+                uint16_t s_idx = fetch2(svm); 
+                double dv = pop_d(svm);
+                write_global_d(svm, s_idx, dv);
 //                exit(1);
                 break;
             }
@@ -462,6 +485,12 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int iv = read_global_i(svm, s_idx);
 //                printf("iv = %d\n", iv);
                 push_i(svm, iv);
+                break;
+            }
+            case SVM_PUSH_STATIC_DOUBLE: {
+                uint16_t s_idx = fetch2(svm);
+                double dv = read_global_d(svm, s_idx);
+                push_d(svm, dv);
                 break;
             }
             case SVM_ADD_INT: {
