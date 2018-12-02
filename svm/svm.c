@@ -151,6 +151,8 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_POP:
             case SVM_ADD_INT:
             case SVM_ADD_DOUBLE:
+            case SVM_SUB_INT:
+            case SVM_SUB_DOUBLE:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -240,17 +242,10 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     }
     
     svm->code_size = read_int(&pos);
-//    printf("code_size = %d\n", svm->code_size);
     svm->code = (uint8_t*)MEM_malloc(svm->code_size);
     memcpy(svm->code, pos, svm->code_size);
     pos += svm->code_size;
-    svm->stack_size = read_int(&pos);
-//    printf("stack_size = %d\n", svm->stack_size);    
-    
-//    printf("-- end of parse --\n\n");
-//    svm->code = pos;
- //   disasm(pos, svm->code_size);
- 
+    svm->stack_size = read_int(&pos); 
 }
 
 
@@ -497,13 +492,25 @@ static void svm_run(SVM_VirtualMachine* svm) {
             case SVM_ADD_INT: {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
-                push_i(svm, (iv1+iv2));
+                push_i(svm, (iv2+iv1));
                 break;
             }
             case SVM_ADD_DOUBLE: {
                 double dv1 = pop_d(svm);
                 double dv2 = pop_d(svm);
-                push_d(svm, (dv1+dv2));
+                push_d(svm, (dv2+dv1));
+                break;
+            }
+            case SVM_SUB_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2-iv1));                
+                break;
+            }
+            case SVM_SUB_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv2-dv1));                
                 break;
             }
             case SVM_CAST_DOUBLE_TO_INT: {
