@@ -120,7 +120,7 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave identifierexpr\n");            
     CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
-    switch (c_visitor->v_state) {
+    switch (c_visitor->vi_state) {
         case VISIT_NORMAL: {
 //            fprintf(stderr, "push value to stack\n");
             if (expr->u.identifier.is_function) {
@@ -138,8 +138,12 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                         break;
                     }
                     case CS_DOUBLE_TYPE: {
-                        fprintf(stderr, "double not implementerd visit_nomal in leave_identexpr codegenvisitor\n");
-                        exit(1);
+//                        fprintf(stderr, "double not implementerd visit_nomal in leave_identexpr codegenvisitor\n");
+//                        exit(1);                        
+                        gen_byte_code(c_visitor, SVM_PUSH_STATIC_DOUBLE,
+                                expr->u.identifier.u.declaration->index);
+                        break;
+                        
                                                 
                     }
                     default: {
@@ -151,8 +155,8 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         case VISIT_NOMAL_ASSIGN: {
-//            fprintf(stderr, "store value to index\n");
-            
+
+            // Variable is not a function, then store the value
             if (!expr->u.identifier.is_function) {
 //                fprintf(stderr, "index = %d\n", expr->u.identifier.u.declaration->index);
 //                fprintf(stderr, "type = %s\n", get_type_name(expr->type->basic_type));
@@ -183,7 +187,8 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                 exit(1);
             }
             
-            if (c_visitor->assign_depth > 1) { // nested assign
+//            if (c_visitor->assign_depth > 1) { // nested assign
+            if ((c_visitor->assign_depth > 1) || (c_visitor->vf_state == VISIT_F_CALL)) { // nested assign or inside function call
                 switch(expr->type->basic_type) {
                     case CS_BOOLEAN_TYPE:
                     case CS_INT_TYPE: {
@@ -192,9 +197,11 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                         break;
                     }
                     case CS_DOUBLE_TYPE: {
-                        fprintf(stderr, "double not implementerd assign_depth in leave_identexpr codegenvisitor\n");
-                        exit(1);
-                                                
+//                        fprintf(stderr, "double not implementerd assign_depth in leave_identexpr codegenvisitor\n");
+//                        exit(1);
+                        gen_byte_code(c_visitor, SVM_PUSH_STATIC_DOUBLE,
+                                expr->u.identifier.u.declaration->index);  
+                        break;
                     }
                     default: {
                         fprintf(stderr, "%d: unknown type in leave_identexpr codegenvisitor\n", expr->line_number); 
@@ -354,20 +361,33 @@ static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave assignexpr\n");
-    --((CodegenVisitor*)visitor)->assign_depth;
+    CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
+    
+//    --((CodegenVisitor*)visitor)->assign_depth;
+    --c_visitor->assign_depth;
 //    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
+    if (c_visitor->vf_state == VISIT_F_CALL) {
+        c_visitor->vi_state = VISIT_NORMAL;
+        c_visitor->assign_depth = 0;      
+    }
+
+//    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
+    
 }
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "NOTIFY assignexpr : %d \n", expr->u.assignment_expression.aope);
-    ((CodegenVisitor*)visitor)->v_state = VISIT_NOMAL_ASSIGN;    
+    ((CodegenVisitor*)visitor)->vi_state = VISIT_NOMAL_ASSIGN;    
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter function call :\n");
+    ((CodegenVisitor*)visitor)->vf_state = VISIT_F_CALL;
+    
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave function call\n");
+    ((CodegenVisitor*)visitor)->vf_state = VISIT_F_NO;    
     gen_byte_code((CodegenVisitor*)visitor, SVM_INVOKE);
 }
 
@@ -380,13 +400,13 @@ static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
 //    fprintf(stderr, "leave exprstmt\n");
     
     CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
-    switch (c_visitor->v_state) {
+    switch (c_visitor->vi_state) {
         case VISIT_NORMAL: {
             gen_byte_code(c_visitor, SVM_POP);
             break;
         }
         case VISIT_NOMAL_ASSIGN: {            
-            c_visitor->v_state = VISIT_NORMAL;
+            c_visitor->vi_state = VISIT_NORMAL;
             c_visitor->assign_depth = 0;
             break;
         }
@@ -433,7 +453,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable *exe
     visitor->current_code_size = 0;
     visitor->pos = 0;
     visitor->code = NULL;
-    visitor->v_state = VISIT_NORMAL;
+    visitor->vi_state = VISIT_NORMAL;
+    visitor->vf_state = VISIT_F_NO;
     visitor->assign_depth = 0;
     
 

@@ -1,6 +1,9 @@
-#int print();
-int print(int i, int j);
+int print(int i, double j);
 
-#int i = 1;
 int i;
-print(1, 6);
+int k;
+double j;
+j = 6.0;
+print(k = i = 1, j);
+
+

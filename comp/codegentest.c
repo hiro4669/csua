@@ -226,9 +226,10 @@ static void exec_disasm(CS_Executable* exec) {
     fprintf(stderr, "< Disassemble Start >\n");
     fprintf(stderr, "-- global variables --\n");
     for (int i = 0; i < exec->global_variable_count; ++i) {
+        if (i % 10 == 0) fprintf(stderr, "\n");        
         fprintf(stderr, "[%d]%s:%s ", i, exec->global_variable[i].name, 
                 get_type_name(exec->global_variable[i].type->basic_type));
-        if (i % 10 == 0) fprintf(stderr, "\n");
+
     }
     fprintf(stderr, "\n");
     fprintf(stderr, "-- constant pool --\n");
@@ -277,6 +278,7 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_PUSH_INT: 
             case SVM_POP_STATIC_INT: 
             case SVM_PUSH_STATIC_INT:
+            case SVM_PUSH_STATIC_DOUBLE:
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
