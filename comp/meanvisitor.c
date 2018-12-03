@@ -212,7 +212,6 @@ static void compare_type_check(Expression* expr, Visitor* visitor) {
     if (check_nulltype_binary_expr(expr, visitor)) {
         return;
     }
-    
     if(cs_same_type(left->type, right->type)) {
         expr->type = cs_create_type_specifier(left->type->basic_type);
         return;
@@ -229,32 +228,35 @@ static void compare_type_check(Expression* expr, Visitor* visitor) {
     } else {
         unacceptable_type_binary_expr(expr, visitor);
     }
-    
-    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
+//    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
 }
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
     compare_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);        
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
     compare_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);    
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
     compare_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);    
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
     compare_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);        
 }
 
 static void compare_equality_type_check(Expression* expr, Visitor* visitor) {
@@ -288,12 +290,14 @@ static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
     compare_equality_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);        
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
     compare_equality_type_check(expr, visitor);
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);    
 }
 
 

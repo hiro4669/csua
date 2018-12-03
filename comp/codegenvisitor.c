@@ -340,14 +340,31 @@ static void enter_gtexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter gtexpr : > \n");
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
-//    fprintf(stderr, "leave gtexpr\n");
+//    fprintf(stderr, "leave gtexpr\n");   
+    switch(expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GT_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GT_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }       
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter geexpr : >= \n");
+    
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave geexpr\n");
+    fprintf(stderr, "ge not implemented yet\n");
+    exit(1);
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
@@ -355,6 +372,21 @@ static void enter_ltexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave ltexpr\n");
+    switch(expr->u.binary_expression.left->type->basic_type) {
+//    switch(expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LT_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LT_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }    
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
@@ -362,6 +394,8 @@ static void enter_leexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave leexpr\n");
+    fprintf(stderr, "le not implemented yet\n");
+    exit(1);
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
@@ -369,6 +403,8 @@ static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave eqexpr\n");
+    fprintf(stderr, "eq not implemented yet\n");
+    exit(1);
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
@@ -376,6 +412,8 @@ static void enter_neexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave neexpr\n");
+    fprintf(stderr, "ne not implemented yet\n");
+    exit(1);
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
@@ -383,6 +421,8 @@ static void enter_landexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave landexpr\n");
+    fprintf(stderr, "land not implemented yet\n");
+    exit(1);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
@@ -390,6 +430,8 @@ static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave lorexpr\n");
+    fprintf(stderr, "lor not implemented yet\n");
+    exit(1);
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
@@ -397,6 +439,8 @@ static void enter_incexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave incexpr\n");
+    fprintf(stderr, "inc not implemented yet\n");
+    exit(1);
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
@@ -404,6 +448,8 @@ static void enter_decexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave decexpr\n");
+    fprintf(stderr, "dec not implemented yet\n");
+    exit(1);
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
@@ -411,6 +457,8 @@ static void enter_minusexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave minusexpr\n");
+    fprintf(stderr, "minus not implemented yet\n");
+    exit(1);
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
@@ -418,6 +466,8 @@ static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave lognotexpr\n");
+    fprintf(stderr, "lognot not implemented yet\n");
+    exit(1);
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
