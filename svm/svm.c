@@ -162,8 +162,12 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_MOD_DOUBLE:
             case SVM_LT_INT:
             case SVM_LT_DOUBLE:
+            case SVM_LE_INT:
+            case SVM_LE_DOUBLE:
             case SVM_GT_INT:
-            case SVM_GT_DOUBLE:                
+            case SVM_GT_DOUBLE:
+            case SVM_GE_INT:
+            case SVM_GE_DOUBLE:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -572,6 +576,18 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_i(svm, (dv2 < dv1) ? 1 : 0 );                
                 break;
             }
+            case SVM_LE_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 <= iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_LE_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 <= dv1) ? 1 : 0 );                
+                break;
+            }
             case SVM_GT_INT: {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
@@ -583,6 +599,19 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 double dv1 = pop_d(svm);
                 double dv2 = pop_d(svm);
                 push_i(svm, (dv2 > dv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_GE_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 >= iv1) ? 1 : 0 );
+                break;
+                break;
+            }
+            case SVM_GE_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 >= dv1) ? 1 : 0 );
                 break;
             }
             case SVM_CAST_DOUBLE_TO_INT: {

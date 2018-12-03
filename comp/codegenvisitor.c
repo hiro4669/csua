@@ -351,7 +351,7 @@ static void leave_gtexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
-            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            fprintf(stderr, "%d: unknown type in leave_gtexpr codegenvisitor\n", expr->line_number); 
             exit(1);
         }
     }       
@@ -363,8 +363,20 @@ static void enter_geexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave geexpr\n");
-    fprintf(stderr, "ge not implemented yet\n");
-    exit(1);
+     switch(expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GE_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GE_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_geexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }    
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
@@ -383,7 +395,7 @@ static void leave_ltexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
-            fprintf(stderr, "%d: unknown type in leave_subexpr codegenvisitor\n", expr->line_number); 
+            fprintf(stderr, "%d: unknown type in leave_ltexpr codegenvisitor\n", expr->line_number); 
             exit(1);
         }
     }    
@@ -393,9 +405,20 @@ static void enter_leexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter leexpr : <= \n");
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
-//    fprintf(stderr, "leave leexpr\n");
-    fprintf(stderr, "le not implemented yet\n");
-    exit(1);
+    switch(expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LE_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LE_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_leexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }        
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
