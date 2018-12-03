@@ -84,6 +84,16 @@ static void enter_boolexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave boolexpr\n");
+    CS_Executable* exec = ((CodegenVisitor*)visitor)->exec;
+    CS_ConstantPool cp;
+    cp.type = CS_CONSTANT_INT;
+    if (expr->u.boolean_value == CS_FALSE) {
+        cp.u.c_int = 0;
+    } else {
+        cp.u.c_int = 1;
+    }
+    int idx = add_constant(exec, &cp);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_INT, idx);
 }
 
 
