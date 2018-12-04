@@ -470,8 +470,7 @@ static void enter_landexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave landexpr\n");
-    fprintf(stderr, "land not implemented yet\n");
-    exit(1);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_AND);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
@@ -479,8 +478,7 @@ static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave lorexpr\n");
-    fprintf(stderr, "lor not implemented yet\n");
-    exit(1);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_OR);    
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {

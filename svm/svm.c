@@ -172,6 +172,8 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_EQ_DOUBLE:
             case SVM_NE_INT:
             case SVM_NE_DOUBLE:
+            case SVM_LOGICAL_AND:
+            case SVM_LOGICAL_OR:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -644,6 +646,18 @@ static void svm_run(SVM_VirtualMachine* svm) {
             case SVM_CAST_DOUBLE_TO_INT: {
                 double dv = pop_d(svm);
                 push_i(svm, (int)dv);
+                break;
+            }
+            case SVM_LOGICAL_AND: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv1 == 1 && iv2 == 1) ? 1 : 0);
+                break;
+            }
+            case SVM_LOGICAL_OR: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv1 == 1 || iv2 == 1) ? 1 : 0);
                 break;
             }
             case SVM_CAST_INT_TO_DOUBLE: {
