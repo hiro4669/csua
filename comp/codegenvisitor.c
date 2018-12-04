@@ -426,8 +426,21 @@ static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave eqexpr\n");
-    fprintf(stderr, "eq not implemented yet\n");
-    exit(1);
+    switch(expr->u.binary_expression.left->type->basic_type) {
+        case CS_BOOLEAN_TYPE:
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_EQ_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_EQ_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_eqexpr codegenvisitor\n", expr->line_number);             
+            exit(1);
+        }
+    }       
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
