@@ -524,9 +524,8 @@ static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter lognotexpr : ! \n");
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
-//    fprintf(stderr, "leave lognotexpr\n");
-    fprintf(stderr, "lognot not implemented yet\n");
-    exit(1);
+//    fprintf(stderr, "leave lognotexpr\n");    
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_NOT); 
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {

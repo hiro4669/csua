@@ -305,6 +305,7 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_NE_DOUBLE:
             case SVM_LOGICAL_AND:
             case SVM_LOGICAL_OR:
+            case SVM_LOGICAL_NOT:
             case SVM_MINUS_INT:
             case SVM_MINUS_DOUBLE:
             case SVM_INVOKE: {

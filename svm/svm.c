@@ -174,6 +174,7 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_NE_DOUBLE:
             case SVM_LOGICAL_AND:
             case SVM_LOGICAL_OR:
+            case SVM_LOGICAL_NOT:
             case SVM_MINUS_INT:
             case SVM_MINUS_DOUBLE:
             case SVM_INVOKE: {
@@ -660,6 +661,11 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
                 push_i(svm, (iv1 == 1 || iv2 == 1) ? 1 : 0);
+                break;
+            }
+            case SVM_LOGICAL_NOT: {
+                int iv = pop_i(svm);
+                push_i(svm, (iv == 1) ? 0 : 1);
                 break;
             }
             case SVM_MINUS_INT: {
