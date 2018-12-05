@@ -486,9 +486,6 @@ static void enter_incexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave incexpr\n");
-//    switch (c_visitor->vi_state) {
-//        case VISIT_NORMAL: {
-//        }
     
     if (((CodegenVisitor*)visitor)->vi_state != VISIT_NORMAL) {
         fprintf(stderr, "expression is not assignable\n");
@@ -509,8 +506,16 @@ static void enter_decexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave decexpr\n");
-    fprintf(stderr, "dec not implemented yet\n");
-    exit(1);
+    if (((CodegenVisitor*)visitor)->vi_state != VISIT_NORMAL) {
+        fprintf(stderr, "expression is not assignable\n");
+        exit(1);
+    }
+    
+    gen_byte_code((CodegenVisitor*)visitor, SVM_DECREMENT);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_POP_STATIC_INT, 
+            expr->u.inc_dec->u.identifier.u.declaration->index);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_INT, 
+            expr->u.inc_dec->u.identifier.u.declaration->index);
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {

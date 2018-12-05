@@ -178,6 +178,7 @@ static void disasm(SVM_VirtualMachine* svm) {
             case SVM_MINUS_INT:
             case SVM_MINUS_DOUBLE:
             case SVM_INCREMENT:
+            case SVM_DECREMENT:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -655,6 +656,11 @@ static void svm_run(SVM_VirtualMachine* svm) {
             case SVM_INCREMENT: {
                 int iv = pop_i(svm);
                 push_i(svm, ++iv);
+                break;
+            }
+            case SVM_DECREMENT: {
+                int iv = pop_i(svm);
+                push_i(svm, --iv);                
                 break;
             }
             case SVM_LOGICAL_AND: {
