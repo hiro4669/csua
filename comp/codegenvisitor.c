@@ -504,8 +504,20 @@ static void enter_minusexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave minusexpr\n");
-    fprintf(stderr, "minus not implemented yet\n");
-    exit(1);
+    switch(expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MINUS_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MINUS_DOUBLE);            
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type in leave_minusexpr codegenvisitor\n", expr->line_number); 
+            exit(1);
+        }
+    }    
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {

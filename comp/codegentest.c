@@ -174,8 +174,8 @@ static void serialize(CS_Executable* exec){
                 break;
             }
             case CS_CONSTANT_DOUBLE: {                
-                printf("write double\n");
-                printf("dval = %f\n", exec->constant_pool[i].u.c_double);
+//                printf("write double\n");
+//                printf("dval = %f\n", exec->constant_pool[i].u.c_double);
                 write_char(SVM_DOUBLE, fp);
                 write_double(exec->constant_pool[i].u.c_double, fp);
                 break;
@@ -305,6 +305,8 @@ static void exec_disasm(CS_Executable* exec) {
             case SVM_NE_DOUBLE:
             case SVM_LOGICAL_AND:
             case SVM_LOGICAL_OR:
+            case SVM_MINUS_INT:
+            case SVM_MINUS_DOUBLE:
             case SVM_INVOKE: {
                 add_string(&dinfo, oinfo->opname);
                 break;
