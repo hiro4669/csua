@@ -344,7 +344,23 @@ static void incdec_typecheck(Expression* expr, Visitor* visitor) {
         sprintf(message, "%d: Cannot find ++ or -- type", expr->line_number);
         add_check_log(message, visitor);        
         return;
+    }   
+    
+    ExpressionKind eKind = expr->u.inc_dec->kind;
+    if (eKind == INT_EXPRESSION) {
+        sprintf(message, "%d: Operand is Immediate data)", 
+                expr->line_number);
+        add_check_log(message, visitor);
     }
+    
+    if (eKind == IDENTIFIER_EXPRESSION) {
+        if (expr->u.inc_dec->u.identifier.is_function) {
+            sprintf(message, "%d: Variable should not be a function)", 
+                expr->line_number);
+        }
+    }
+            
+    
    
     if (idexpr->type->basic_type != CS_INT_TYPE) {
         sprintf(message, "%d: Operand is not INT type (%s)", 
