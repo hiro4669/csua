@@ -549,6 +549,21 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
+    
+    printf("ope = %d\n", expr->u.assignment_expression.aope);
+    if (expr->u.assignment_expression.aope != ASSIGN) {
+        if (expr->u.assignment_expression.left->kind == IDENTIFIER_EXPRESSION &&
+                expr->u.assignment_expression.left->u.identifier.is_function == CS_FALSE) {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_INT,
+                    expr->u.assignment_expression.left->u.identifier.u.declaration->index);
+            
+//gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_INT, 
+//           expr->u.inc_dec->u.identifier.u.declaration->index);            
+            
+        }
+    }
+    
+    
     ((CodegenVisitor*)visitor)->assign_depth++;
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
@@ -569,7 +584,51 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "NOTIFY assignexpr : %d \n", expr->u.assignment_expression.aope);
-    ((CodegenVisitor*)visitor)->vi_state = VISIT_NOMAL_ASSIGN;    
+
+    switch(expr->u.assignment_expression.aope) {
+        case ADD_ASSIGN: {
+            switch(expr->u.assignment_expression.right->type->basic_type) {
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_INT);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_DOUBLE);                    
+                    break;
+                }
+                default: {
+                    exit(1);
+                }
+            }                    
+            break;
+        }
+        case SUB_ASSIGN: {
+            break;
+        }
+        case MUL_ASSIGN: {
+            break;
+        }
+        case DIV_ASSIGN: {
+            break;
+        }
+        case MOD_ASSIGN: {
+            break;
+        }
+        case ASSIGN: {
+            break;
+        }
+        case ASSIGN_PLUS_ONE:
+        defualt: {
+            fprintf(stderr, "unsuuuport4ed assign operator\n");
+            exit(1);
+        }
+    }
+
+    ((CodegenVisitor*)visitor)->vi_state = VISIT_NOMAL_ASSIGN;
+
+    
+    
+    
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
