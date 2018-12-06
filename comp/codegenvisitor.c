@@ -728,6 +728,36 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 //    fprintf(stderr, "leave declstmt\n");
+    if (stmt->u.declaration_s->initializer) {
+         Declaration* decl = cs_search_decl_in_block(); // dummy
+         if (!decl) {
+
+             decl = cs_search_decl_global(stmt->u.declaration_s->name);
+
+
+             switch(decl->type->basic_type) {
+                 case CS_BOOLEAN_TYPE:
+                 case CS_INT_TYPE: {
+                     gen_byte_code((CodegenVisitor*)visitor, SVM_POP_STATIC_INT, 
+                             decl->index);
+                     break;
+                 }
+                 case CS_DOUBLE_TYPE: {
+                     gen_byte_code((CodegenVisitor*)visitor, SVM_POP_STATIC_DOUBLE, 
+                             decl->index);
+                     break;
+                 }
+                 default: {
+                     fprintf(stderr, "unknown type in leave_declstmt\n");
+                     exit(1);
+                 }
+             }
+             
+             
+         }
+    }
+    
+    
 }
 
 
