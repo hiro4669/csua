@@ -550,7 +550,7 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
     
-    printf("ope = %d\n", expr->u.assignment_expression.aope);
+//    printf("ope = %d\n", expr->u.assignment_expression.aope);
     if (expr->u.assignment_expression.aope != ASSIGN) {
         if (expr->u.assignment_expression.left->kind == IDENTIFIER_EXPRESSION &&
                 expr->u.assignment_expression.left->u.identifier.is_function == CS_FALSE) {
@@ -570,16 +570,11 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave assignexpr\n");
     CodegenVisitor* c_visitor = (CodegenVisitor*)visitor;
     
-//    --((CodegenVisitor*)visitor)->assign_depth;
     --c_visitor->assign_depth;
-//    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
     if (c_visitor->vf_state == VISIT_F_CALL) {
         c_visitor->vi_state = VISIT_NORMAL;
         c_visitor->assign_depth = 0;      
-    }
-
-//    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL;
-    
+    }    
 }
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
@@ -603,15 +598,67 @@ static void notify_assignexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         case SUB_ASSIGN: {
+            switch(expr->u.assignment_expression.right->type->basic_type) {
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_SUB_INT);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_SUB_DOUBLE);                    
+                    break;
+                }
+                default: {
+                    exit(1);
+                }
+            }
             break;
         }
         case MUL_ASSIGN: {
+            switch(expr->u.assignment_expression.right->type->basic_type) {
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_INT);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_DOUBLE);                    
+                    break;
+                }
+                default: {
+                    exit(1);
+                }
+            }
             break;
         }
         case DIV_ASSIGN: {
+            switch(expr->u.assignment_expression.right->type->basic_type) {
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_INT);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_DOUBLE);                    
+                    break;
+                }
+                default: {
+                    exit(1);
+                }
+            }
             break;
         }
         case MOD_ASSIGN: {
+            switch(expr->u.assignment_expression.right->type->basic_type) {
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_MOD_INT);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_MOD_DOUBLE);                    
+                    break;
+                }
+                default: {
+                    exit(1);
+                }
+            }
             break;
         }
         case ASSIGN: {
