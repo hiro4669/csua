@@ -1,8 +1,8 @@
-TARGET = scant
+TARGET = parsetest
 CC = /usr/bin/gcc
 CFLAGS = -g -DDEBUG
-OBJS = scanner.o keyword.o 
-EXEC = scantest.o
+OBJS = scanner.o keyword.o
+EXEC = parser.o
 
 all: $(OBJS) $(EXEC)
 	$(CC) -o $(TARGET) $^
