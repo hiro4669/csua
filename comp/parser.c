@@ -12,6 +12,23 @@ static int t_type;
 
 static int EFLG = OK;
 
+static int depth = 0;
+
+static void increment() {
+    depth++;
+}
+
+static void decrement() {
+    depth--;
+}
+
+static void debug(const char* str) {
+    for (int i = 0; i < depth; ++i) {
+        printf("  ");
+    }
+    printf("%s\n", str);
+}
+
 static void token_test() {    
 
     while (1) {
@@ -61,7 +78,9 @@ static void token_test() {
 static void expression();
 
 static void factor() {
-    printf("factor\n");
+    increment();
+    debug("factor");
+    //printf("factor\n");
 
     switch (t_type) {
         case INT_LITERAL: {
@@ -78,13 +97,12 @@ static void factor() {
             }
             break;
         }
-        default: {
-            printf("hoge?\n");
+        default: {            
             EFLG = ERR;
             break;
         }
     }
-
+    decrement();
     /*
     if (t_type == INT_LITERAL) {        
         t_type = yylex();
@@ -95,23 +113,32 @@ static void factor() {
 }
 
 static void term() {
-    printf("term\n");
+    increment();
+    //printf("term\n");
+    debug("term");
     factor();
     if (t_type == MUL | t_type == DIV) {
-        printf("* | /\n");
+        //printf("* | /\n");
+        debug("* | /");
         t_type = yylex();
         factor();
-    }    
+    }
+    decrement();
 }
 
 static void expression() {
-    printf("expression\n");
+    increment();
+    //printf("expression\n");
+    debug("expression");
     term();
     if (t_type == ADD | t_type == DIV) {
-        printf("+ | -\n");
+        //printf("+ | -\n");
+        debug("+ | -");
         t_type = yylex();
         term();
     }
+
+    decrement();
 }
 
 
@@ -140,7 +167,8 @@ int main(void) {
         fprintf(stderr, "cannot open file\n");
         exit(1);
     }
-    printf("Hello World\n");
+    //printf("Hello World\n");
+    debug("Hello World");
     //token_test();
     
     t_type = yylex();
