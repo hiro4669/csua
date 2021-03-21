@@ -182,3 +182,42 @@ StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt
     
     return stmt_list;
 }
+
+ParameterList* cs_create_parameter(CS_BasicType type, char *identifier) {
+    ParameterList *p;
+    p = cs_malloc(sizeof(ParameterList));
+    p->name = identifier;
+    p->type = cs_create_type_specifier(type);
+    p->line_number = 0; // ToDo
+    p->next = NULL;
+    return p;
+}
+
+ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *identifier) {
+    ParameterList *p = NULL;
+
+    for (p = list; p->next; p = p->next);
+    p->next = cs_create_parameter(type, identifier);
+    return list;
+}
+
+Block* cs_open_block() {
+    Block *new_block;    
+    CS_Compiler *compiler = cs_get_current_compiler();
+    new_block = cs_malloc(sizeof(Block));
+    new_block->type = UNDEFINED_BLOCK;    
+    new_block->outer_block = compiler->current_block;
+    new_block->declaration_list = NULL;
+    new_block->statement_list = NULL;
+    compiler->current_block = new_block;
+
+    return new_block;
+}
+
+Block* cs_close_block(Block *block, StatementList *statement_list) {
+    CS_Compiler *compiler = cs_get_current_compiler();
+    block->statement_list = statement_list;
+    compiler->current_block = block->outer_block;
+    return block;
+}
+

@@ -7,8 +7,12 @@
     int                iv;
     double             dv;
     char               *name;
+    ParameterList      *parameter_list;
+    ArgumentList       *argument_list;
     Expression         *expression;
+    Block              *block;
     Statement          *statement;
+    StatementList      *statement_list;
     AssignmentOperator assignment_operator;
     CS_BasicType       type_specifier;
 }
@@ -69,6 +73,9 @@
                  additive_expression multiplicative_expression unary_expression
                  postfix_expression primary_expression
                  
+%type <block> block
+%type <statement_list> statement_list
+%type <parameter_list> parameter_list                 
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
 %type <statement> statement declaration_statement
@@ -91,7 +98,16 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON
+        : type_specifier IDENTIFIER LP RP SEMICOLON { printf("function_definition1 \n"); }
+        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { printf("function definision2 \n"); }
+        | type_specifier IDENTIFIER LP RP block { printf("function definision3\n");}
+        | type_specifier IDENTIFIER LP parameter_list RP block 
+        { 
+                printf("function definision4 \n"); 
+
+                Block *block = (Block*)$6;
+                printf("block type = %d\n", block->type);
+        }
         ;
 
 statement
@@ -105,12 +121,13 @@ statement
      */
             $$ = cs_create_expression_statement($1);
         }
-        | declaration_statement { /*printf("declaration_statement\n"); */}
+        | declaration_statement { printf("declaration_statement\n"); }
 	;
         
 declaration_statement
         : type_specifier IDENTIFIER SEMICOLON 
-        { 
+        {
+            printf("definition\n");
             $$ = cs_create_declaration_statement($1, $2, NULL); 
         }
         | type_specifier IDENTIFIER ASSIGN_T expression SEMICOLON 
@@ -126,11 +143,37 @@ type_specifier
         | DOUBLE_T  { $$ = CS_DOUBLE_TYPE;  }
         ;
 
+parameter_list
+        : type_specifier IDENTIFIER 
+        { 
+                printf("parameter_list1\n");
+                $$ = cs_create_parameter($1, $2);
+        }
+        | parameter_list COMMA type_specifier IDENTIFIER 
+        { 
+                printf("parameter_list2\n"); 
+                $$ = cs_chain_parameter($1, $3, $4);
+        }
+        ;
+
+argument_list
+        : assignment_expression 
+        { 
+                printf("argument_list1\n");                 
+        }
+        | argument_list COMMA assignment_expression { printf("argument_list2\n");}
+        ;
+
+statement_list
+        : statement                  { printf("statement_list1\n"); }
+        | statement_list statement   { printf("statement_list2\n"); }
+        ;
+
 expression
 	: assignment_expression 
          { 
              Expression* expr = $1;
-             printf("type = %d\n", expr->kind);
+             printf("type1 = %d\n", expr->kind);
              $$ = $1;
          }
 	;
@@ -197,6 +240,7 @@ unary_expression
 postfix_expression
         : primary_expression
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
+        | postfix_expression LP argument_list RP { $$ = cs_create_function_call_expression($1, NULL); /* change NULL*/ }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
         ;
@@ -209,6 +253,24 @@ primary_expression
 	| TRUE_T           { $$ = cs_create_boolean_expression(CS_TRUE); }
 	| FALSE_T          { $$ = cs_create_boolean_expression(CS_FALSE); }
 	;
+block
+        : LC 
+        {
+                $<block>$ = cs_open_block();
+        }
+          statement_list RC 
+        { 
+                printf("block1\n");
+                //$<block>$ = cs_close_block($<block>2, $3);
+                $$ = cs_close_block($<block>2, $3);
+        }
+        | LC RC                
+        { 
+                Block *empty_block = cs_open_block();
+                $$ = cs_close_block(empty_block, NULL);
+                printf("block2\n");
+        }
+        ;
 %%
 int
 yyerror(char const *str)

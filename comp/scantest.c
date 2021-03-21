@@ -7,7 +7,7 @@ int main(void) {
     
     extern FILE *yyin;
     extern int yylex();
-    yyin = fopen("tests/test.cs", "r");
+    yyin = fopen("tests/prog1.cs", "r");
     if (yyin == NULL) {
         fprintf(stderr, "cannot open file\n");
         exit(1);

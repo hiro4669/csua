@@ -10,6 +10,9 @@ int main(void) {
     FILE *fin = fopen("tests/prog1.cs", "r");
     CS_Compiler* compiler = CS_create_compiler();
     CS_compile(compiler, fin);
+
+    printf("temporary end\n");
+    exit(1);
     
     Visitor* visitor = create_treeview_visitor();
 

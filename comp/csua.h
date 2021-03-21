@@ -68,6 +68,17 @@ typedef enum {
     EXPRESSION_KIND_PLUS_ONE
 } ExpressionKind;
 
+typedef struct ParameterList_tag {
+    char                     *name;
+    TypeSpecifier            *type;
+    int                      line_number;
+    struct ParameterList_tag *next;
+} ParameterList;
+
+typedef struct ArgumentList_tag {
+    Expression *expression;
+    struct ArgumentList_tag *next;
+} ArgumentList;
 
 
 typedef struct {
@@ -146,12 +157,32 @@ typedef struct StatementList_tag {
     struct StatementList_tag *next;
 } StatementList;
 
+typedef struct DeclarationList_tag {
+    Declaration                *decl;
+    struct DeclarationList_tag *next;
+} DeclarationList;
+
+typedef enum {
+    UNDEFINED_BLOCK = 1,
+    FUNCTION_BLOCK,
+    WHILE_STATEMENT_BLOCK,
+    IF_STATEMENT_BLOCK,
+} BlockType;
+
+typedef struct Block_tag {
+    BlockType         type;
+    struct Block_tag *outer_block;
+    StatementList    *statement_list;
+    DeclarationList  *declaration_list;
+} Block;
+
 struct CS_Compiler_tag {
     MEM_Storage storage;
-    ExpressionList *expr_list; // temporary
-    StatementList  *stmt_list;
+    ExpressionList  *expr_list; // temporary
+    StatementList   *stmt_list;
+    DeclarationList *decl_list;
+    Block           *current_block;
 };
-
 
 
 /* create.c */
@@ -174,6 +205,12 @@ Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
 StatementList* cs_create_statement_list(Statement* stmt);
 StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
+ParameterList* cs_create_parameter(CS_BasicType type, char *identifier);
+ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *identifier);
+
+
+Block* cs_open_block();
+Block* cs_close_block(Block *block, StatementList *statement_list);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();

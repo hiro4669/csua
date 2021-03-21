@@ -48,9 +48,17 @@
 #a %= 2;
 
 # for declaration statement
-int i;
-int j = 1;
+#int i;
+#int j;
 
-a = 2;
-print();
+#a = 2;
+#int func(int a, double d);
+
+int func(int a, double d) {
+    int i;
+    i = 2;
+}
+
+#func(1);
+#print();
 
