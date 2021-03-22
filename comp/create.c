@@ -152,6 +152,7 @@ static Declaration* cs_create_declaration(CS_BasicType type, char* name, Express
     decl->name = name;
     decl->initializer = initializer;
     decl->index = -1;
+    decl->is_local = CS_TRUE; // initialize
     return decl;        
 }
 
@@ -219,5 +220,60 @@ Block* cs_close_block(Block *block, StatementList *statement_list) {
     block->statement_list = statement_list;
     compiler->current_block = block->outer_block;
     return block;
+}
+
+static FunctionDefinition* create_function_definition(CS_BasicType type, char *name, 
+    ParameterList *parameter_list, Block *block) {
+
+    FunctionDefinition *fd;
+    CS_Compiler *compiler;
+
+    compiler = cs_get_current_compiler();
+
+    fd = cs_malloc(sizeof(FunctionDefinition));
+    fd->type = cs_create_type_specifier(type);
+    fd->name = name;
+    fd->parameter = parameter_list;
+    fd->block = block;
+    fd->index = compiler->function_count;
+    compiler->function_count++;
+    fd->local_variable = NULL;
+    fd->local_variable_count = 0;
+    fd->next = NULL;
+
+    return fd;
+}
+
+void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_list, Block *block) {
+    FunctionDefinition *fd;
+    FunctionDefinition *pos;
+    CS_Compiler *compiler;
+
+    cs_search_function(name);
+
+    // find from compiler
+    if (cs_search_function(name) || cs_search_declaration(name, NULL)) {
+        fprintf(stderr, "%s exist as function or definition of root\n", name);
+        return;
+    }
+
+    fd = create_function_definition(type, name, parameter_list, block);
+
+    if (block) {
+        block->type = FUNCTION_BLOCK;
+        block->parent.function.function = fd;
+    }
+
+    compiler = cs_get_current_compiler();
+    if (compiler->function_list) {
+        for (pos = compiler->function_list; pos; pos = pos->next);
+        pos->next = fd;
+        
+    } else {
+        compiler->function_list = fd;
+    }
+
+
+
 }
 

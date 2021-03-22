@@ -13,6 +13,7 @@
 typedef struct Expression_tag Expression;
 typedef struct Visitor_tag Visitor;
 typedef struct CS_Compiler_tag CS_Compiler;
+typedef struct FunctionDefinition_tag FunctionDefinition;
 
 typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
@@ -38,6 +39,7 @@ typedef struct {
     TypeSpecifier *type;
     Expression    *initializer;
     int           index;
+    CS_Boolean    is_local;
     
 } Declaration;
 
@@ -169,12 +171,31 @@ typedef enum {
     IF_STATEMENT_BLOCK,
 } BlockType;
 
+typedef struct {
+    FunctionDefinition *function;
+    int                end_label;
+} FunctionBlockInfo;
+
 typedef struct Block_tag {
     BlockType         type;
     struct Block_tag *outer_block;
     StatementList    *statement_list;
     DeclarationList  *declaration_list;
+    union {
+        FunctionBlockInfo function;
+    } parent;
 } Block;
+
+struct FunctionDefinition_tag {
+    TypeSpecifier  *type;
+    char           *name;
+    ParameterList  *parameter;
+    Block          *block;
+    int            local_variable_count;
+    Declaration    **local_variable;
+    int            index;
+    struct FunctionDefinition_tag *next;
+};
 
 struct CS_Compiler_tag {
     MEM_Storage storage;
@@ -182,6 +203,8 @@ struct CS_Compiler_tag {
     StatementList   *stmt_list;
     DeclarationList *decl_list;
     Block           *current_block;
+    int             function_count;
+    FunctionDefinition *function_list;
 };
 
 
@@ -212,6 +235,8 @@ ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *
 Block* cs_open_block();
 Block* cs_close_block(Block *block, StatementList *statement_list);
 
+void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_list, Block *block);
+
 /* interface.c */
 CS_Compiler* CS_create_compiler();
 void CS_compile(CS_Compiler* compiler, FILE *fin);
@@ -220,6 +245,8 @@ void CS_delete_compiler(CS_Compiler* compiler);
 /* util.c */
 void cs_set_current_compiler(CS_Compiler *compiler);
 CS_Compiler* cs_get_current_compiler();
+FunctionDefinition* cs_search_function(char *name);
+Declaration* cs_search_declaration(char *name, Block *block);
 
 
 #endif /* CSUA_H */

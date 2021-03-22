@@ -14,7 +14,7 @@
     Statement          *statement;
     StatementList      *statement_list;
     AssignmentOperator assignment_operator;
-    CS_BasicType       type_specifier;
+    CS_BasicType       type_specifier;    
 }
 
 %token LP
@@ -104,9 +104,12 @@ function_definition
         | type_specifier IDENTIFIER LP parameter_list RP block 
         { 
                 printf("function definision4 \n"); 
+                CS_Compiler* compiler = cs_get_current_compiler();
+                printf("function count = %d\n", compiler->function_count);
+                cs_function_define($1, $2, $4, $6);
+                
+                printf("function count = %d\n", compiler->function_count);
 
-                Block *block = (Block*)$6;
-                printf("block type = %d\n", block->type);
         }
         ;
 
