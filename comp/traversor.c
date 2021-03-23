@@ -29,7 +29,7 @@ void traverse_stmt(Statement* stmt, Visitor* visitor) {
             fprintf(stderr, "enter->type(%d) is null\n", stmt->type);
             exit(1);
         }
-        
+                
         visitor->enter_stmt_list[stmt->type](stmt);
         traverse_stmt_children(stmt, visitor);
         visitor->leave_stmt_list[stmt->type](stmt);        
@@ -59,6 +59,15 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
         }
         case DECLARATION_STATEMENT: {
             traverse_expr(stmt->u.declaration_s->initializer, visitor);
+            break;
+        }
+        case WHILE_STATEMENT: {
+            traverse_expr(stmt->u.while_s.condition, visitor);
+            StatementList* stmt_list = stmt->u.while_s.block->statement_list;
+            while (stmt_list) {                
+                traverse_stmt(stmt_list->stmt, visitor);                
+                stmt_list = stmt_list->next;
+            }        
             break;
         }
         default: {
