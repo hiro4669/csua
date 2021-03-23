@@ -162,6 +162,18 @@ Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expres
     return stmt;    
 }
 
+Statement* cs_create_while_statement(Expression *cond, Block *block) {
+    Statement* stmt = cs_create_statement(WHILE_STATEMENT);
+    stmt->u.while_s.condition = cond;
+    stmt->u.while_s.block = block;
+
+    block->type = WHILE_STATEMENT_BLOCK;
+    block->parent.statement.statement = stmt;
+
+    return stmt;
+
+}
+
 
 StatementList* cs_create_statement_list(Statement* stmt) {
     StatementList* stmt_list = (StatementList*)cs_malloc(sizeof(StatementList));

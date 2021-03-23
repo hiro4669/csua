@@ -78,7 +78,7 @@
 %type <parameter_list> parameter_list                 
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement
+%type <statement> statement declaration_statement while_statement
 
 %%
 translation_unit
@@ -145,6 +145,8 @@ statement
                 printf("declaration_statement\n"); 
                 $$ = $1;
         }
+        | while_statement
+
 	;
         
 declaration_statement
@@ -159,6 +161,15 @@ declaration_statement
         }
         ;
         
+while_statement
+        : WHILE LP expression RP block
+        {
+                printf("while statement\n");
+                $$ = cs_create_while_statement($3, $5);
+        }
+        ;
+
+
         
 type_specifier
         : BOOLEAN_T { $$ = CS_BOOLEAN_TYPE; }

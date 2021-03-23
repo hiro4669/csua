@@ -131,38 +131,15 @@ struct Expression_tag {
 
 /*  Statement */
 
-typedef enum {
-    EXPRESSION_STATEMENT = 1,
-    DECLARATION_STATEMENT,
-    STATEMENT_TYPE_COUNT_PLUS_ONE
-} StatementType;
-
-
-struct Statement_tag {
-    StatementType type;
-    int           line_number;
-    union {
-        Expression   *expression_s;
-        Declaration  *declaration_s;
-    }u;
-
-};
-
-/* Temporary used */
-typedef struct ExpressionList_tag {
-    Expression *expression;
-    struct ExpressionList_tag *next;
-} ExpressionList;
+typedef struct DeclarationList_tag {
+    Declaration                *decl;
+    struct DeclarationList_tag *next;
+} DeclarationList;
 
 typedef struct StatementList_tag {
     Statement *stmt;
     struct StatementList_tag *next;
 } StatementList;
-
-typedef struct DeclarationList_tag {
-    Declaration                *decl;
-    struct DeclarationList_tag *next;
-} DeclarationList;
 
 typedef enum {
     UNDEFINED_BLOCK = 1,
@@ -176,6 +153,13 @@ typedef struct {
     int                end_label;
 } FunctionBlockInfo;
 
+typedef struct {
+    Statement* statement;
+    int        break_label;    /* not used yet */
+    int        continue_label; /* not used yet */
+} StatementBlockInfo;
+
+
 typedef struct Block_tag {
     BlockType         type;
     struct Block_tag *outer_block;
@@ -183,8 +167,39 @@ typedef struct Block_tag {
     DeclarationList  *declaration_list;
     union {
         FunctionBlockInfo function;
+        StatementBlockInfo statement;
     } parent;
 } Block;
+
+typedef enum {
+    EXPRESSION_STATEMENT = 1,
+    DECLARATION_STATEMENT,
+    WHILE_STATEMENT,
+    STATEMENT_TYPE_COUNT_PLUS_ONE
+} StatementType;
+
+typedef struct {
+    Expression *condition;
+    Block      *block;    
+} WhileStatement;
+
+
+struct Statement_tag {
+    StatementType type;
+    int           line_number;
+    union {
+        Expression     *expression_s;
+        Declaration    *declaration_s;
+        WhileStatement while_s; // shold not be pointer
+    }u;
+
+};
+
+/* Temporary used */
+typedef struct ExpressionList_tag {
+    Expression *expression;
+    struct ExpressionList_tag *next;
+} ExpressionList;
 
 struct FunctionDefinition_tag {
     TypeSpecifier  *type;
@@ -226,6 +241,7 @@ char* cs_create_identifier(const char* str);
 
 Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
+Statement* cs_create_while_statement(Expression *cond, Block *block);
 StatementList* cs_create_statement_list(Statement* stmt);
 StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
 ParameterList* cs_create_parameter(CS_BasicType type, char *identifier);
@@ -234,7 +250,6 @@ ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *
 
 Block* cs_open_block();
 Block* cs_close_block(Block *block, StatementList *statement_list);
-
 void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_list, Block *block);
 
 /* interface.c */

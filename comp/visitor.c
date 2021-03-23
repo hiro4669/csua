@@ -302,6 +302,18 @@ static void leave_declstmt(Statement* stmt) {
     fprintf(stderr, "leave declstmt\n");
 }
 
+static void enter_whilestmt(Statement* stmt) {
+    print_depth();
+    fprintf(stderr, "enter whilestatement\n");
+    increment();
+}
+
+static void leave_whilestmt(Statement* stmt) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave whilestatement\n");
+}
+
 
 static void enter_func(FunctionDefinition* func) {
     print_depth();
@@ -327,6 +339,14 @@ static void leave_func(FunctionDefinition* func) {
     fprintf(stderr, "leave function\n");
 }
 
+static void init_visit_stmt_functions(visit_stmt *func_list, size_t size) {
+    for (int i = 0; i < size; ++i) func_list[i] = NULL;    
+}
+
+static void init_visit_expr_functions(visit_expr *func_list, size_t size) {
+    for (int i = 0; i < size; ++i) func_list[i] = NULL;
+}
+
 
 Visitor* create_treeview_visitor() {
     visit_expr* enter_expr_list;
@@ -338,7 +358,21 @@ Visitor* create_treeview_visitor() {
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
-    leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);    
+    leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
+
+
+    init_visit_expr_functions(enter_expr_list, EXPRESSION_KIND_PLUS_ONE);
+    init_visit_expr_functions(leave_expr_list, EXPRESSION_KIND_PLUS_ONE);
+    init_visit_stmt_functions(enter_stmt_list, STATEMENT_TYPE_COUNT_PLUS_ONE);
+    init_visit_stmt_functions(leave_stmt_list, STATEMENT_TYPE_COUNT_PLUS_ONE);
+
+    /*
+    for (int i = 0; i < STATEMENT_TYPE_COUNT_PLUS_ONE; ++i) {
+        enter_stmt_list[i] = NULL;
+        leave_stmt_list[i] = NULL;
+    }
+    */
+
     
     
 
@@ -368,6 +402,7 @@ Visitor* create_treeview_visitor() {
     
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
+    enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
     
     
     
@@ -398,6 +433,7 @@ Visitor* create_treeview_visitor() {
     
     leave_stmt_list[EXPRESSION_STATEMENT]     = leave_exprstmt;
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
+    leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
     
 
     visitor->enter_expr_list = enter_expr_list;

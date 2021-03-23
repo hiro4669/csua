@@ -17,6 +17,7 @@ int main(void) {
     Visitor* visitor = create_treeview_visitor();
 
     printf("--------------\n");
+    printf("-- Function Definition --\n");
     FunctionDefinition* function = compiler->function_list;
     while (function) {
         traverse_func(function, visitor);
@@ -24,7 +25,7 @@ int main(void) {
     }
 
 
-    exit(1);
+    
     /*
     ExpressionList* expr_list = compiler->expr_list;
     while(expr_list) {
@@ -33,10 +34,10 @@ int main(void) {
         expr_list = expr_list->next;
     }
     */
-    
+    printf("--------------\n");
+    printf("-- Statement List --\n");
     StatementList* stmt_list = compiler->stmt_list;
-    while(stmt_list) {
-        printf("type = %d\n", stmt_list->stmt->type);
+    while(stmt_list) {        
         traverse_stmt(stmt_list->stmt, visitor);
         stmt_list = stmt_list->next;
     }
