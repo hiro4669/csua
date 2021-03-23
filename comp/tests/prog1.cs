@@ -51,13 +51,28 @@
 #int i;
 #int j;
 
-#a = 2;
-#int func(int a, double d);
+#j = 2;
+
 
 int func(int a, double d) {
     int i;
     i = 2;
 }
+
+int func2() {
+    int j;
+    j = 3;
+
+}
+
+int func3(int a, double d);
+
+int func4();
+
+while(true) {
+    a = 2;
+}
+
 
 #func(1);
 #print();
