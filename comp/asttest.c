@@ -12,11 +12,19 @@ int main(void) {
     CS_compile(compiler, fin);
 
     printf("temporary end\n");
-    exit(1);
+
     
     Visitor* visitor = create_treeview_visitor();
 
     printf("--------------\n");
+    FunctionDefinition* function = compiler->function_list;
+    while (function) {
+        traverse_func(function, visitor);
+        function = function->next;
+    }
+
+
+    exit(1);
     /*
     ExpressionList* expr_list = compiler->expr_list;
     while(expr_list) {

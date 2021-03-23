@@ -259,14 +259,16 @@ void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_
 
     fd = create_function_definition(type, name, parameter_list, block);
 
+    
+
     if (block) {
         block->type = FUNCTION_BLOCK;
         block->parent.function.function = fd;
-    }
+    }    
 
     compiler = cs_get_current_compiler();
-    if (compiler->function_list) {
-        for (pos = compiler->function_list; pos; pos = pos->next);
+    if (compiler->function_list) {        
+        for (pos = compiler->function_list; pos->next; pos = pos->next);        
         pos->next = fd;
         
     } else {

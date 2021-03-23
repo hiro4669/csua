@@ -23,14 +23,31 @@ void traverse_expr(Expression* expr, Visitor* visitor) {
 }
 
 void traverse_stmt(Statement* stmt, Visitor* visitor) {
+    
     if (stmt) {
         if (visitor->enter_stmt_list[stmt->type] == NULL) {
             fprintf(stderr, "enter->type(%d) is null\n", stmt->type);
             exit(1);
         }
+        
         visitor->enter_stmt_list[stmt->type](stmt);
         traverse_stmt_children(stmt, visitor);
         visitor->leave_stmt_list[stmt->type](stmt);        
+    }
+}
+
+void traverse_func(FunctionDefinition* function, Visitor* visitor) {
+    if (function) {
+        visitor->enter_func(function);        
+        if (function->block) {
+            
+            StatementList* stmt_list = function->block->statement_list;            
+            while (stmt_list) {                
+                traverse_stmt(stmt_list->stmt, visitor);                
+                stmt_list = stmt_list->next;
+            }
+        }
+        visitor->leave_func(function);
     }
 }
 

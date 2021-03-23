@@ -98,9 +98,25 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON { printf("function_definition1 \n"); }
-        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { printf("function definision2 \n"); }
-        | type_specifier IDENTIFIER LP RP block { printf("function definision3\n");}
+        : type_specifier IDENTIFIER LP RP SEMICOLON 
+        { 
+                printf("function_definition1 \n"); 
+                CS_Compiler* compiler = cs_get_current_compiler();
+                cs_function_define($1, $2, NULL, NULL);
+        }
+        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON 
+        { 
+                printf("function definision2 \n"); 
+                CS_Compiler* compiler = cs_get_current_compiler();
+                cs_function_define($1, $2, $4, NULL);
+        }
+        | type_specifier IDENTIFIER LP RP block 
+        { 
+                printf("function definision3\n");
+                CS_Compiler* compiler = cs_get_current_compiler();                
+                cs_function_define($1, $2, NULL, $5);
+
+        }
         | type_specifier IDENTIFIER LP parameter_list RP block 
         { 
                 printf("function definision4 \n"); 
@@ -124,7 +140,11 @@ statement
      */
             $$ = cs_create_expression_statement($1);
         }
-        | declaration_statement { printf("declaration_statement\n"); }
+        | declaration_statement 
+        { 
+                printf("declaration_statement\n"); 
+                $$ = $1;
+        }
 	;
         
 declaration_statement
@@ -168,8 +188,16 @@ argument_list
         ;
 
 statement_list
-        : statement                  { printf("statement_list1\n"); }
-        | statement_list statement   { printf("statement_list2\n"); }
+        : statement                  
+        { 
+                printf("statement_list1\n"); 
+                $$ = cs_create_statement_list($1);
+        }
+        | statement_list statement   
+        { 
+                printf("statement_list2\n"); 
+                $$ = cs_chain_statement_list($1, $2);
+        }
         ;
 
 expression

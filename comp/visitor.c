@@ -303,6 +303,31 @@ static void leave_declstmt(Statement* stmt) {
 }
 
 
+static void enter_func(FunctionDefinition* func) {
+    print_depth();
+    fprintf(stderr, "enter function:");
+    fprintf(stderr, "name(%s), type(%d) ", func->name, func->type->basic_type);
+    if (func->parameter) {
+        fprintf(stderr, "args = ");
+        ParameterList* param = func->parameter;
+        while(param) {
+            fprintf(stderr, "type(%d), name(%s), ", param->type->basic_type, param->name);
+            param = param->next;
+        }
+        fprintf(stderr, "\n");
+    }
+
+    if (!func->block) fprintf(stderr, "\n");
+    increment();
+}
+
+static void leave_func(FunctionDefinition* func) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave function\n");
+}
+
+
 Visitor* create_treeview_visitor() {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
@@ -379,7 +404,10 @@ Visitor* create_treeview_visitor() {
     visitor->leave_expr_list = leave_expr_list;
     visitor->enter_stmt_list = enter_stmt_list;
     visitor->leave_stmt_list = leave_stmt_list;
-            
+
+    visitor->enter_func = enter_func;
+    visitor->leave_func = leave_func;
+    
     
     
 
