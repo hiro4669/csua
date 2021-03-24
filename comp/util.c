@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "csua.h"
 
@@ -46,8 +47,25 @@ Declaration* cs_search_declaration(char *name, Block *block) {
         if (!strcmp(dpos->decl->name, name)) {
             return dpos->decl;
         }
-    }
-
-    
+    }    
     return NULL;
 }
+
+
+DeclarationList* cs_chain_declaration(DeclarationList *decl_list, Declaration* decl) {
+    DeclarationList *pos;
+    DeclarationList* list = cs_create_declaration_list(decl);
+    if (!list) {
+        fprintf(stderr, "cannot create declaration list\n");
+        exit(1);
+    }
+    if (decl_list == NULL) return list;
+
+    for (pos = decl_list; pos->next; pos = pos->next);
+    pos->next = list;
+    list->next = NULL;
+
+    return decl_list;
+
+}
+

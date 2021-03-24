@@ -287,7 +287,15 @@ void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_
         compiler->function_list = fd;
     }
 
+}
 
-
+DeclarationList* cs_create_declaration_list(Declaration* decl) {
+    DeclarationList* list = (DeclarationList*)cs_malloc(sizeof(DeclarationList));
+    if (list) {
+        list->decl = decl;
+        list->next = NULL;
+        return list;
+    } 
+    return NULL;
 }
 

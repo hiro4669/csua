@@ -24,6 +24,10 @@ typedef enum {
     CS_TRUE = 1    
 } CS_Boolean;
 
+typedef enum {
+    CS_INT_TO_DOUBLE = 1,
+    CS_DOUBLE_TO_INT,
+} CS_CastType;
 
 typedef enum {
     CS_BOOLEAN_TYPE,
@@ -68,6 +72,7 @@ typedef enum {
     LOGICAL_AND_EXPRESSION,
     LOGICAL_OR_EXPRESSION,
     ASSIGN_EXPRESSION,
+    CAST_EXPRESSION,
     EXPRESSION_KIND_PLUS_ONE
 } ExpressionKind;
 
@@ -96,6 +101,11 @@ typedef struct {
     Expression *left;
     Expression *right;    
 } BinaryExpression;
+
+typedef struct {
+    CS_CastType ctype;
+    Expression *expr;
+} CastExpression;
 
 typedef enum {
     ASSIGN = 1,
@@ -126,6 +136,7 @@ struct Expression_tag {
         Expression             *logical_not_expression;        
         BinaryExpression       binary_expression;
         AssignmentExpression   assignment_expression;
+        CastExpression         cast_expression;
     } u;
 };
 
@@ -248,6 +259,8 @@ StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt
 ParameterList* cs_create_parameter(CS_BasicType type, char *identifier);
 ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *identifier);
 
+DeclarationList* cs_create_declaration_list(Declaration* decl);
+
 
 Block* cs_open_block();
 Block* cs_close_block(Block *block, StatementList *statement_list);
@@ -263,6 +276,8 @@ void cs_set_current_compiler(CS_Compiler *compiler);
 CS_Compiler* cs_get_current_compiler();
 FunctionDefinition* cs_search_function(char *name);
 Declaration* cs_search_declaration(char *name, Block *block);
+DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* decl);
+
 
 
 #endif /* CSUA_H */
