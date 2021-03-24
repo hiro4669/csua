@@ -20,9 +20,15 @@ struct Visitor_tag {
     visit_func leave_func;
 };
 
-void print_depth();
+struct MeanVisitor_tag {
+    Visitor visitor;
+    CS_Compiler *compiler;
+};
+
 Visitor* create_treeview_visitor();
+MeanVisitor* create_mean_visitor();
 void delete_visitor(Visitor* visitor);
+void delete_mean_visitor(MeanVisitor* visitor);
 void traverse_expr(Expression* expr, Visitor* visitor);
 void traverse_stmt(Statement*  stmt, Visitor* visitor);
 void traverse_func(FunctionDefinition* func, Visitor* visitor);

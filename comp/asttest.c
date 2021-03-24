@@ -14,13 +14,14 @@ int main(void) {
     printf("temporary end\n");
 
     
-    Visitor* visitor = create_treeview_visitor();
+    //Visitor* visitor = create_treeview_visitor();
+    MeanVisitor* visitor = create_mean_visitor();
 
     printf("--------------\n");
     printf("-- Function Definition --\n");
     FunctionDefinition* function = compiler->function_list;
     while (function) {
-        traverse_func(function, visitor);
+        traverse_func(function, (Visitor*)visitor);
         function = function->next;
     }
 
@@ -38,14 +39,15 @@ int main(void) {
     printf("-- Statement List --\n");
     StatementList* stmt_list = compiler->stmt_list;
     while(stmt_list) {        
-        traverse_stmt(stmt_list->stmt, visitor);
+        traverse_stmt(stmt_list->stmt, (Visitor*)visitor);
         stmt_list = stmt_list->next;
     }
     
     
     
     fclose(fin);
-    delete_visitor(visitor);    
+    //delete_visitor((Visitor*)visitor);
+    delete_mean_visitor(visitor);
     CS_delete_compiler(compiler);
     MEM_dump_memory();
     return 0;
