@@ -248,6 +248,7 @@ Expression* cs_create_minus_expression(Expression* operand);
 Expression* cs_create_logical_not_expression(Expression* operand);
 Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, Expression* right);
 Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator aope, Expression* operand);
+Expression* cs_create_cast_expression(CS_CastType ctype, Expression *expr);
 void delete_storage();
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
 char* cs_create_identifier(const char* str);

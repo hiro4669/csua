@@ -114,6 +114,13 @@ Expression* cs_create_assignment_expression(Expression *left, AssignmentOperator
     expr->u.assignment_expression.right = operand;
     return expr;            
 }
+
+Expression* cs_create_cast_expression(CS_CastType ctype, Expression *operand) {
+    Expression* expr = cs_create_expression(CAST_EXPRESSION);
+    expr->u.cast_expression.expr = operand;
+    expr->u.cast_expression.ctype = ctype;
+    return expr;
+}
         
         
 char* cs_create_identifier(const char* str) {
