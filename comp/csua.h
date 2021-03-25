@@ -125,6 +125,7 @@ typedef struct {
 
 struct Expression_tag {
     ExpressionKind kind;
+    TypeSpecifier  *type;
     union {
         double                 double_value;
         int                    int_value;
@@ -265,6 +266,8 @@ DeclarationList* cs_create_declaration_list(Declaration* decl);
 Block* cs_open_block();
 Block* cs_close_block(Block *block, StatementList *statement_list);
 void cs_function_define(CS_BasicType type, char *name, ParameterList *parameter_list, Block *block);
+
+TypeSpecifier* cs_create_type_specifier(CS_BasicType type);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();

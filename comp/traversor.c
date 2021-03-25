@@ -15,9 +15,9 @@ void traverse_expr(Expression* expr, Visitor* visitor) {
             exit(1);
         }
 
-        visitor->enter_expr_list[expr->kind](expr);
+        visitor->enter_expr_list[expr->kind](expr, visitor);
         traverse_expr_children(expr, visitor);
-        visitor->leave_expr_list[expr->kind](expr);
+        visitor->leave_expr_list[expr->kind](expr, visitor);
 
     }    
 }
@@ -30,15 +30,15 @@ void traverse_stmt(Statement* stmt, Visitor* visitor) {
             exit(1);
         }
                 
-        visitor->enter_stmt_list[stmt->type](stmt);
+        visitor->enter_stmt_list[stmt->type](stmt, visitor);
         traverse_stmt_children(stmt, visitor);
-        visitor->leave_stmt_list[stmt->type](stmt);        
+        visitor->leave_stmt_list[stmt->type](stmt, visitor);
     }
 }
 
 void traverse_func(FunctionDefinition* function, Visitor* visitor) {
     if (function) {
-        visitor->enter_func(function);        
+        visitor->enter_func(function, visitor);
         if (function->block) {
             
             StatementList* stmt_list = function->block->statement_list;            
@@ -47,7 +47,7 @@ void traverse_func(FunctionDefinition* function, Visitor* visitor) {
                 stmt_list = stmt_list->next;
             }
         }
-        visitor->leave_func(function);
+        visitor->leave_func(function, visitor);
     }
 }
 

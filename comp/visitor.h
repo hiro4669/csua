@@ -4,9 +4,15 @@
 
 #include "csua.h"
 
+/*
 typedef void (*visit_expr)(Expression* expr);
 typedef void (*visit_stmt)(Statement*  stmt);
 typedef void (*visit_func)(FunctionDefinition* function);
+*/
+
+typedef void (*visit_expr)(Expression* expr, Visitor* visitor);
+typedef void (*visit_stmt)(Statement*  stmt, Visitor* visitor);
+typedef void (*visit_func)(FunctionDefinition* function, Visitor* visitor);
 
 
 struct Visitor_tag {
@@ -21,8 +27,9 @@ struct Visitor_tag {
 };
 
 struct MeanVisitor_tag {
-    Visitor visitor;
+    Visitor      visitor;
     CS_Compiler *compiler;
+    Block       *block;
 };
 
 Visitor* create_treeview_visitor();

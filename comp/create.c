@@ -139,7 +139,7 @@ Statement* cs_create_expression_statement(Expression* expr) {
 }
 
 
-static TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
+TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     TypeSpecifier* ts = (TypeSpecifier*)cs_malloc(sizeof(TypeSpecifier));
     ts->basic_type = type;
 

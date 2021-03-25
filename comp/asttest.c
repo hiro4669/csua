@@ -42,6 +42,14 @@ int main(void) {
         traverse_stmt(stmt_list->stmt, (Visitor*)visitor);
         stmt_list = stmt_list->next;
     }
+
+
+    // for decl test
+    DeclarationList* pos;
+    for (pos = compiler->decl_list; pos; pos = pos->next) {
+        printf("name(%s), type(%d)\n", pos->decl->name, pos->decl->type->basic_type);
+    }
+
     
     
     
