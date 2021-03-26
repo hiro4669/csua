@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "visitor.h"
 #include "../memory/MEM.h"
@@ -13,7 +14,7 @@ static void decrement() {
     depth--;
 }
 
-void print_depth() {
+static void print_depth() {
     for (int i = 0; i < depth; ++i) {
         fprintf(stderr, "  ");
     }
@@ -22,16 +23,15 @@ void print_depth() {
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter castexpr\n");
-    //fprintf(stderr, "enter boolexpr : %d\n", expr->u.boolean_value);
     increment();
 }
 
 static void leave_castexpr(Expression* expr, Visitor* visitor) {
     decrement();
-    print_depth();
-    //fprintf(stderr, "leave boolexpr\n");
+    print_depth();    
     fprintf(stderr, "leave castexpr\n");
 }
+
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
     print_depth();
@@ -42,6 +42,7 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave boolexpr\n");
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
 }
 
 
@@ -54,6 +55,8 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave intexpr\n");
+
+    expr->type = cs_create_type_specifier(CS_INT_TYPE);
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
@@ -64,7 +67,8 @@ static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave doubleexpr\n");            
+    fprintf(stderr, "leave doubleexpr\n");
+    expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
@@ -75,7 +79,18 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
-    fprintf(stderr, "leave identifierexpr\n");            
+    fprintf(stderr, "leave identifierexpr\n");
+        
+    Declaration *decl = cs_search_declaration(expr->u.identifier.name, ((MeanVisitor*)visitor)->block);
+    if (decl) {
+        expr->type = decl->type;        
+
+    } else {
+        fprintf(stderr, "Cannot find identifier type %s\n", expr->u.identifier.name);
+        exit(1);
+    }
+
+
 }
 
 
@@ -267,6 +282,38 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lognotexpr\n");
 }
 
+static Expression* assignment_type_check(TypeSpecifier *ltype, Expression *expr, Visitor *visitor) {
+    printf("assignment_type_check\n");
+    if (ltype == NULL) {
+        fprintf(stderr, "ltype is NULL\n");
+        exit(1);
+    }
+
+    if (expr->type == NULL) {
+        fprintf(stderr, "rtype is NULL\n");
+        exit(1);
+    }
+
+    if (ltype->basic_type == expr->type->basic_type) {
+        return expr;
+    } else if (ltype->basic_type == CS_INT_TYPE && expr->type->basic_type == CS_DOUBLE_TYPE) {
+        printf("double to int\n");
+        Expression *cast_expr = cs_create_cast_expression(CS_DOUBLE_TO_INT, expr);
+        cast_expr->type = cs_create_type_specifier(CS_INT_TYPE);
+        return cast_expr;
+    } else if (ltype->basic_type == CS_DOUBLE_TYPE && expr->type->basic_type == CS_INT_TYPE) {
+        printf("int to double\n");
+        Expression *cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        return cast_expr;
+    } else {
+        fprintf(stderr, "cast error\n");
+        exit(1);
+    }
+
+    return expr;
+}
+
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter assignexpr : %d \n", expr->u.assignment_expression.aope);
@@ -276,6 +323,11 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave assignexpr\n");
+    Expression* left = expr->u.assignment_expression.left;
+    Expression* right = expr->u.assignment_expression.right;
+
+    expr->u.assignment_expression.right = assignment_type_check(left->type, right, visitor);
+    expr->type = left->type;
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
@@ -306,6 +358,16 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "enter declstmt name=%s, type=%d:\n", 
             stmt->u.declaration_s->name,
             stmt->u.declaration_s->type->basic_type);
+
+    MeanVisitor* mvisitor = (MeanVisitor*)visitor;
+    CS_Compiler* compiler = mvisitor->compiler;
+    if (mvisitor->block) {
+        // Todo
+    } else {        
+        compiler->decl_list = cs_chain_declaration(compiler->decl_list, stmt->u.declaration_s);
+    }
+
+
             
     increment(); 
 }
@@ -362,13 +424,22 @@ static void init_visit_expr_functions(visit_expr *func_list, size_t size) {
 }
 
 
-Visitor* create_treeview_visitor() {
+MeanVisitor* create_mean_visitor() {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
     
-    Visitor* visitor = MEM_malloc(sizeof(Visitor));
+    //Visitor* visitor = MEM_malloc(sizeof(Visitor));
+    MeanVisitor* visitor = MEM_malloc(sizeof(MeanVisitor));    
+    visitor->compiler = cs_get_current_compiler();
+    visitor->block = NULL;
+    if (!visitor->compiler) {
+        fprintf(stderr, "Compiler is NULL\n");
+        exit(1);
+    }
+    
+
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
@@ -380,14 +451,6 @@ Visitor* create_treeview_visitor() {
     init_visit_stmt_functions(enter_stmt_list, STATEMENT_TYPE_COUNT_PLUS_ONE);
     init_visit_stmt_functions(leave_stmt_list, STATEMENT_TYPE_COUNT_PLUS_ONE);
 
-    /*
-    for (int i = 0; i < STATEMENT_TYPE_COUNT_PLUS_ONE; ++i) {
-        enter_stmt_list[i] = NULL;
-        leave_stmt_list[i] = NULL;
-    }
-    */
-
-    
     
 
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
@@ -418,8 +481,6 @@ Visitor* create_treeview_visitor() {
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
-    
-
     
     
     
@@ -454,13 +515,13 @@ Visitor* create_treeview_visitor() {
     leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
     
 
-    visitor->enter_expr_list = enter_expr_list;
-    visitor->leave_expr_list = leave_expr_list;
-    visitor->enter_stmt_list = enter_stmt_list;
-    visitor->leave_stmt_list = leave_stmt_list;
+    ((Visitor*)visitor)->enter_expr_list = enter_expr_list;
+    ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
+    ((Visitor*)visitor)->enter_stmt_list = enter_stmt_list;
+    ((Visitor*)visitor)->leave_stmt_list = leave_stmt_list;
 
-    visitor->enter_func = enter_func;
-    visitor->leave_func = leave_func;
+    ((Visitor*)visitor)->enter_func = enter_func;
+    ((Visitor*)visitor)->leave_func = leave_func;
     
     
     
@@ -468,10 +529,11 @@ Visitor* create_treeview_visitor() {
     return visitor;
 }
 
-void delete_visitor(Visitor* visitor) {
-    MEM_free(visitor->enter_expr_list);
-    MEM_free(visitor->leave_expr_list);
-    MEM_free(visitor->enter_stmt_list);
-    MEM_free(visitor->leave_stmt_list);
+void delete_mean_visitor(MeanVisitor* visitor) {
+    MEM_free(((Visitor*)visitor)->enter_expr_list);
+    MEM_free(((Visitor*)visitor)->leave_expr_list);
+    MEM_free(((Visitor*)visitor)->enter_stmt_list);
+    MEM_free(((Visitor*)visitor)->leave_stmt_list);
     MEM_free(visitor);
 }
+

@@ -107,6 +107,10 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             traverse_expr(expr->u.function_call_expression.function, visitor);
             break;
         }
+        case CAST_EXPRESSION: {
+            traverse_expr(expr->u.cast_expression.expr, visitor);
+            break;
+        }
         case LOGICAL_AND_EXPRESSION:
         case LOGICAL_OR_EXPRESSION:            
         case LT_EXPRESSION:
