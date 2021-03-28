@@ -17,7 +17,7 @@ static void init_storage() {
     }
 }
 
-static void* cs_malloc(size_t size) {
+void* cs_malloc(size_t size) {
     init_storage();
     return MEM_storage_malloc(storage, size);
 }
@@ -25,6 +25,9 @@ static void* cs_malloc(size_t size) {
 static Expression* cs_create_expression(ExpressionKind ekind) {
     Expression* expr = (Expression*)cs_malloc(sizeof(Expression));    
     expr->kind = ekind;
+    expr->type = NULL;
+    expr->line_number = cs_get_current_compiler()->current_line;
+
     return expr;
 }
 

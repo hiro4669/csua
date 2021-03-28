@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "csua.h"
 #include "visitor.h"
 #include "../memory/MEM.h"
 
@@ -17,6 +19,29 @@ static void decrement() {
 static void print_depth() {
     for (int i = 0; i < depth; ++i) {
         fprintf(stderr, "  ");
+    }
+}
+
+
+static void add_check_log(const char *str, MeanVisitor* mvisitor) {
+    MeanCheckLog* log = (MeanCheckLog*)cs_malloc(sizeof(MeanCheckLog));
+    log->next = NULL;
+    log->log_str = (char*)cs_malloc(strlen(str) + 1);
+    strcpy(log->log_str, str);
+    MeanCheckLog *p;
+    if (mvisitor->mean_log == NULL) {
+        mvisitor->mean_log = log;
+        return;
+    } else {
+        for (p = mvisitor->mean_log; p->next; p = p->next);
+        p->next = log;
+    }
+}
+
+void show_mean_error(MeanVisitor *mvisitor) {
+    MeanCheckLog *p;
+    for (p = mvisitor->mean_log; p; p = p->next) {
+        fprintf(stderr, "%s\n", p->log_str);
     }
 }
 
@@ -87,7 +112,9 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
 
     } else {
         fprintf(stderr, "Cannot find identifier type %s\n", expr->u.identifier.name);
-        exit(1);
+        char messages[50];
+        sprintf(messages, "%d: Cannot find identifier %s", expr->line_number, expr->u.identifier.name);
+        add_check_log(messages, (MeanVisitor*)visitor);
     }
 
 
@@ -286,12 +313,18 @@ static Expression* assignment_type_check(TypeSpecifier *ltype, Expression *expr,
     printf("assignment_type_check\n");
     if (ltype == NULL) {
         fprintf(stderr, "ltype is NULL\n");
-        exit(1);
+        char messages[50];        
+        sprintf(messages, "%d: ltype is NULL", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return expr;
     }
 
     if (expr->type == NULL) {
-        fprintf(stderr, "rtype is NULL\n");
-        exit(1);
+        fprintf(stderr, "rtype is NULL\n");        
+        char messages[50];        
+        sprintf(messages, "%d: rtype is NULL", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);         
+        return expr;
     }
 
     if (ltype->basic_type == expr->type->basic_type) {
@@ -434,6 +467,8 @@ MeanVisitor* create_mean_visitor() {
     MeanVisitor* visitor = MEM_malloc(sizeof(MeanVisitor));    
     visitor->compiler = cs_get_current_compiler();
     visitor->block = NULL;
+    visitor->mean_log = NULL;
+
     if (!visitor->compiler) {
         fprintf(stderr, "Compiler is NULL\n");
         exit(1);

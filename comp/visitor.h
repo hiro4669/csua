@@ -15,6 +15,11 @@ typedef void (*visit_stmt)(Statement*  stmt, Visitor* visitor);
 typedef void (*visit_func)(FunctionDefinition* function, Visitor* visitor);
 
 
+typedef struct MeanCheckLog_tag {
+    char                    *log_str;
+    struct MeanCheckLog_tag *next;
+} MeanCheckLog;
+
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
@@ -27,9 +32,10 @@ struct Visitor_tag {
 };
 
 struct MeanVisitor_tag {
-    Visitor      visitor;
-    CS_Compiler *compiler;
-    Block       *block;
+    Visitor       visitor;
+    CS_Compiler  *compiler;
+    MeanCheckLog *mean_log;
+    Block        *block;
 };
 
 Visitor* create_treeview_visitor();

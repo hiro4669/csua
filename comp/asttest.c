@@ -63,6 +63,10 @@ int main(void) {
         stmt_list = stmt_list->next;
     }
 
+    printf("---------------------\n");
+    printf("-- Errors --\n");
+    show_mean_error(mvisitor);
+
 
 
 

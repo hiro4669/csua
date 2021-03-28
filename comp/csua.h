@@ -126,6 +126,7 @@ typedef struct {
 struct Expression_tag {
     ExpressionKind kind;
     TypeSpecifier  *type;
+    int            line_number;
     union {
         double                 double_value;
         int                    int_value;
@@ -233,11 +234,14 @@ struct CS_Compiler_tag {
     Block           *current_block;
     int             function_count;
     FunctionDefinition *function_list;
+    int             current_line;
 };
 
 
 /* create.c */
 //Expression* cs_create_expression(ExpressionKind ekind);
+void* cs_malloc(size_t size);
+
 Expression* cs_create_int_expression(int v);
 Expression* cs_create_double_expression(double v);
 Expression* cs_create_boolean_expression(CS_Boolean v);
@@ -281,6 +285,9 @@ CS_Compiler* cs_get_current_compiler();
 FunctionDefinition* cs_search_function(char *name);
 Declaration* cs_search_declaration(char *name, Block *block);
 DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* decl);
+
+/* meanvisitor.c */
+void show_mean_error(MeanVisitor *mvisitor);
 
 
 
