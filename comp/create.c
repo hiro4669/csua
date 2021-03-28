@@ -75,6 +75,7 @@ Expression* cs_create_boolean_expression(CS_Boolean v) {
 Expression* cs_create_identifier_expression(char* identifier) {
     Expression* expr = cs_create_expression(IDENTIFIER_EXPRESSION);
     expr->u.identifier.name = identifier;
+    expr->u.identifier.is_function = CS_FALSE;
     return expr;
 }
 

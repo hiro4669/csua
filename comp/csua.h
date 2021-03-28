@@ -94,7 +94,12 @@ typedef struct {
 } FunctionCallExpression;
 
 typedef struct {
-    char *name;    
+    char *name;
+    CS_Boolean is_function;
+    union {
+        Declaration        *decl;
+        FunctionDefinition *func;
+    }u;
 } IdentifierExpression;
 
 typedef struct {
