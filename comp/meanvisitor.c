@@ -22,6 +22,23 @@ static void print_depth() {
     }
 }
 
+static const char* get_type_name(CS_BasicType type) {
+    switch(type) {
+        case CS_BOOLEAN_TYPE: {
+            return "boolean";            
+        }
+        case CS_INT_TYPE: {
+            return "int";
+        }
+        case CS_DOUBLE_TYPE: {
+            return "double";            
+        }
+        default: {
+            return "untyped";
+        }
+    }
+}
+
 
 static void add_check_log(const char *str, MeanVisitor* mvisitor) {
     MeanCheckLog* log = (MeanCheckLog*)cs_malloc(sizeof(MeanCheckLog));
@@ -108,14 +125,25 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
         
     Declaration *decl = cs_search_declaration(expr->u.identifier.name, ((MeanVisitor*)visitor)->block);
     if (decl) {
-        expr->type = decl->type;        
-
-    } else {
-        fprintf(stderr, "Cannot find identifier type %s\n", expr->u.identifier.name);
-        char messages[50];
-        sprintf(messages, "%d: Cannot find identifier %s", expr->line_number, expr->u.identifier.name);
-        add_check_log(messages, (MeanVisitor*)visitor);
+        expr->type = decl->type;
+        expr->u.identifier.u.decl = decl;
+        expr->u.identifier.is_function = CS_FALSE;
+        return;
     }
+
+    FunctionDefinition *func = cs_search_function(expr->u.identifier.name);
+    if (func) {
+        expr->type = func->type;
+        expr->u.identifier.u.func = func;
+        expr->u.identifier.is_function = CS_TRUE;
+        return;
+    }
+    
+    
+    fprintf(stderr, "Cannot find identifier type %s\n", expr->u.identifier.name);
+    char messages[50];
+    sprintf(messages, "%d: Cannot find identifier %s", expr->line_number, expr->u.identifier.name);
+    add_check_log(messages, (MeanVisitor*)visitor);    
 
 
 }
@@ -265,6 +293,27 @@ static void leave_lorexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave lorexpr\n");
 }
 
+static void incdec_typecheck(Expression* expr, Visitor* visitor) {
+    Expression* incdec_expr = expr->u.inc_dec;
+    char messages[50];
+    if (incdec_expr->type == NULL) {
+        sprintf(messages, "%d: Cannot find type for inc/dec", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return;
+    }
+
+    if (incdec_expr->type->basic_type != CS_INT_TYPE) {
+        sprintf(messages, "%d: Type cannot be allowed for ++ or -- %s",
+            expr->line_number,
+            get_type_name(incdec_expr->type->basic_type));
+
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return; 
+    }
+    
+    expr->type = incdec_expr->type;
+}
+
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter incexpr : ++ \n");
@@ -274,6 +323,7 @@ static void leave_incexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave incexpr\n");
+    incdec_typecheck(expr, visitor);
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
@@ -285,6 +335,7 @@ static void leave_decexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave decexpr\n");
+    incdec_typecheck(expr, visitor);
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
@@ -296,6 +347,19 @@ static void leave_minusexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave minusexpr\n");
+
+    if (expr->u.minus_expression->type->basic_type != CS_INT_TYPE &&
+        expr->u.minus_expression->type->basic_type != CS_DOUBLE_TYPE) {
+        char messages[50];
+        sprintf(messages, "%d: %s is not int or double\n", 
+            expr->line_number,
+            get_type_name(expr->u.minus_expression->type->basic_type));
+
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return;
+    }
+
+    expr->type = expr->u.minus_expression->type;
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
@@ -372,6 +436,7 @@ static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave function call\n");
+    expr->type = expr->u.function_call_expression.function->type;
 }
 
 /* For statement */
