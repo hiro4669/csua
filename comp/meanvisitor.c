@@ -371,6 +371,19 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave lognotexpr\n");
+
+    if (expr->u.logical_not_expression->type->basic_type != CS_BOOLEAN_TYPE) {
+        char messages[50];
+        sprintf(messages, "%d: %s is not in\n", 
+            expr->line_number,
+            get_type_name(expr->u.logical_not_expression->type->basic_type));
+
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return;
+    }
+
+    expr->type = expr->u.logical_not_expression->type;
+    return;
 }
 
 static Expression* assignment_type_check(TypeSpecifier *ltype, Expression *expr, Visitor *visitor) {
