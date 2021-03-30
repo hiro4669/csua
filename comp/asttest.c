@@ -67,6 +67,8 @@ int main(void) {
     printf("-- Errors --\n");
     show_mean_error(mvisitor);
 
+    //printf(">>>>>>>>>>>>>>>>\n");
+    //printf("current_block = %p\n", compiler->current_block);
 
 
 
