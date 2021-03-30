@@ -21,7 +21,7 @@ void print_depth() {
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
     print_depth();
-    fprintf(stderr, "enter castexpr\n");
+    fprintf(stderr, "enter castexpr : %d\n", expr->u.cast_expression.ctype);
     //fprintf(stderr, "enter boolexpr : %d\n", expr->u.boolean_value);
     increment();
 }

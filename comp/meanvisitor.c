@@ -6,6 +6,20 @@
 #include "visitor.h"
 #include "../memory/MEM.h"
 
+
+#define cs_is_type(type, cs_type) \
+  ((type)->basic_type == (cs_type))
+
+#define cs_is_int(type) \
+    (cs_is_type(type, CS_INT_TYPE))
+#define cs_is_double(type) \
+    (cs_is_type(type, CS_DOUBLE_TYPE))
+#define cs_is_boolean(type) \
+    (cs_is_type(type, CS_BOOLEAN_TYPE))
+
+#define cs_same_type(type1, type2) \
+    ((type1)->basic_type == (type2)->basic_type)
+
 static int depth = 0;
 
 static void increment() {
@@ -144,10 +158,77 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
     char messages[50];
     sprintf(messages, "%d: Cannot find identifier %s", expr->line_number, expr->u.identifier.name);
     add_check_log(messages, (MeanVisitor*)visitor);    
-
-
 }
 
+
+/* Arithmetic expressions */
+
+static CS_Boolean check_nulltype_binary_expression(Expression* expr, Visitor* visitor) {
+    CS_Boolean result = CS_TRUE;
+
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    if (left->type == NULL) {
+        char messages[100];
+        sprintf(messages, "%d: Cannot find left expr type", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);
+        result = CS_FALSE;
+    }
+
+    if (right->type == NULL) {
+        char messages[100];
+        sprintf(messages, "%d: Cannot find right expr type", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);
+        result = CS_FALSE;
+    }
+    return result;
+}
+
+static void check_arithmetic_binary_expression(Expression* expr, Visitor* visitor) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    
+
+    if (!check_nulltype_binary_expression(expr, visitor)) {
+        return;
+    }
+
+    if (cs_is_int(left->type) && cs_is_int(right->type)) {
+        expr->type = cs_create_type_specifier(CS_INT_TYPE);        
+        return;
+    }
+
+    if (cs_is_int(left->type) && cs_is_double(right->type)) {
+        Expression *cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.left = cast_expr;
+        expr->type = expr->u.binary_expression.left->type;        
+        return;
+    }
+
+    if (cs_is_double(left->type) && cs_is_int(right->type)) {    
+        Expression *cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, right);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.right = cast_expr;
+        expr->type = left->type;
+        return;
+    }
+
+    if (cs_is_double(left->type) && cs_is_double(right->type)) {
+        expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        return;
+    }
+
+    /* otherwise error */
+    char messages[50];
+    sprintf(messages, "%d: %s and %s cannot be calculated as arithmetic expressions\n", 
+            expr->line_number, 
+            get_type_name(left->type->basic_type), 
+            get_type_name(right->type->basic_type));
+    add_check_log(messages, (MeanVisitor*)visitor);
+
+    return;
+}
 
 static void enter_addexpr(Expression* expr, Visitor* visitor) {
     print_depth();
@@ -158,6 +239,8 @@ static void leave_addexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave addexpr\n");
+
+    check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
@@ -169,28 +252,32 @@ static void leave_subexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave subexpr\n");
+
+    check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter mulexpr : *\n");
-    increment();
+    increment();    
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave mulexpr\n");
+    check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter divexpr : /\n");
-    increment();
+    increment();    
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave divexpr\n");
+    check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
@@ -202,8 +289,52 @@ static void leave_modexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave modexpr\n");
+    check_arithmetic_binary_expression(expr, visitor);
 }
 
+
+/* Logical expressions */
+
+static void unacceptable_type_binary_expr(Expression* expr, Visitor* visitor) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+    char message[100];
+    sprintf(message, "%d: type mismatch in binary expression left:%s, right:%s", 
+            expr->line_number, 
+            get_type_name(left->type->basic_type),
+            get_type_name(right->type->basic_type));
+    
+    add_check_log(message, (MeanVisitor*)visitor);
+}
+
+static void check_compare_expression(Expression* expr, Visitor* visitor) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+
+    if (!check_nulltype_binary_expression(expr, visitor)) {
+        return;
+    }
+
+    if (cs_same_type(left->type, right->type)) {
+        //expr->type = cs_create_type_specifier(left->type->basic_type);
+        expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
+        return;
+    }
+    if (cs_is_int(left->type) && cs_is_double(right->type)) {
+        Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.left = cast_expr;
+        return;
+    }
+
+    if (cs_is_double(left->type) && cs_is_int(right->type)) {
+        Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        expr->u.binary_expression.right = cast_expr;
+        return;
+    }
+    unacceptable_type_binary_expr(expr, visitor);   
+}
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
     print_depth();
@@ -214,6 +345,7 @@ static void leave_gtexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave gtexpr\n");
+    check_compare_expression(expr, visitor);
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
@@ -225,6 +357,7 @@ static void leave_geexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave geexpr\n");
+    check_compare_expression(expr, visitor);
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
@@ -236,6 +369,7 @@ static void leave_ltexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave ltexpr\n");
+    check_compare_expression(expr, visitor);
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
@@ -247,6 +381,29 @@ static void leave_leexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave leexpr\n");
+    check_compare_expression(expr, visitor);
+}
+
+static void add_type_mismatch(CS_BasicType ltype, CS_BasicType rtype, int line_number, Visitor* visitor) {
+    char messages[100];
+    sprintf(messages, "%d: type mismatched for equality left:%s, right:%s",
+        line_number,
+        get_type_name(ltype),
+        get_type_name(rtype));
+    add_check_log(messages, (MeanVisitor*)visitor);
+}
+
+static void check_equality_binary_expression(Expression* expr, Visitor* visitor) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;
+
+    if (cs_is_boolean(left->type) && !cs_is_boolean(right->type)) {
+        add_type_mismatch(left->type->basic_type, right->type->basic_type, expr->line_number, visitor);       
+    } else if (!cs_is_boolean(left->type) && cs_is_boolean(right->type)) {
+        add_type_mismatch(left->type->basic_type, right->type->basic_type, expr->line_number, visitor);
+    } else {
+        check_compare_expression(expr, visitor);
+    }
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
@@ -258,6 +415,8 @@ static void leave_eqexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave eqexpr\n");
+    check_equality_binary_expression(expr, visitor);
+
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
@@ -269,6 +428,23 @@ static void leave_neexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave neexpr\n");
+    check_equality_binary_expression(expr, visitor);
+}
+
+
+static void check_logical_and_or(Expression* expr, Visitor* visitor) {
+    Expression* left  = expr->u.binary_expression.left;
+    Expression* right = expr->u.binary_expression.right;    
+
+    if (!cs_is_boolean(left->type) || !cs_is_boolean(right->type)) {
+        char messages[100];
+        sprintf(messages, "%d: type mismatched for logical and/or left:%s, right:%s", 
+            expr->line_number,
+            get_type_name(left->type->basic_type),
+            get_type_name(right->type->basic_type));
+
+        add_check_log(messages, (MeanVisitor*)visitor);
+    }
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
