@@ -140,6 +140,7 @@ static Statement* cs_create_statement(StatementType type) {
     //Expression* expr = (Expression*)cs_malloc(sizeof(Expression));   
     Statement* stmt = (Statement*)cs_malloc(sizeof(Statement));
     stmt->type = type;
+    stmt->line_number = cs_get_current_compiler()->current_line;
     return stmt;    
 }
 
@@ -157,7 +158,7 @@ TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     return ts;
 }
 
-static Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
+Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
     Declaration* decl = (Declaration*)cs_malloc(sizeof(Declaration));
     decl->type = cs_create_type_specifier(type);
     decl->name = name;

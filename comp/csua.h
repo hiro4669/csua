@@ -270,6 +270,7 @@ StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt
 ParameterList* cs_create_parameter(CS_BasicType type, char *identifier);
 ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *identifier);
 
+Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer);
 DeclarationList* cs_create_declaration_list(Declaration* decl);
 
 
