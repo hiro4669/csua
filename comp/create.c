@@ -86,9 +86,10 @@ Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc
 }
 
 // args is argument not yet
-Expression* cs_create_function_call_expression(Expression* function, void* args) {
+Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args) {
     Expression* expr = cs_create_expression(FUNCTION_CALL_EXPRESSION);
     expr->u.function_call_expression.function = function;
+    expr->u.function_call_expression.args = args;
     return expr;
 }
 
@@ -309,5 +310,21 @@ DeclarationList* cs_create_declaration_list(Declaration* decl) {
         return list;
     } 
     return NULL;
+}
+
+ArgumentList* cs_create_argument_list(Expression* expr) {
+    ArgumentList* list = NULL;
+
+    list = (ArgumentList*)cs_malloc(sizeof(ArgumentList));
+    list->expression = expr;
+    list->next = NULL;
+    return list;
+}
+
+ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr) {
+    ArgumentList* pos;
+    for (pos = list; pos->next; pos = pos->next);
+    pos->next = cs_create_argument_list(expr);
+    return list;    
 }
 

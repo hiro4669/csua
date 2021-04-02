@@ -565,6 +565,36 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
     expr->type = left->type;
 }
 
+static Expression* check_argument(TypeSpecifier* def_type, Expression* arg, Visitor* visitor) {
+    if (def_type->basic_type == arg->type->basic_type) {
+        // nothing to do
+        fprintf(stderr, "nothing to do\n");
+        return arg;
+    }
+
+    if (cs_is_int(def_type) && cs_is_double(arg->type)) {
+        Expression* cast_expr = cs_create_cast_expression(CS_DOUBLE_TO_INT, arg);
+        cast_expr->type = cs_create_type_specifier(CS_INT_TYPE);
+        return cast_expr;        
+    }
+    if (cs_is_double(def_type) && cs_is_int(arg->type)) {
+        Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, arg);
+        cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+        return cast_expr;
+    }
+
+    // error
+    char messages[100];
+    sprintf(messages, "%d: cast mismatch left = %s, right = %s",
+            arg->line_number,
+            get_type_name(def_type->basic_type),
+            get_type_name(arg->type->basic_type));
+    add_check_log(messages, (MeanVisitor*)visitor);
+
+
+    return arg;
+}
+
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     increment(); 
@@ -573,6 +603,47 @@ static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     expr->type = expr->u.function_call_expression.function->type;
+
+    fprintf(stderr, "type = %d\n", expr->u.function_call_expression.function->kind);
+
+    if (expr->u.function_call_expression.function->kind == IDENTIFIER_EXPRESSION) {
+        Expression* ident_expr = expr->u.function_call_expression.function;
+        FunctionDefinition* func = ident_expr->u.identifier.u.func;
+        fprintf(stderr, "func name = %s\n", func->name);
+        ParameterList* pos;
+        ArgumentList* arg_pos;
+        int param_count = 0;
+        for (pos = func->parameter; pos; pos = pos->next) {        
+            fprintf(stderr, "name = %s, type=%d \n", pos->name, pos->type->basic_type);
+            param_count++;
+        }
+        int arg_count = 0;
+        for (arg_pos = expr->u.function_call_expression.args; arg_pos; arg_pos = arg_pos->next) {
+            fprintf(stderr, "expr type = %d\n", arg_pos->expression->type->basic_type);
+            arg_count++;
+        }
+
+        if (param_count != arg_count) {
+            char messages[50];
+            sprintf(messages, "%d: The number of arguments does not match", expr->line_number);
+            add_check_log(messages, (MeanVisitor*)visitor);
+            return;
+        }
+        int i;
+        for (i = 0, pos = func->parameter, 
+            arg_pos = expr->u.function_call_expression.args; i < param_count; ++i) {
+                arg_pos->expression = check_argument(pos->type, arg_pos->expression, visitor);
+
+            pos = pos->next;
+            arg_pos = arg_pos->next;
+        }
+    } else {
+        char messages[50];
+        sprintf(messages, "%d: The function cannot be invoked", expr->line_number);
+        add_check_log(messages, (MeanVisitor*)visitor);
+        return;
+
+    }
 }
 
 /* For statement */

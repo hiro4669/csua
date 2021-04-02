@@ -73,6 +73,7 @@
                  additive_expression multiplicative_expression unary_expression
                  postfix_expression primary_expression
                  
+%type <argument_list> argument_list                 
 %type <block> block
 %type <statement_list> statement_list
 %type <parameter_list> parameter_list                 
@@ -193,9 +194,14 @@ parameter_list
 argument_list
         : assignment_expression 
         { 
-                printf("argument_list1\n");                 
+                printf("argument_list1\n");
+                $$ = cs_create_argument_list($1);
         }
-        | argument_list COMMA assignment_expression { printf("argument_list2\n");}
+        | argument_list COMMA assignment_expression 
+        { 
+                printf("argument_list2\n");
+                $$ = cs_chain_argument_list($1, $3);
+        }
         ;
 
 statement_list
@@ -282,7 +288,7 @@ unary_expression
 postfix_expression
         : primary_expression
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
-        | postfix_expression LP argument_list RP { $$ = cs_create_function_call_expression($1, NULL); /* change NULL*/ }
+        | postfix_expression LP argument_list RP { $$ = cs_create_function_call_expression($1, $3); /* change NULL*/ }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
         ;

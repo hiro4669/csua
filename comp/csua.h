@@ -90,7 +90,8 @@ typedef struct ArgumentList_tag {
 
 
 typedef struct {
-    Expression  *function;    
+    Expression   *function;    
+    ArgumentList *args;
 } FunctionCallExpression;
 
 typedef struct {
@@ -252,7 +253,7 @@ Expression* cs_create_double_expression(double v);
 Expression* cs_create_boolean_expression(CS_Boolean v);
 Expression* cs_create_identifier_expression(char* identifier);
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec);
-Expression* cs_create_function_call_expression(Expression* function, void* args);
+Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args);
 Expression* cs_create_minus_expression(Expression* operand);
 Expression* cs_create_logical_not_expression(Expression* operand);
 Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, Expression* right);
@@ -272,6 +273,9 @@ ParameterList* cs_chain_parameter(ParameterList *list, CS_BasicType type, char *
 
 Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer);
 DeclarationList* cs_create_declaration_list(Declaration* decl);
+
+ArgumentList* cs_create_argument_list(Expression* expr);
+ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr);
 
 
 Block* cs_open_block();
