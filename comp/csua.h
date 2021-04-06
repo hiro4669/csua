@@ -9,6 +9,7 @@
 #define _CSUA_H_
 #include <stdio.h>
 #include "../memory/MEM.h"
+#include "../svm/svm.h"
 
 typedef struct Expression_tag Expression;
 typedef struct Visitor_tag Visitor;
@@ -19,21 +20,25 @@ typedef struct FunctionDefinition_tag FunctionDefinition;
 typedef struct TypeSpecifier_tag TypeSpecifier;
 typedef struct Statement_tag Statement;
 
+/*
 typedef enum {
     CS_FALSE = 0,
     CS_TRUE = 1    
 } CS_Boolean;
+*/
 
 typedef enum {
     CS_INT_TO_DOUBLE = 1,
     CS_DOUBLE_TO_INT,
 } CS_CastType;
 
+/*
 typedef enum {
     CS_BOOLEAN_TYPE,
     CS_INT_TYPE,
     CS_DOUBLE_TYPE,    
 } CS_BasicType;
+*/
 
 struct TypeSpecifier_tag {
     CS_BasicType basic_type;
