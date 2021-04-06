@@ -48,10 +48,26 @@
 #a %= 2;
 
 # for declaration statement
-#int i;
+#double i;
 #int j;
+#boolean b;
+#boolean c;
 
-#j = 2;
+#b = true;
+#c = false;
+
+#true && 1;
+
+#int print();
+#print();
+
+#b = true;
+#c = !b;
+
+
+int f1(int x) {
+    x = 10;
+}
 
 
 int func(int a, double d) {
@@ -59,21 +75,17 @@ int func(int a, double d) {
     i = 2;
 }
 
-int func2() {
-    int j;
-    j = 3;
+int a;
+int b;
 
-}
-
-int func3(int a, double d);
-
-int func4();
-
-while(true) {
-    a = 2;
-}
+#while(true) {
+    #int b;
+    #a = 2;
+    #b = 3;
+    #a == b;
+#}
 
 
-#func(1);
+func(1.5, 1);
 #print();
 

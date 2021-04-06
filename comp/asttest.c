@@ -67,10 +67,17 @@ int main(void) {
     printf("-- Errors --\n");
     show_mean_error(mvisitor);
 
-    //printf(">>>>>>>>>>>>>>>>\n");
-    //printf("current_block = %p\n", compiler->current_block);
-
-
+    DeclarationList* dpos;
+    int var_count = 0;
+    for (dpos = compiler->decl_list; dpos; dpos = dpos->next) {
+        dpos->decl->index = var_count++;
+    }
+    printf("var count  = %d\n", var_count);
+    printf("func count = %d\n", compiler->function_count);
+    FunctionDefinition* func;
+    for (func = compiler->function_list; func; func = func->next) {
+        printf("name = %s, variable = %d\n", func->name, func->local_variable_count);
+    }
 
 
     
@@ -79,5 +86,6 @@ int main(void) {
     delete_mean_visitor(mvisitor);
     CS_delete_compiler(compiler);
     MEM_dump_memory();
+    
     return 0;
 }
