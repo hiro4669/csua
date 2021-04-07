@@ -56,6 +56,9 @@ int main(void) {
         printf("execute code generate\n");
         CS_Executable* exec = code_generate(compiler);
 
+        CodegenVisitor* cvisitor = create_codegen_visitor(compiler, exec);
+
+        delete_codegen_visitor(cvisitor);
         delete_executable(exec);
     }
 

@@ -38,10 +38,23 @@ struct MeanVisitor_tag {
     Block        *block;
 };
 
+struct CodegenVisitor_tag {
+    Visitor        visitor;
+    CS_Compiler   *compiler;
+    CS_Executable *exec;
+};
+
+
+
 Visitor* create_treeview_visitor();
 MeanVisitor* create_mean_visitor();
+CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exec);
+
 void delete_visitor(Visitor* visitor);
 void delete_mean_visitor(MeanVisitor* visitor);
+void delete_codegen_visitor(CodegenVisitor* cvisitor);
+
+
 void traverse_expr(Expression* expr, Visitor* visitor);
 void traverse_stmt(Statement*  stmt, Visitor* visitor);
 void traverse_func(FunctionDefinition* func, Visitor* visitor);
