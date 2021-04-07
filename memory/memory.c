@@ -127,6 +127,12 @@ void MEM_dump_memory_func(MEM_Controller controller) {
 
 }
 
+char* MEM_strdup_func(MEM_Controller controller, char* filename, int line, char* src) {
+    char* dst = MEM_malloc_func(controller, filename, line, strlen(src) + 1);
+    strcpy(dst, src);
+    return dst;
+}
+
 void MEM_free_func(MEM_Controller controller, void* bptr) {
     uint8_t *ptr = (uint8_t*)bptr - sizeof(Header);
 //    fprintf(stderr, "free ptr = %p\n", ptr);
