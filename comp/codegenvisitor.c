@@ -5,9 +5,32 @@
 #include "csua.h"
 #include "visitor.h"
 #include "../svm/svm.h"
+#include "../memory/MEM.h"
 
 
+static size_t get_opsize(OpcodeInfo* op) {
+    size_t size = strlen(op->parameter);
+    size *= 2;
+    return size;
+}
 
+
+static int add_constant(CS_Executable* exec, CS_ConstantPool* cp) {
+    exec->constant_pool = (CS_ConstantPool*)MEM_realloc(exec->constant_pool, exec->constant_pool_count+1);
+    exec->constant_pool[exec->constant_pool_count] = *cp;
+    return exec->constant_pool_count++;
+}
+
+
+static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
+    va_list ap;
+    va_start(ap, op);
+
+    OpcodeInfo oInfo = svm_opcode_info[op];
+    fprintf(stderr, "name  = %s\n", oInfo.opname);
+    fprintf(stderr, "param = %s\n", oInfo.parameter);
+
+}
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {    
 }
@@ -19,9 +42,18 @@ static void enter_boolexpr(Expression* expr, Visitor* visitor) {
 static void leave_boolexpr(Expression* expr, Visitor* visitor) {    
 }
 
-static void enter_intexpr(Expression* expr, Visitor* visitor) {    
+static void enter_intexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {    
+    fprintf(stderr, "enterint \n");
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+    CS_ConstantPool cp;
+    cp.type = CS_CONSTANT_INT;
+    cp.u.c_int = expr->u.int_value;
+    int idx = add_constant(cvisitor->exec, &cp);
+    fprintf(stderr, "idx = %d\n", idx);
+    gen_byte_code(cvisitor, SVM_PUSH_INT, idx);
+    exit(1);
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {    
@@ -176,6 +208,12 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     CodegenVisitor* cvisitor = (CodegenVisitor*)MEM_malloc(sizeof(CodegenVisitor));
     cvisitor->compiler = compiler;
     cvisitor->exec = exec;
+    cvisitor->CODE_ALLOC_SIZE = 10;
+    cvisitor->current_code_size = 0;
+    cvisitor->pos = 0;
+    cvisitor->code = NULL;
+
+
 
     enter_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
@@ -254,14 +292,14 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     ((Visitor*)cvisitor)->enter_func = enter_func;
     ((Visitor*)cvisitor)->leave_func = leave_func;
 
-
-
-
-
-
     return cvisitor;
 }
 
-void delete_codegen_visitor(CodegenVisitor* cvisitor) {
+void delete_codegen_visitor(CodegenVisitor* cvisitor) {    
+    Visitor* visitor = (Visitor*)cvisitor;
+    MEM_free(visitor->enter_expr_list);
+    MEM_free(visitor->leave_expr_list);
+    MEM_free(visitor->enter_stmt_list);
+    MEM_free(visitor->leave_stmt_list);
     MEM_free(cvisitor);
 }

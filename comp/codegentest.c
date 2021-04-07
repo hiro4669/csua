@@ -58,6 +58,17 @@ int main(void) {
 
         CodegenVisitor* cvisitor = create_codegen_visitor(compiler, exec);
 
+        StatementList* stmt_list = compiler->stmt_list;
+        while (stmt_list) {
+            traverse_stmt(stmt_list->stmt, (Visitor*)cvisitor);
+            stmt_list = stmt_list->next;
+        }
+
+     //   while (stmt_list) {
+       // traverse_stmt(stmt_list->stmt, (Visitor*)mvisitor);
+        //stmt_list = stmt_list->next;
+
+
         delete_codegen_visitor(cvisitor);
         delete_executable(exec);
     }
