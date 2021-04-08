@@ -10,6 +10,7 @@ YACC = csua.y
 
 cgent: $(MEMORY) $(OBJS) $(CODEGEN) codegentest.o
 	make -C ../memory
+	make -C ../svm
 	$(CC) -o $@ $^
 
 astt: $(MEMORY) $(OBJS) asttest.o

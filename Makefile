@@ -2,9 +2,10 @@
 MAKE = /usr/bin/make
 
 all:
+	$(MAKE) -C svm/
 	$(MAKE) -C comp/
 	$(MAKE) -C memory/
-	$(MAKE) -C svm/
+	
 
 clean:
 	$(MAKE) clean -C comp/

@@ -30,6 +30,32 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     fprintf(stderr, "name  = %s\n", oInfo.opname);
     fprintf(stderr, "param = %s\n", oInfo.parameter);
 
+    if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {
+        cvisitor->code = MEM_realloc(cvisitor->code, 
+            cvisitor->current_code_size += cvisitor->CODE_ALLOC_SIZE);
+    }
+
+    cvisitor->code[cvisitor->pos++] = op & 0xff;
+    for (int i = 0; i < strlen(oInfo.parameter); ++i) {
+        switch(oInfo.parameter[i]) {
+            case 'i': {// 2byte index
+                fprintf(stderr, "hoge123\n");
+                int operand = va_arg(ap, int);
+                cvisitor->code[cvisitor->pos++] = (operand >> 8) & 0xff;
+                cvisitor->code[cvisitor->pos++] = (operand >> 0) & 0xff;
+                break;
+            }
+            default: {
+                fprintf(stderr, "undefined parameter\n");
+                exit(1);
+            }
+        }
+    }
+
+
+
+
+
 }
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {    
@@ -53,7 +79,7 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
     int idx = add_constant(cvisitor->exec, &cp);
     fprintf(stderr, "idx = %d\n", idx);
     gen_byte_code(cvisitor, SVM_PUSH_INT, idx);
-    exit(1);
+    
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {    
@@ -70,6 +96,20 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
 static void enter_addexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_INT);
+            break;
+        }        
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_ADD_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type \n", expr->line_number);
+            break;
+        }        
+    }
 }
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
@@ -301,5 +341,6 @@ void delete_codegen_visitor(CodegenVisitor* cvisitor) {
     MEM_free(visitor->leave_expr_list);
     MEM_free(visitor->enter_stmt_list);
     MEM_free(visitor->leave_stmt_list);
+    MEM_free(cvisitor->code);
     MEM_free(cvisitor);
 }

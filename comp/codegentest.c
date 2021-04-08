@@ -42,6 +42,7 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
 
 static void delete_executable(CS_Executable* exec) {
     MEM_free(exec->global_variable);
+    MEM_free(exec->constant_pool);
 
     MEM_free(exec);
 }
@@ -64,11 +65,14 @@ int main(void) {
             stmt_list = stmt_list->next;
         }
 
-     //   while (stmt_list) {
-       // traverse_stmt(stmt_list->stmt, (Visitor*)mvisitor);
-        //stmt_list = stmt_list->next;
+        // for test
+        fprintf(stderr, "code len = %d\n", cvisitor->pos);
+        for (int i = 0; i < cvisitor->pos; ++i) {
+            fprintf(stderr, "%02x ", cvisitor->code[i]);
+        }
+        
 
-
+     
         delete_codegen_visitor(cvisitor);
         delete_executable(exec);
     }
