@@ -39,7 +39,6 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     for (int i = 0; i < strlen(oInfo.parameter); ++i) {
         switch(oInfo.parameter[i]) {
             case 'i': {// 2byte index
-                fprintf(stderr, "hoge123\n");
                 int operand = va_arg(ap, int);
                 cvisitor->code[cvisitor->pos++] = (operand >> 8) & 0xff;
                 cvisitor->code[cvisitor->pos++] = (operand >> 0) & 0xff;
@@ -70,14 +69,12 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_intexpr(Expression* expr, Visitor* visitor) {    
-    fprintf(stderr, "enterint \n");
+static void leave_intexpr(Expression* expr, Visitor* visitor) {        
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
     CS_ConstantPool cp;
     cp.type = CS_CONSTANT_INT;
     cp.u.c_int = expr->u.int_value;
-    int idx = add_constant(cvisitor->exec, &cp);
-    fprintf(stderr, "idx = %d\n", idx);
+    int idx = add_constant(cvisitor->exec, &cp);    
     gen_byte_code(cvisitor, SVM_PUSH_INT, idx);
     
 }

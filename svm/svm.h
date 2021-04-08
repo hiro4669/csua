@@ -106,6 +106,7 @@ typedef struct {
 
 extern OpcodeInfo svm_opcode_info[];
 
-
+/* disasm.c */
+void show_variables(CS_Variable* variables, int size);
 void disasm(uint8_t* code, uint32_t len);
 #endif

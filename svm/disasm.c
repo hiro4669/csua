@@ -10,9 +10,15 @@ static uint16_t fetch2(uint8_t* code) {
     return (upper << 8 | lower) & 0xffff;
 }
 
+void show_variables(CS_Variable* variables, int size) {
+    fprintf(stderr, "-- variables --\n");    
+    for (int i = 0; i < size; ++i) {
+        fprintf(stderr, "name=%s, type=%d\n", variables->name, variables->type->basic_type);
+    }
+}
 
 void disasm(uint8_t* code, uint32_t len) {
-    
+    fprintf(stderr, "-- code --\n");
     for (uint32_t i = 0; i < len; ++i) {
         switch(code[i]) {
             case SVM_PUSH_INT: {

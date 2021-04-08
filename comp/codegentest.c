@@ -7,12 +7,14 @@
 #include "../svm/svm.h"
 
 static void copy_declaration(CS_Compiler* compiler, CS_Executable* exec) {
+    fprintf(stderr, "copy decls\n");
     DeclarationList* decl_list = compiler->decl_list;
     int size;
-    for (size = 0; decl_list; decl_list = decl_list->next);
+    for (size = 0; decl_list; decl_list = decl_list->next, ++size);
     CS_Variable* variables = (CS_Variable*)MEM_malloc(sizeof(CS_Variable) * size);
-    decl_list = compiler->decl_list;
-    for (int i = 0; i < size; decl_list = decl_list->next) {
+    decl_list = compiler->decl_list;    
+    for (int i = 0; i < size; decl_list = decl_list->next, ++i) {
+        fprintf(stderr, "yahoo\n");
         variables[i].name = (char*)MEM_strdup(decl_list->decl->name);
         CS_TypeSpecifier* type = MEM_malloc(sizeof(CS_TypeSpecifier));
         type->basic_type = decl_list->decl->type->basic_type;
@@ -41,6 +43,11 @@ static CS_Executable* code_generate(CS_Compiler* compiler) {
 }
 
 static void delete_executable(CS_Executable* exec) {
+    fprintf(stderr, "count = %d\n", exec->global_variable_count);
+    for (int i = 0; i < exec->global_variable_count; ++i) {
+        MEM_free(exec->global_variable[i].name);
+        MEM_free(exec->global_variable[i].type);
+    }
     MEM_free(exec->global_variable);
     MEM_free(exec->constant_pool);
 
@@ -72,7 +79,8 @@ int main(void) {
         }
         fprintf(stderr, "\n");
 
-
+        // for test
+        show_variables(exec->global_variable, exec->global_variable_count);
         disasm(cvisitor->code, cvisitor->pos);
         
 
