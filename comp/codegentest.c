@@ -70,6 +70,10 @@ int main(void) {
         for (int i = 0; i < cvisitor->pos; ++i) {
             fprintf(stderr, "%02x ", cvisitor->code[i]);
         }
+        fprintf(stderr, "\n");
+
+
+        disasm(cvisitor->code, cvisitor->pos);
         
 
      

@@ -3,7 +3,7 @@ CC = /usr/bin/gcc
 TARGET = disasm
 CFLAGS = -c -g -DDEBUG
 
-OBJS = disasm.o opinfo.o
+OBJS = disasm.o opinfo.o dmain.o
 
 all: $(TARGET)
 

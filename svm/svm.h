@@ -106,4 +106,6 @@ typedef struct {
 
 extern OpcodeInfo svm_opcode_info[];
 
+
+void disasm(uint8_t* code, uint32_t len);
 #endif
