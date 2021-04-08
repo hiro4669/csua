@@ -27,8 +27,8 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     va_start(ap, op);
 
     OpcodeInfo oInfo = svm_opcode_info[op];
-    fprintf(stderr, "name  = %s\n", oInfo.opname);
-    fprintf(stderr, "param = %s\n", oInfo.parameter);
+    //fprintf(stderr, "name  = %s\n", oInfo.opname);
+    //fprintf(stderr, "param = %s\n", oInfo.parameter);
 
     if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {
         cvisitor->code = MEM_realloc(cvisitor->code, 
@@ -86,7 +86,47 @@ static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_identexpr(Expression* expr, Visitor* visitor) {        
+static void leave_identexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "ident!!\n");
+    fprintf(stderr, "type = %d\n", expr->u.identifier.is_function);
+    fprintf(stderr, "name = %s\n", expr->u.identifier.name);
+    CS_Boolean is_function = expr->u.identifier.is_function;
+
+    if (is_function) {
+
+    } else {
+        Declaration* decl = expr->u.identifier.u.decl;
+        fprintf(stderr, "decl idx = %d\n", decl->index);
+        fprintf(stderr, "expr type= %d\n", expr->type->basic_type);
+        if (decl->is_local) {
+
+        } else {
+            switch (expr->type->basic_type) {
+                case CS_BOOLEAN_TYPE:
+                case CS_INT_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_INT, decl->index);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_DOUBLE, decl->index);
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "%d: undefined type", expr->line_number);
+                    exit(1);
+                }
+            }
+
+        }
+
+        
+    }
+
+
+    
+    
+
+
 }
 
 
