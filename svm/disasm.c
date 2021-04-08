@@ -31,6 +31,12 @@ void disasm(uint8_t* code, uint32_t len) {
                 fprintf(stderr, "%s\n", svm_opcode_info[SVM_ADD_INT].opname);
                 break;
             }
+            case SVM_PUSH_STATIC_INT: {
+                uint16_t idx = fetch2(&code[i+1]);                
+                fprintf(stderr, "%s %04x\n", svm_opcode_info[SVM_PUSH_STATIC_INT].opname, idx);
+                i += 2;                
+                break;
+            }
 
             default: {
             fprintf(stderr, "unknown operator %02x\n", code[i]);

@@ -59,6 +59,14 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
 
     delete_mean_visitor(mvisitor);
 
+    DeclarationList* decls;
+    int idx = 0;
+    for (decls = compiler->decl_list; decls; decls = decls->next) {
+        decls->decl->index = idx++;
+        decls->decl->is_local = CS_FALSE;
+    }
+
+
     return result;
 
 }
