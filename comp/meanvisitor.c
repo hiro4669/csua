@@ -883,6 +883,8 @@ MeanVisitor* create_mean_visitor() {
 
     ((Visitor*)visitor)->enter_expr_list = enter_expr_list;
     ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
+    ((Visitor*)visitor)->notify_expr_list = NULL;
+
     ((Visitor*)visitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)visitor)->leave_stmt_list = leave_stmt_list;
 
@@ -899,7 +901,7 @@ void delete_mean_visitor(MeanVisitor* visitor) {
     MEM_free(((Visitor*)visitor)->enter_expr_list);
     MEM_free(((Visitor*)visitor)->leave_expr_list);
     MEM_free(((Visitor*)visitor)->enter_stmt_list);
-    MEM_free(((Visitor*)visitor)->leave_stmt_list);
+    MEM_free(((Visitor*)visitor)->leave_stmt_list);    
     MEM_free(visitor);
 }
 

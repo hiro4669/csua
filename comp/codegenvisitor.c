@@ -84,16 +84,55 @@ static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {        
 }
 
+
+
+static void generate_pop_static(CodegenVisitor* cvisitor, TypeSpecifier* type, int  idx) {
+    switch (type->basic_type) {
+        case CS_BOOLEAN_TYPE:
+        case CS_INT_TYPE: {
+            gen_byte_code(cvisitor, SVM_POP_STATIC_INT, idx);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code(cvisitor, SVM_POP_STATIC_DOUBLE, idx);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }
+
+}
+static void generate_push_static(CodegenVisitor* cvisitor, TypeSpecifier* type, int  idx) {
+    switch (type->basic_type) {
+        case CS_BOOLEAN_TYPE:
+        case CS_INT_TYPE: {
+            gen_byte_code(cvisitor, SVM_PUSH_STATIC_INT, idx);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code(cvisitor, SVM_PUSH_STATIC_DOUBLE, idx);
+            break;
+        }
+        default: {
+            fprintf(stderr, "undefined type");
+            exit(1);
+        }
+    }
+}
+
+
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "ident!!\n");
+    /*    
     fprintf(stderr, "type = %d\n", expr->u.identifier.is_function);
     fprintf(stderr, "name = %s\n", expr->u.identifier.name);
+    */
     CS_Boolean is_function = expr->u.identifier.is_function;
 
     if (is_function) {
-
+        // not yet
     } else {
         Declaration* decl = expr->u.identifier.u.decl;
         fprintf(stderr, "decl idx = %d\n", decl->index);
@@ -101,32 +140,25 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
         if (decl->is_local) {
 
         } else {
-            switch (expr->type->basic_type) {
-                case CS_BOOLEAN_TYPE:
-                case CS_INT_TYPE: {
-                    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_INT, decl->index);
+            CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+            switch (cvisitor->v_state) {
+                case VISIT_NORMAL: { // generate push
+                    generate_push_static(cvisitor, expr->type, decl->index);
                     break;
                 }
-                case CS_DOUBLE_TYPE: {
-                    gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_STATIC_DOUBLE, decl->index);
+                case VISIT_NORMAL_ASSIGN: { // generate pop
+                    generate_pop_static(cvisitor, expr->type, decl->index);
+                    if (cvisitor->assign_depth > 1) {
+                        generate_push_static(cvisitor, expr->type, decl->index);
+                    }
                     break;
                 }
                 default: {
-                    fprintf(stderr, "%d: undefined type", expr->line_number);
                     exit(1);
                 }
-            }
-
-        }
-
-        
+            }                        
+        }        
     }
-
-
-    
-    
-
-
 }
 
 
@@ -230,8 +262,10 @@ static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
+    ((CodegenVisitor*)visitor)->assign_depth++;
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
+    --((CodegenVisitor*)visitor)->assign_depth;
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
@@ -239,10 +273,30 @@ static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 
+static void notify_assignexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "notify assign expr\n");
+    ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL_ASSIGN;
+}
+
 /* For statement */
 static void enter_exprstmt(Statement* stmt, Visitor* visitor) {
 }
 static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+
+    switch (cvisitor->v_state) {
+        case VISIT_NORMAL_ASSIGN: {
+            cvisitor->v_state = VISIT_NORMAL;
+            break;
+        }
+        case VISIT_NORMAL: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_POP);
+            break;            
+        }
+        default: {
+            break;
+        }
+    }
 }
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
@@ -277,6 +331,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
 
+    visit_expr* notify_expr_list;
+
     if (!compiler || !exec) {
         fprintf(stderr, "Compiler or Executable is NULL\n");
         exit(1);
@@ -285,6 +341,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     CodegenVisitor* cvisitor = (CodegenVisitor*)MEM_malloc(sizeof(CodegenVisitor));
     cvisitor->compiler = compiler;
     cvisitor->exec = exec;
+    cvisitor->v_state = VISIT_NORMAL;
+    cvisitor->assign_depth = 0;
     cvisitor->CODE_ALLOC_SIZE = 10;
     cvisitor->current_code_size = 0;
     cvisitor->pos = 0;
@@ -296,6 +354,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     leave_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
     enter_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
     leave_stmt_list = (visit_stmt*)MEM_malloc(sizeof(visit_stmt) * STATEMENT_TYPE_COUNT_PLUS_ONE);
+
+    notify_expr_list = (visit_expr*)MEM_malloc(sizeof(visit_expr) * EXPRESSION_KIND_PLUS_ONE);
 
     init_visit_expr_functions(enter_expr_list, EXPRESSION_KIND_PLUS_ONE);
     init_visit_expr_functions(leave_expr_list, EXPRESSION_KIND_PLUS_ONE);
@@ -331,6 +391,13 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
 
+
+    notify_expr_list[ASSIGN_EXPRESSION]       = notify_assignexpr;
+
+
+
+
+
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
@@ -363,6 +430,8 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
 
     ((Visitor*)cvisitor)->enter_expr_list = enter_expr_list;
     ((Visitor*)cvisitor)->leave_expr_list = leave_expr_list;
+    ((Visitor*)cvisitor)->notify_expr_list = notify_expr_list;
+
     ((Visitor*)cvisitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)cvisitor)->leave_stmt_list = leave_stmt_list;
 
@@ -376,6 +445,7 @@ void delete_codegen_visitor(CodegenVisitor* cvisitor) {
     Visitor* visitor = (Visitor*)cvisitor;
     MEM_free(visitor->enter_expr_list);
     MEM_free(visitor->leave_expr_list);
+    MEM_free(visitor->notify_expr_list);
     MEM_free(visitor->enter_stmt_list);
     MEM_free(visitor->leave_stmt_list);
     MEM_free(cvisitor->code);

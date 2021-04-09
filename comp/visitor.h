@@ -23,9 +23,12 @@ typedef struct MeanCheckLog_tag {
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
+    visit_expr* notify_expr_list;
     
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
+
+    
 
     visit_func enter_func;
     visit_func leave_func;
@@ -38,10 +41,18 @@ struct MeanVisitor_tag {
     Block        *block;
 };
 
+typedef enum {
+    VISIT_NORMAL,
+    VISIT_NORMAL_ASSIGN,
+} VisitState;
+
 struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
     CS_Executable *exec;
+
+    VisitState    v_state;
+    uint16_t      assign_depth;
     uint32_t      CODE_ALLOC_SIZE;
     uint32_t      current_code_size;
     uint32_t      pos;

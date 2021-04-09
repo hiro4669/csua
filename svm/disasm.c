@@ -13,7 +13,7 @@ static uint16_t fetch2(uint8_t* code) {
 void show_variables(CS_Variable* variables, int size) {
     fprintf(stderr, "-- variables --\n");    
     for (int i = 0; i < size; ++i) {
-        fprintf(stderr, "name=%s, type=%d\n", variables->name, variables->type->basic_type);
+        fprintf(stderr, "name=%s, type=%d\n", variables[i].name, variables[i].type->basic_type);
     }
 }
 
@@ -35,6 +35,16 @@ void disasm(uint8_t* code, uint32_t len) {
                 uint16_t idx = fetch2(&code[i+1]);                
                 fprintf(stderr, "%s %04x\n", svm_opcode_info[SVM_PUSH_STATIC_INT].opname, idx);
                 i += 2;                
+                break;
+            }
+            case SVM_POP_STATIC_INT: {
+                uint16_t idx = fetch2(&code[i+1]);                
+                fprintf(stderr, "%s %04x\n", svm_opcode_info[SVM_POP_STATIC_INT].opname, idx);
+                i += 2;                
+                break;
+            }
+            case SVM_POP: {
+                fprintf(stderr, "%s\n", svm_opcode_info[SVM_POP].opname);
                 break;
             }
 

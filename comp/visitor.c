@@ -459,6 +459,8 @@ Visitor* create_treeview_visitor() {
     visitor->enter_stmt_list = enter_stmt_list;
     visitor->leave_stmt_list = leave_stmt_list;
 
+    visitor->notify_expr_list = NULL;
+
     visitor->enter_func = enter_func;
     visitor->leave_func = leave_func;
     
@@ -472,6 +474,6 @@ void delete_visitor(Visitor* visitor) {
     MEM_free(visitor->enter_expr_list);
     MEM_free(visitor->leave_expr_list);
     MEM_free(visitor->enter_stmt_list);
-    MEM_free(visitor->leave_stmt_list);
+    MEM_free(visitor->leave_stmt_list);    
     MEM_free(visitor);
 }
