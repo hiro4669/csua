@@ -884,6 +884,9 @@ MeanVisitor* create_mean_visitor() {
     ((Visitor*)visitor)->enter_expr_list = enter_expr_list;
     ((Visitor*)visitor)->leave_expr_list = leave_expr_list;
     ((Visitor*)visitor)->notify_expr_list = NULL;
+    ((Visitor*)visitor)->end_block_func   = NULL;
+    ((Visitor*)visitor)->after_cond_func  = NULL;
+
 
     ((Visitor*)visitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)visitor)->leave_stmt_list = leave_stmt_list;

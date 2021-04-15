@@ -460,6 +460,8 @@ Visitor* create_treeview_visitor() {
     visitor->leave_stmt_list = leave_stmt_list;
 
     visitor->notify_expr_list = NULL;
+    visitor->after_cond_func  = NULL;
+    visitor->end_block_func   = NULL;
 
     visitor->enter_func = enter_func;
     visitor->leave_func = leave_func;

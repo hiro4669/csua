@@ -317,14 +317,20 @@ static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 }
-
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 }
 
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
 }
-
 static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
+}
+
+static void end_block_func(Statement* stmt, Visitor* visitor, StatementType s_type) {
+    fprintf(stderr, "end block func\n");
+}
+
+static void after_cond_func(Statement* stmt, Visitor* visitor, StatementType s_type) {    
+    fprintf(stderr, "after_cond_func\n");
 }
 
 
@@ -450,6 +456,10 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
 
     ((Visitor*)cvisitor)->enter_stmt_list = enter_stmt_list;
     ((Visitor*)cvisitor)->leave_stmt_list = leave_stmt_list;
+
+    ((Visitor*)cvisitor)->end_block_func  = end_block_func;
+    ((Visitor*)cvisitor)->after_cond_func = after_cond_func;
+
 
     ((Visitor*)cvisitor)->enter_func = enter_func;
     ((Visitor*)cvisitor)->leave_func = leave_func;

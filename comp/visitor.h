@@ -14,6 +14,9 @@ typedef void (*visit_expr)(Expression* expr, Visitor* visitor);
 typedef void (*visit_stmt)(Statement*  stmt, Visitor* visitor);
 typedef void (*visit_func)(FunctionDefinition* function, Visitor* visitor);
 
+typedef void (*callback_stmt)(Statement* stmt, Visitor* visitor, StatementType s_type);
+
+
 
 typedef struct MeanCheckLog_tag {
     char                    *log_str;
@@ -28,7 +31,9 @@ struct Visitor_tag {
     visit_stmt* enter_stmt_list;
     visit_stmt* leave_stmt_list;
 
-    
+
+    callback_stmt after_cond_func;
+    callback_stmt end_block_func;
 
     visit_func enter_func;
     visit_func leave_func;

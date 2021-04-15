@@ -63,11 +63,13 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
         }
         case WHILE_STATEMENT: {
             traverse_expr(stmt->u.while_s.condition, visitor);
+            if (visitor->after_cond_func) visitor->after_cond_func(stmt, visitor, WHILE_STATEMENT);                
             StatementList* stmt_list = stmt->u.while_s.block->statement_list;
             while (stmt_list) {                
                 traverse_stmt(stmt_list->stmt, visitor);                
                 stmt_list = stmt_list->next;
-            }        
+            }
+            if (visitor->end_block_func) visitor->end_block_func(stmt, visitor, WHILE_STATEMENT);
             break;
         }
         default: {
