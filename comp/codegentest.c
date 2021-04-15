@@ -46,29 +46,45 @@ static void delete_executable(CS_Executable* exec) {
         MEM_free(exec->global_variable[i].name);
         MEM_free(exec->global_variable[i].type);
     }
-    MEM_free(exec->global_variable);
-    MEM_free(exec->constant_pool);
+
+    if (exec->global_variable) MEM_free(exec->global_variable);
+    if (exec->constant_pool) MEM_free(exec->constant_pool);
 
     MEM_free(exec);
 }
 
-int main(void) {
+int main(int argc, char* argv[]) {
 
-    FILE *fin = fopen("tests/prog2.cs", "r");
+    //FILE *fin = fopen("tests/prog2.cs", "r");
+
+    FILE *fin;
+    if (argc == 2) {
+        printf("file = %s\n", argv[1]);
+        fin = fopen(argv[1], "r");
+    } else {
+        exit(1);
+    }
+    
+
+
     CS_Compiler* compiler = CS_create_compiler();
     CS_Boolean result = CS_compile(compiler, fin);
 
     if (result) {
-        printf("execute code generate\n");
+        printf("\nexecute code generate\n");
         CS_Executable* exec = code_generate(compiler);
-
+        
+        
         CodegenVisitor* cvisitor = create_codegen_visitor(compiler, exec);
+
 
         StatementList* stmt_list = compiler->stmt_list;
         while (stmt_list) {
+            printf("count\n" );
             traverse_stmt(stmt_list->stmt, (Visitor*)cvisitor);
             stmt_list = stmt_list->next;
         }
+       
 
         // for test
         fprintf(stderr, "code len = %d\n", cvisitor->pos);
@@ -81,9 +97,10 @@ int main(void) {
         show_variables(exec->global_variable, exec->global_variable_count);
         disasm(cvisitor->code, cvisitor->pos);
         
-
-     
+       
+       
         delete_codegen_visitor(cvisitor);
+        
         delete_executable(exec);
     }
 

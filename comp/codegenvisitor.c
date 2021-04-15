@@ -14,12 +14,23 @@ static size_t get_opsize(OpcodeInfo* op) {
     return size;
 }
 
-
+/*
 static int add_constant(CS_Executable* exec, CS_ConstantPool* cp) {
     exec->constant_pool = (CS_ConstantPool*)MEM_realloc(exec->constant_pool, exec->constant_pool_count+1);
     exec->constant_pool[exec->constant_pool_count] = *cp;
     return exec->constant_pool_count++;
 }
+*/
+
+static int add_constant(CS_Executable* exec, CS_ConstantPool* cp) {    
+    exec->constant_pool = (CS_ConstantPool*)MEM_realloc(exec->constant_pool, 
+        sizeof(CS_ConstantPool) * (exec->constant_pool_count+1));
+    exec->constant_pool[exec->constant_pool_count] = *cp;
+    return exec->constant_pool_count++;
+}
+
+
+
 
 
 static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
@@ -27,13 +38,15 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     va_start(ap, op);
 
     OpcodeInfo oInfo = svm_opcode_info[op];
-    //fprintf(stderr, "name  = %s\n", oInfo.opname);
-    //fprintf(stderr, "param = %s\n", oInfo.parameter);
+    fprintf(stderr, "name  = %s\n", oInfo.opname);
+    fprintf(stderr, "param = %s\n", oInfo.parameter);
 
+    
     if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {
         cvisitor->code = MEM_realloc(cvisitor->code, 
             cvisitor->current_code_size += cvisitor->CODE_ALLOC_SIZE);
     }
+    
 
     cvisitor->code[cvisitor->pos++] = op & 0xff;
     for (int i = 0; i < strlen(oInfo.parameter); ++i) {
@@ -50,11 +63,7 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
             }
         }
     }
-
-
-
-
-
+    va_end(ap);    
 }
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {    
@@ -69,13 +78,20 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_intexpr(Expression* expr, Visitor* visitor) {        
+static void leave_intexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "leave int expr1\n");
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+    
     CS_ConstantPool cp;
     cp.type = CS_CONSTANT_INT;
     cp.u.c_int = expr->u.int_value;
+    
     int idx = add_constant(cvisitor->exec, &cp);    
+    fprintf(stderr, "whywhy\n");
     gen_byte_code(cvisitor, SVM_PUSH_INT, idx);
+    fprintf(stderr, "notnot\n");
+    
+    fprintf(stderr, "leave int expr2\n");
     
 }
 
@@ -448,6 +464,6 @@ void delete_codegen_visitor(CodegenVisitor* cvisitor) {
     MEM_free(visitor->notify_expr_list);
     MEM_free(visitor->enter_stmt_list);
     MEM_free(visitor->leave_stmt_list);
-    MEM_free(cvisitor->code);
+    if (cvisitor->code) MEM_free(cvisitor->code);
     MEM_free(cvisitor);
 }

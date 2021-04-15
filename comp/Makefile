@@ -8,6 +8,11 @@ EXEC = scantest.o
 
 YACC = csua.y
 
+#cgent2: $(MEMORY) $(OBJS) $(CODEGEN) codegentest2.o codegenvisitor2.o
+#	make -C ../memory
+#	#make -C ../svm
+#	$(CC) -o $@ $^
+
 cgent: $(MEMORY) $(OBJS) $(CODEGEN) codegentest.o codegenvisitor.o
 	make -C ../memory
 	make -C ../svm
