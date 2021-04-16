@@ -363,6 +363,7 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     CodegenVisitor* cvisitor = (CodegenVisitor*)MEM_malloc(sizeof(CodegenVisitor));
     cvisitor->compiler = compiler;
     cvisitor->exec = exec;
+    cvisitor->jtable = create_jumptable();
     cvisitor->v_state = VISIT_NORMAL;
     cvisitor->assign_depth = 0;
     cvisitor->CODE_ALLOC_SIZE = 10;
@@ -475,5 +476,6 @@ void delete_codegen_visitor(CodegenVisitor* cvisitor) {
     MEM_free(visitor->enter_stmt_list);
     MEM_free(visitor->leave_stmt_list);
     if (cvisitor->code) MEM_free(cvisitor->code);
+    delete_jumptable(cvisitor->jtable);
     MEM_free(cvisitor);
 }

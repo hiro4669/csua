@@ -23,6 +23,16 @@ typedef struct MeanCheckLog_tag {
     struct MeanCheckLog_tag *next;
 } MeanCheckLog;
 
+
+typedef struct {
+    uint16_t address;
+} Table;
+
+typedef struct {
+    uint16_t idx;
+    Table* tables;
+} JumpTable;
+
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
@@ -55,6 +65,7 @@ struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
     CS_Executable *exec;
+    JumpTable     *jtable;
 
     VisitState    v_state;
     uint16_t      assign_depth;
@@ -78,5 +89,10 @@ void delete_codegen_visitor(CodegenVisitor* cvisitor);
 void traverse_expr(Expression* expr, Visitor* visitor);
 void traverse_stmt(Statement*  stmt, Visitor* visitor);
 void traverse_func(FunctionDefinition* func, Visitor* visitor);
+
+
+/* jumptablee.c */
+JumpTable* create_jumptable();
+void delete_jumptable(JumpTable* jtable);
 
 #endif
