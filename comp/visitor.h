@@ -94,5 +94,8 @@ void traverse_func(FunctionDefinition* func, Visitor* visitor);
 /* jumptablee.c */
 JumpTable* create_jumptable();
 void delete_jumptable(JumpTable* jtable);
+uint16_t get_index(JumpTable* jtable);
+void set_address(JumpTable* jtable, uint16_t idx, uint16_t addr);
+uint16_t get_address(JumpTable* jtable, uint16_t idx);
 
 #endif

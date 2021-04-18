@@ -39,13 +39,25 @@ void disasm(uint8_t* code, uint32_t len) {
                 break;
             }
             case SVM_POP_STATIC_INT: {
-                uint16_t idx = fetch2(&code[i+1]);                
+                uint16_t idx = fetch2(&code[i+1]);
                 fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_POP_STATIC_INT].opname, idx);
                 i += 2;                
                 break;
             }
             case SVM_POP: {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_POP].opname);
+                break;
+            }
+            case SVM_JUMP_IF_FALSE: {
+                uint16_t idx = fetch2(&code[i+1]);
+                fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_JUMP_IF_FALSE].opname, idx);
+                i += 2;
+                break;
+            }
+            case SVM_JUMP: {
+                uint16_t idx = fetch2(&code[i+1]);
+                fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_JUMP].opname, idx);
+                i += 2;
                 break;
             }
             default: {

@@ -79,8 +79,7 @@ int main(int argc, char* argv[]) {
 
 
         StatementList* stmt_list = compiler->stmt_list;
-        while (stmt_list) {
-            printf("count\n" );
+        while (stmt_list) {            
             traverse_stmt(stmt_list->stmt, (Visitor*)cvisitor);
             stmt_list = stmt_list->next;
         }

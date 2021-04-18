@@ -54,5 +54,7 @@ OpcodeInfo svm_opcode_info[] = {
     {"push_function", "i", 0},
     {"invoke", "", -1},
     {"return", "", -1},
-            
+    {"jump", "i", 0},
+    {"jump_if_false", "i", -1},
+    {"jump_if_true", "i", -1},            
 };

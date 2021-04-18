@@ -206,6 +206,7 @@ typedef enum {
 } StatementType;
 
 typedef struct {
+    int         loop_label;
     Expression *condition;
     Block      *block;    
 } WhileStatement;

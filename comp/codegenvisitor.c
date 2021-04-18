@@ -78,8 +78,7 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_intexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "leave int expr1\n");
+static void leave_intexpr(Expression* expr, Visitor* visitor) {    
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
     
     CS_ConstantPool cp;
@@ -87,12 +86,7 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
     cp.u.c_int = expr->u.int_value;
     
     int idx = add_constant(cvisitor->exec, &cp);    
-    fprintf(stderr, "whywhy\n");
-    gen_byte_code(cvisitor, SVM_PUSH_INT, idx);
-    fprintf(stderr, "notnot\n");
-    
-    fprintf(stderr, "leave int expr2\n");
-    
+    gen_byte_code(cvisitor, SVM_PUSH_INT, idx);    
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {    
@@ -321,16 +315,64 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 }
 
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+    fprintf(stderr, "enter while statement\n");
+    //fprintf(stderr, "pos = %02x\n", cvisitor->pos);
+    int loop_label = get_index(cvisitor->jtable);
+    stmt->u.while_s.loop_label = loop_label;
+    //fprintf(stderr, "loop_label = %d\n", loop_label);
+    //uint16_t address = get_address(cvisitor->jtable, loop_label);
+    set_address(cvisitor->jtable, loop_label, cvisitor->pos);
+    //uint16_t address = get_address(cvisitor->jtable, loop_label);
+    //fprintf(stderr, "address = %02x\n", address);
+
+
 }
 static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
+    fprintf(stderr, "leave while statement\n");
 }
 
 static void end_block_func(Statement* stmt, Visitor* visitor, StatementType s_type) {
     fprintf(stderr, "end block func\n");
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+
+    switch (s_type) {
+        case WHILE_STATEMENT: {
+            fprintf(stderr, "while statement\n");
+            gen_byte_code(cvisitor, SVM_JUMP, stmt->u.while_s.loop_label);
+            set_address(cvisitor->jtable, stmt->u.while_s.block->parent.statement.break_label, cvisitor->pos);
+            uint16_t address= get_address(cvisitor->jtable, stmt->u.while_s.block->parent.statement.break_label);
+            fprintf(stderr, "address = %02x\n", address);
+
+            break;
+        }
+        default: {
+            fprintf(stderr, "unknown stateement\n");
+            exit(1);
+        }
+    }
 }
 
 static void after_cond_func(Statement* stmt, Visitor* visitor, StatementType s_type) {    
     fprintf(stderr, "after_cond_func\n");
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+    switch (s_type) {
+        case WHILE_STATEMENT: {
+            fprintf(stderr, "while statement\n");
+            stmt->u.while_s.block->parent.statement.break_label = get_index(cvisitor->jtable);
+            fprintf(stderr, "braek_label = %d\n", stmt->u.while_s.block->parent.statement.break_label);
+
+            //gen_byte_code(cvisitor, SVM_PUSH_STATIC_DOUBLE, idx);
+            gen_byte_code(cvisitor, SVM_JUMP_IF_FALSE,
+                stmt->u.while_s.block->parent.statement.break_label);
+
+            break;
+        }
+        default: {
+            fprintf(stderr, "unknown stateement\n");
+            exit(1);
+        }
+    }
 }
 
 
