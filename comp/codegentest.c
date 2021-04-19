@@ -92,6 +92,8 @@ int main(int argc, char* argv[]) {
         }
         fprintf(stderr, "\n");
 
+        backpatch(cvisitor);
+
         // for test
         show_variables(exec->global_variable, exec->global_variable_count);
         disasm(cvisitor->code, cvisitor->pos);

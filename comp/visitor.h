@@ -90,8 +90,10 @@ void traverse_expr(Expression* expr, Visitor* visitor);
 void traverse_stmt(Statement*  stmt, Visitor* visitor);
 void traverse_func(FunctionDefinition* func, Visitor* visitor);
 
+void backpatch(CodegenVisitor* cvisitor);
 
-/* jumptablee.c */
+
+/* jumptable.c */
 JumpTable* create_jumptable();
 void delete_jumptable(JumpTable* jtable);
 uint16_t get_index(JumpTable* jtable);

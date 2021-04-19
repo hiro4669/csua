@@ -375,6 +375,55 @@ static void after_cond_func(Statement* stmt, Visitor* visitor, StatementType s_t
     }
 }
 
+static uint16_t fetch2(uint8_t *code, uint32_t pos) {
+    uint8_t first = code[pos];
+    uint8_t second = code[pos+1];
+    return (uint16_t)(first << 8 | second);
+}
+
+void backpatch(CodegenVisitor* cvisitor) {    
+    fprintf(stderr, "--- backpatch --\n");
+    for (int i = 0; i < cvisitor->pos; ++i) {
+        fprintf(stderr, "%02x ", cvisitor->code[i]);
+        switch (cvisitor->code[i]) {
+            case SVM_JUMP:
+            case SVM_JUMP_IF_TRUE:
+            case SVM_JUMP_IF_FALSE: {
+                OpcodeInfo oInfo = svm_opcode_info[cvisitor->code[i]];
+                fprintf(stderr, "name = %s\n", oInfo.opname);
+                for (int j = 0; j < strlen(oInfo.parameter); j++) {
+                    switch(oInfo.parameter[j]) {
+                        case 'i': {
+                            uint16_t idx = fetch2(cvisitor->code, ++i);
+                            //fprintf(stderr, "idx = %d\n", idx);
+                            uint16_t address = get_address(cvisitor->jtable, idx);
+                            //fprintf(stderr, "address = %02x\n", address);
+                            cvisitor->code[i++] = (address >> 8) & 0xff;
+                            cvisitor->code[i++] = (address >> 0) & 0xff;
+                            break;
+                        }
+                        default: {
+                            fprintf(stderr, "unknown parameter\n");
+                            exit(1);
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+
+    }
+    fprintf(stderr, "\n");
+
+
+
+
+}
+
 
 static void enter_func(FunctionDefinition* func, Visitor* visitor) {
 }
