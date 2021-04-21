@@ -40,6 +40,14 @@ struct CS_TypeSpecifier_tag {
     CS_BasicType       basic_type;
 };
 
+
+typedef struct {
+    CS_TypeSpecifier    *type;
+    char                *name;
+    
+
+} CS_Function;
+
 typedef struct {
     uint32_t         constant_pool_count;
     CS_ConstantPool *constant_pool;

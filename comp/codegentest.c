@@ -49,6 +49,7 @@ static void delete_executable(CS_Executable* exec) {
 
     if (exec->global_variable) MEM_free(exec->global_variable);
     if (exec->constant_pool) MEM_free(exec->constant_pool);
+    if (exec->code) MEM_free(exec->code);
 
     MEM_free(exec);
 }
@@ -94,9 +95,15 @@ int main(int argc, char* argv[]) {
 
         backpatch(cvisitor);
 
+        exec->code = cvisitor->code;
+        exec->code_size = cvisitor->pos;
+        cvisitor->code = NULL;
+
+
         // for test
         show_variables(exec->global_variable, exec->global_variable_count);
-        disasm(cvisitor->code, cvisitor->pos);
+        disasm(exec->code, exec->code_size);
+        //disasm(cvisitor->code, cvisitor->pos);
         
        
        
