@@ -35,18 +35,36 @@ typedef struct {
     }u;    
 } CS_ConstantPool;
 
+typedef struct {
+    char             *name;
+    CS_TypeSpecifier *type;
+} CS_LocalVariable;
+
+
+typedef struct {
+    CS_TypeSpecifier    *type;
+    char                *name;
+    CS_Boolean          is_implemented;
+
+    uint16_t            parameter_count;
+    CS_LocalVariable    *parameter;
+
+    uint16_t            local_variable_count;
+    CS_LocalVariable    *local_variable;
+
+    uint32_t            code_size;
+    uint8_t             *code;
+
+    
+
+} CS_Function;
+
 
 struct CS_TypeSpecifier_tag {
     CS_BasicType       basic_type;
 };
 
 
-typedef struct {
-    CS_TypeSpecifier    *type;
-    char                *name;
-    
-
-} CS_Function;
 
 typedef struct {
     uint32_t         constant_pool_count;
@@ -55,6 +73,8 @@ typedef struct {
     CS_Variable     *global_variable;
     uint32_t        code_size;
     uint8_t         *code;
+    CS_Function     *function;
+    uint32_t        function_count;
 } CS_Executable;
 
 

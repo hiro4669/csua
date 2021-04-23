@@ -60,6 +60,12 @@ void disasm(uint8_t* code, uint32_t len) {
                 i += 2;
                 break;
             }
+            case SVM_POP_STACK_INT: {
+                uint16_t idx = fetch2(&code[i+1]);
+                fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_POP_STACK_INT].opname, idx);
+                i += 2;
+                break;
+            }
             default: {
                 fprintf(stderr, "unknown operator %02x\n", code[i]);
                 exit(1);

@@ -42,7 +42,7 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     fprintf(stderr, "param = %s\n", oInfo.parameter);
 
     
-    if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {
+    if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {        
         cvisitor->code = MEM_realloc(cvisitor->code, 
             cvisitor->current_code_size += cvisitor->CODE_ALLOC_SIZE);
     }
@@ -77,6 +77,7 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "enter intexpr \n");
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {    
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
@@ -85,8 +86,11 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
     cp.type = CS_CONSTANT_INT;
     cp.u.c_int = expr->u.int_value;
     
-    int idx = add_constant(cvisitor->exec, &cp);    
+    int idx = add_constant(cvisitor->exec, &cp);
+    fprintf(stderr, "leave intexpr idx = %d\n", idx);
+    fprintf(stderr, "            value = %d\n", cp.u.c_int);
     gen_byte_code(cvisitor, SVM_PUSH_INT, idx);    
+    
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {    
@@ -108,11 +112,31 @@ static void generate_pop_static(CodegenVisitor* cvisitor, TypeSpecifier* type, i
             break;
         }
         default: {
+            fprintf(stderr, "undefined type");
             exit(1);
         }
     }
-
 }
+
+static void generate_pop_stack(CodegenVisitor* cvisitor, TypeSpecifier* type, int idx) {
+    switch (type->basic_type) {
+        case CS_BOOLEAN_TYPE:
+        case CS_INT_TYPE: {
+            gen_byte_code(cvisitor, SVM_POP_STACK_INT, idx);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code(cvisitor, SVM_POP_STACK_DOUBLE, idx);
+            break;
+        }
+        default: {
+            fprintf(stderr, "undefined type");
+            exit(1);
+        }
+    }
+}
+
+
 static void generate_push_static(CodegenVisitor* cvisitor, TypeSpecifier* type, int  idx) {
     switch (type->basic_type) {
         case CS_BOOLEAN_TYPE:
@@ -131,26 +155,65 @@ static void generate_push_static(CodegenVisitor* cvisitor, TypeSpecifier* type, 
     }
 }
 
+static void generate_push_stack(CodegenVisitor* cvisitor, TypeSpecifier* type, int idx) {
+    switch (type->basic_type) {
+        case CS_BOOLEAN_TYPE:
+        case CS_INT_TYPE: {
+            gen_byte_code(cvisitor, SVM_PUSH_STACK_INT, idx);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code(cvisitor, SVM_PUSH_STACK_DOUBLE, idx);
+            break;
+        }
+        default: {
+            fprintf(stderr, "undefined type");
+            exit(1);
+        }
+    }
+
+}
+
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
-    /*    
+    
     fprintf(stderr, "type = %d\n", expr->u.identifier.is_function);
     fprintf(stderr, "name = %s\n", expr->u.identifier.name);
-    */
+    
     CS_Boolean is_function = expr->u.identifier.is_function;
 
     if (is_function) {
+
+
         // not yet
     } else {
         Declaration* decl = expr->u.identifier.u.decl;
-        fprintf(stderr, "decl idx = %d\n", decl->index);
-        fprintf(stderr, "expr type= %d\n", expr->type->basic_type);
+        //fprintf(stderr, "decl idx = %d\n", decl->index);
+        //fprintf(stderr, "expr type= %d\n", expr->type->basic_type);
+        CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
         if (decl->is_local) {
-
-        } else {
-            CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+            fprintf(stderr, "is local\n");
+            fprintf(stderr, "idx = %d\n", decl->index);
+            switch (cvisitor->v_state) {
+                case VISIT_NORMAL: {
+                    generate_push_stack(cvisitor, expr->type, decl->index);
+                    break;
+                }
+                case VISIT_NORMAL_ASSIGN: {
+                    generate_pop_stack(cvisitor, expr->type, decl->index);
+                    if (cvisitor->assign_depth > 1) {
+                        generate_push_stack(cvisitor, expr->type, decl->index);
+                    }
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "v_state error\n");
+                    exit(1);
+                }
+            }
+        } else {            
             switch (cvisitor->v_state) {
                 case VISIT_NORMAL: { // generate push
                     generate_push_static(cvisitor, expr->type, decl->index);
@@ -164,6 +227,7 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
                     break;
                 }
                 default: {
+                    fprintf(stderr, "v_state error\n");
                     exit(1);
                 }
             }                        
@@ -316,7 +380,7 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
-    fprintf(stderr, "enter while statement\n");
+    //fprintf(stderr, "enter while statement\n");
     //fprintf(stderr, "pos = %02x\n", cvisitor->pos);
     int loop_label = get_index(cvisitor->jtable);
     stmt->u.while_s.loop_label = loop_label;
@@ -329,20 +393,20 @@ static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
 
 }
 static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "leave while statement\n");
+    //fprintf(stderr, "leave while statement\n");
 }
 
 static void end_block_func(Statement* stmt, Visitor* visitor, StatementType s_type) {
-    fprintf(stderr, "end block func\n");
+    //fprintf(stderr, "end block func\n");
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
 
     switch (s_type) {
         case WHILE_STATEMENT: {
-            fprintf(stderr, "while statement\n");
+//            fprintf(stderr, "while statement\n");
             gen_byte_code(cvisitor, SVM_JUMP, stmt->u.while_s.loop_label);
             set_address(cvisitor->jtable, stmt->u.while_s.block->parent.statement.break_label, cvisitor->pos);
             uint16_t address= get_address(cvisitor->jtable, stmt->u.while_s.block->parent.statement.break_label);
-            fprintf(stderr, "address = %02x\n", address);
+//            fprintf(stderr, "address = %02x\n", address);
 
             break;
         }
@@ -354,13 +418,13 @@ static void end_block_func(Statement* stmt, Visitor* visitor, StatementType s_ty
 }
 
 static void after_cond_func(Statement* stmt, Visitor* visitor, StatementType s_type) {    
-    fprintf(stderr, "after_cond_func\n");
+    //fprintf(stderr, "after_cond_func\n");
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
     switch (s_type) {
         case WHILE_STATEMENT: {
-            fprintf(stderr, "while statement\n");
+            //fprintf(stderr, "while statement\n");
             stmt->u.while_s.block->parent.statement.break_label = get_index(cvisitor->jtable);
-            fprintf(stderr, "braek_label = %d\n", stmt->u.while_s.block->parent.statement.break_label);
+            //fprintf(stderr, "braek_label = %d\n", stmt->u.while_s.block->parent.statement.break_label);
 
             //gen_byte_code(cvisitor, SVM_PUSH_STATIC_DOUBLE, idx);
             gen_byte_code(cvisitor, SVM_JUMP_IF_FALSE,
@@ -390,7 +454,7 @@ void backpatch(CodegenVisitor* cvisitor) {
             case SVM_JUMP_IF_TRUE:
             case SVM_JUMP_IF_FALSE: {
                 OpcodeInfo oInfo = svm_opcode_info[cvisitor->code[i]];
-                fprintf(stderr, "name = %s\n", oInfo.opname);
+                //fprintf(stderr, "name = %s\n", oInfo.opname);
                 for (int j = 0; j < strlen(oInfo.parameter); j++) {
                     switch(oInfo.parameter[j]) {
                         case 'i': {
