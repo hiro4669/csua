@@ -83,14 +83,14 @@
 
 %%
 translation_unit
-        : definition_or_statement  {printf("definition_or_statement\n");}
-        | translation_unit definition_or_statement {printf("unit definition\n");}
+        : definition_or_statement  { /* printf("definition_or_statement\n"); */}
+        | translation_unit definition_or_statement { /*printf("unit definition\n"); */}
 	;
 definition_or_statement
         : function_definition
         | statement  
         {
-           printf("match statement\n");
+           //printf("match statement\n");
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
@@ -101,31 +101,31 @@ definition_or_statement
 function_definition
         : type_specifier IDENTIFIER LP RP SEMICOLON 
         { 
-                printf("function_definition1 \n"); 
+                //printf("function_definition1 \n"); 
                 CS_Compiler* compiler = cs_get_current_compiler();
                 cs_function_define($1, $2, NULL, NULL);
         }
         | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON 
         { 
-                printf("function definision2 \n"); 
+                //printf("function definision2 \n"); 
                 CS_Compiler* compiler = cs_get_current_compiler();
                 cs_function_define($1, $2, $4, NULL);
         }
         | type_specifier IDENTIFIER LP RP block 
         { 
-                printf("function definision3\n");
+                //printf("function definision3\n");
                 CS_Compiler* compiler = cs_get_current_compiler();                
                 cs_function_define($1, $2, NULL, $5);
 
         }
         | type_specifier IDENTIFIER LP parameter_list RP block 
         { 
-                printf("function definision4 \n"); 
+                //printf("function definision4 \n"); 
                 CS_Compiler* compiler = cs_get_current_compiler();
-                printf("function count = %d\n", compiler->function_count);
+                //printf("function count = %d\n", compiler->function_count);
                 cs_function_define($1, $2, $4, $6);
                 
-                printf("function count = %d\n", compiler->function_count);
+                //printf("function count = %d\n", compiler->function_count);
 
         }
         ;
@@ -143,7 +143,7 @@ statement
         }
         | declaration_statement 
         { 
-                printf("declaration_statement\n"); 
+                /* printf("declaration_statement\n"); */
                 $$ = $1;
         }
         | while_statement
@@ -153,7 +153,7 @@ statement
 declaration_statement
         : type_specifier IDENTIFIER SEMICOLON 
         {
-            printf("definition\n");
+            /* printf("definition\n"); */
             $$ = cs_create_declaration_statement($1, $2, NULL); 
         }
         | type_specifier IDENTIFIER ASSIGN_T expression SEMICOLON 
@@ -165,7 +165,7 @@ declaration_statement
 while_statement
         : WHILE LP expression RP block
         {
-                printf("while statement\n");
+                /* printf("while statement\n"); */
                 $$ = cs_create_while_statement($3, $5);
         }
         ;
@@ -181,12 +181,12 @@ type_specifier
 parameter_list
         : type_specifier IDENTIFIER 
         { 
-                printf("parameter_list1\n");
+                /* printf("parameter_list1\n"); */
                 $$ = cs_create_parameter($1, $2);
         }
         | parameter_list COMMA type_specifier IDENTIFIER 
         { 
-                printf("parameter_list2\n"); 
+                /* printf("parameter_list2\n"); */
                 $$ = cs_chain_parameter($1, $3, $4);
         }
         ;
@@ -194,12 +194,12 @@ parameter_list
 argument_list
         : assignment_expression 
         { 
-                printf("argument_list1\n");
+                /* printf("argument_list1\n"); */
                 $$ = cs_create_argument_list($1);
         }
         | argument_list COMMA assignment_expression 
         { 
-                printf("argument_list2\n");
+                /* printf("argument_list2\n"); */
                 $$ = cs_chain_argument_list($1, $3);
         }
         ;
@@ -207,12 +207,12 @@ argument_list
 statement_list
         : statement                  
         { 
-                printf("statement_list1\n"); 
+                /* printf("statement_list1\n"); */
                 $$ = cs_create_statement_list($1);
         }
         | statement_list statement   
         { 
-                printf("statement_list2\n"); 
+                /* printf("statement_list2\n"); */
                 $$ = cs_chain_statement_list($1, $2);
         }
         ;
@@ -221,7 +221,7 @@ expression
 	: assignment_expression 
          { 
              Expression* expr = $1;
-             printf("type1 = %d\n", expr->kind);
+             /* printf("type1 = %d\n", expr->kind); */
              $$ = $1;
          }
 	;
@@ -288,7 +288,7 @@ unary_expression
 postfix_expression
         : primary_expression
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
-        | postfix_expression LP argument_list RP { $$ = cs_create_function_call_expression($1, $3); /* change NULL*/ }
+        | postfix_expression LP argument_list RP { $$ = cs_create_function_call_expression($1, $3); }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
         ;
@@ -308,8 +308,8 @@ block
         }
           statement_list RC 
         { 
-                printf("block1\n");
-                //$<block>$ = cs_close_block($<block>2, $3);
+                //printf("block1\n");
+                $<block>$ = cs_close_block($<block>2, $3);
                 $$ = cs_close_block($<block>2, $3);
         }
         | LC RC                

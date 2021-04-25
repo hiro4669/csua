@@ -38,8 +38,10 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
     va_start(ap, op);
 
     OpcodeInfo oInfo = svm_opcode_info[op];
+    /*
     fprintf(stderr, "name  = %s\n", oInfo.opname);
     fprintf(stderr, "param = %s\n", oInfo.parameter);
+    */
 
     
     if ((cvisitor->pos + 1 + get_opsize(&oInfo)) >= cvisitor->current_code_size) {        
@@ -77,7 +79,7 @@ static void leave_boolexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "enter intexpr \n");
+    //fprintf(stderr, "enter intexpr \n");
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {    
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
@@ -87,8 +89,10 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
     cp.u.c_int = expr->u.int_value;
     
     int idx = add_constant(cvisitor->exec, &cp);
+    /*
     fprintf(stderr, "leave intexpr idx = %d\n", idx);
     fprintf(stderr, "            value = %d\n", cp.u.c_int);
+    */
     gen_byte_code(cvisitor, SVM_PUSH_INT, idx);    
     
 }
@@ -179,8 +183,10 @@ static void enter_identexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
     
+    /*
     fprintf(stderr, "type = %d\n", expr->u.identifier.is_function);
     fprintf(stderr, "name = %s\n", expr->u.identifier.name);
+    */
     
     CS_Boolean is_function = expr->u.identifier.is_function;
 
@@ -194,8 +200,8 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
         //fprintf(stderr, "expr type= %d\n", expr->type->basic_type);
         CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
         if (decl->is_local) {
-            fprintf(stderr, "is local\n");
-            fprintf(stderr, "idx = %d\n", decl->index);
+            //fprintf(stderr, "is local\n");
+            //fprintf(stderr, "idx = %d\n", decl->index);
             switch (cvisitor->v_state) {
                 case VISIT_NORMAL: {
                     generate_push_stack(cvisitor, expr->type, decl->index);
@@ -348,7 +354,7 @@ static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "notify assign expr\n");
+    //fprintf(stderr, "notify assign expr\n");
     ((CodegenVisitor*)visitor)->v_state = VISIT_NORMAL_ASSIGN;
 }
 
@@ -448,7 +454,7 @@ static uint16_t fetch2(uint8_t *code, uint32_t pos) {
 void backpatch(CodegenVisitor* cvisitor) {    
     fprintf(stderr, "--- backpatch --\n");
     for (int i = 0; i < cvisitor->pos; ++i) {
-        fprintf(stderr, "%02x ", cvisitor->code[i]);
+        //fprintf(stderr, "%02x ", cvisitor->code[i]);
         switch (cvisitor->code[i]) {
             case SVM_JUMP:
             case SVM_JUMP_IF_TRUE:

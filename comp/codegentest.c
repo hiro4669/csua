@@ -62,12 +62,6 @@ static void delete_function(CS_Function* func) {
     MEM_free(func->local_variable);
 
     MEM_free(func->code);
-
-
-    
-
-
-
 }
 
 static void delete_functions(CS_Executable* exec) {
@@ -120,8 +114,8 @@ static void copy_function(FunctionDefinition* src_fd, CS_Function* dest_fd) {
     }
 
     dest_fd->parameter_count = param_count;
-    fprintf(stderr, "param_count = %d\n", param_count);
-    fprintf(stderr, "val count   = %d\n", src_fd->local_variable_count);
+    //fprintf(stderr, "param_count = %d\n", param_count);
+    //fprintf(stderr, "val count   = %d\n", src_fd->local_variable_count);
 
     int local_val_count = src_fd->local_variable_count - param_count;
     dest_fd->local_variable = MEM_malloc(sizeof(CS_LocalVariable) * local_val_count);
@@ -139,22 +133,23 @@ static void reset_gencode(CodegenVisitor* cvisitor) {
 }
 
 static void add_functions(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
-    fprintf(stderr, "add functions\n");
+    //fprintf(stderr, "add functions\n");
 
-    FunctionDefinition* func;    
+    FunctionDefinition* func;
+    /*
     for (func = compiler->function_list; func; func = func->next) {
         fprintf(stderr, "fname = %s, local_val_count = %d\n", func->name, func->local_variable_count);
 
     }
     fprintf(stderr, "func size = %d\n", compiler->function_count);
+    */
 
     cvisitor->exec->function = MEM_malloc(sizeof(CS_Function) * compiler->function_count);
     cvisitor->exec->function_count = compiler->function_count;
     int i;
     for (i = 0, func = compiler->function_list; func; func = func->next, ++i) {
         copy_function(func, &cvisitor->exec->function[i]);
-        if (func->block) {
-            fprintf(stderr, "compile!\n");
+        if (func->block) {            
             StatementList* stmt_list = func->block->statement_list;
             while (stmt_list) {
                 traverse_stmt(stmt_list->stmt, (Visitor*)cvisitor);
@@ -210,14 +205,14 @@ int main(int argc, char* argv[]) {
         
 
         StatementList* stmt_list = compiler->stmt_list;
-        while (stmt_list) {
-            fprintf(stderr, "count\n");
+        while (stmt_list) {            
             traverse_stmt(stmt_list->stmt, (Visitor*)cvisitor);
             stmt_list = stmt_list->next;
         }
        
 
         // for test
+        fprintf(stderr, "\n-- main --\n");
         fprintf(stderr, "code len = %d\n", cvisitor->pos);
         for (int i = 0; i < cvisitor->pos; ++i) {
             fprintf(stderr, "%02x ", cvisitor->code[i]);
@@ -229,6 +224,11 @@ int main(int argc, char* argv[]) {
         exec->code = cvisitor->code;
         exec->code_size = cvisitor->pos;
         cvisitor->code = NULL;
+
+        for (int i = 0; i < exec->code_size; ++i) {
+            fprintf(stderr, "%02x ", exec->code[i]);
+        }
+        fprintf(stderr, "\n");
 
 
         // for test

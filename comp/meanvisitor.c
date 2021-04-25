@@ -22,6 +22,7 @@
 
 static int depth = 0;
 
+/*
 static void increment() {
     depth++;
 }
@@ -35,6 +36,7 @@ static void print_depth() {
         fprintf(stderr, "  ");
     }
 }
+*/
 
 static const char* get_type_name(CS_BasicType type) {
     switch(type) {
@@ -77,54 +79,74 @@ void show_mean_error(MeanVisitor *mvisitor) {
 }
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 
 static void leave_castexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
 }
 
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_boolexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
 }
 
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();
+    */
 }
 static void leave_intexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     expr->type = cs_create_type_specifier(CS_INT_TYPE);
 }
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_identexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
         
     Declaration *decl = cs_search_declaration(expr->u.identifier.name, ((MeanVisitor*)visitor)->block);
     if (decl) {
@@ -220,52 +242,72 @@ static void check_arithmetic_binary_expression(Expression* expr, Visitor* visito
 }
 
 static void enter_addexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_addexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();
+    */
 }
 static void leave_subexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
-    increment();    
+    increment();
+    */
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
-    increment();    
+    increment();
+    */
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_arithmetic_binary_expression(expr, visitor);
 }
 
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_arithmetic_binary_expression(expr, visitor);
 }
 
@@ -314,42 +356,58 @@ static void check_compare_expression(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     check_compare_expression(expr, visitor);
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_compare_expression(expr, visitor);
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_ltexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_compare_expression(expr, visitor);
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_compare_expression(expr, visitor);
 }
 
@@ -376,23 +434,31 @@ static void check_equality_binary_expression(Expression* expr, Visitor* visitor)
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
-    print_depth();
+    /*
+    print_depth();    
     increment();
+    */
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_equality_binary_expression(expr, visitor);
 
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();
+    */
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_equality_binary_expression(expr, visitor);
 }
 
@@ -413,22 +479,30 @@ static void check_logical_and_or(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();    
+    */
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_logical_and_or(expr, visitor);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();
+    */
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
     check_logical_and_or(expr, visitor);
 }
 
@@ -454,32 +528,44 @@ static void incdec_typecheck(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();   
+    */
 }
 static void leave_incexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     incdec_typecheck(expr, visitor);
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();   
+    */
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     incdec_typecheck(expr, visitor);
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();    
     increment();   
+    */
 }
 static void leave_minusexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
 
     if (expr->u.minus_expression->type->basic_type != CS_INT_TYPE &&
         expr->u.minus_expression->type->basic_type != CS_DOUBLE_TYPE) {
@@ -496,12 +582,16 @@ static void leave_minusexpr(Expression* expr, Visitor* visitor) {
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment();  
+    */
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();    
+    */
 
     if (expr->u.logical_not_expression->type->basic_type != CS_BOOLEAN_TYPE) {
         char messages[50];
@@ -552,12 +642,16 @@ static Expression* assignment_type_check(TypeSpecifier *ltype, Expression *expr,
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment(); 
+    */
 }
 static void leave_assignexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     Expression* left = expr->u.assignment_expression.left;
     Expression* right = expr->u.assignment_expression.right;
 
@@ -596,12 +690,16 @@ static Expression* check_argument(TypeSpecifier* def_type, Expression* arg, Visi
 }
 
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
+    /*
     print_depth();
     increment(); 
+    */
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     expr->type = expr->u.function_call_expression.function->type;
 
     fprintf(stderr, "type = %d\n", expr->u.function_call_expression.function->kind);
@@ -657,18 +755,22 @@ static void add_decl_to_function(FunctionDefinition* func, Declaration* decl) {
 
 
 static void enter_exprstmt(Statement* stmt, Visitor* visitor) {
+    /*
     print_depth();
     //fprintf(stderr, "enter exprstmt :\n");
     increment(); 
+    */
 }
 static void leave_exprstmt(Statement* stmt, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     //fprintf(stderr, "leave exprstmt\n");
 }
 
 static void enter_declstmt(Statement* stmt, Visitor* visitor) {
-    print_depth();
+    //print_depth();
     /*
     fprintf(stderr, "enter declstmt name=%s, type=%d:\n", 
             stmt->u.declaration_s->name,
@@ -679,11 +781,11 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
     CS_Compiler* compiler = mvisitor->compiler;
 
     if (mvisitor->block) {
-        fprintf(stderr, "add decl in a block\n");
+        //fprintf(stderr, "add decl in a block\n");
         mvisitor->block->declaration_list = cs_chain_declaration(mvisitor->block->declaration_list,
             stmt->u.declaration_s); 
         // kokokara
-        fprintf(stderr, "block type = %d\n", mvisitor->block->type);
+        //fprintf(stderr, "block type = %d\n", mvisitor->block->type);
 
         if (mvisitor->block->type == FUNCTION_BLOCK) {
             add_decl_to_function(mvisitor->block->parent.function.function, stmt->u.declaration_s);
@@ -696,25 +798,29 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 
 
     } else {
-        fprintf(stderr, "add decl as global\n");
+        //fprintf(stderr, "add decl as global\n");
         compiler->decl_list = cs_chain_declaration(compiler->decl_list, stmt->u.declaration_s);
     }
 
 
             
-    increment(); 
+    //increment(); 
 }
 
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     //fprintf(stderr, "leave declstmt\n");
 }
 
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
+    /*
     print_depth();
     //fprintf(stderr, "enter whilestatement\n");
     increment();
+    */
 
     MeanVisitor* mvisitor = (MeanVisitor*)visitor;
     Block* block = stmt->u.while_s.block;
@@ -725,8 +831,10 @@ static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
 }
 
 static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
+    */
     //fprintf(stderr, "leave whilestatement\n");
     MeanVisitor* mvisitor = (MeanVisitor*)visitor;
     Block* block = stmt->u.while_s.block;
@@ -738,42 +846,46 @@ static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
 
 
 static void enter_func(FunctionDefinition* func, Visitor* visitor) {
+    /*
     print_depth();
     fprintf(stderr, "enter function:");
     fprintf(stderr, "name(%s), type(%d) ", func->name, func->type->basic_type);
+    */
     if (func->parameter) {
-        fprintf(stderr, "args = ");
+        //fprintf(stderr, "args = ");
         ParameterList* param = func->parameter;
         while(param) {
-            fprintf(stderr, "type(%d), name(%s), ", param->type->basic_type, param->name);            
+            //fprintf(stderr, "type(%d), name(%s), ", param->type->basic_type, param->name);            
             if (func->block) {
                 Declaration* decl = cs_create_declaration(param->type->basic_type, param->name, NULL);
                 func->block->declaration_list = cs_chain_declaration(func->block->declaration_list, decl);
                 add_decl_to_function(func, decl);
-                fprintf(stderr, "\nchain decl\n");
+                //fprintf(stderr, "\nchain decl\n");
             }
 
             param = param->next;
             
             
         }
-        fprintf(stderr, "\n");
+        //fprintf(stderr, "\n");
     }
 
     if (func->block) {
         ((MeanVisitor*)visitor)->block = func->block;
     } else {
-        fprintf(stderr, "\n");
+        //fprintf(stderr, "\n");
     }
 
     //if (!func->block) fprintf(stderr, "\n");
-    increment();
+    //increment();
 }
 
 static void leave_func(FunctionDefinition* func, Visitor* visitor) {
+    /*
     decrement();
     print_depth();
     fprintf(stderr, "leave function\n");
+    */
     if (func->block) {
         ((MeanVisitor*)visitor)->block = func->block->outer_block;
     }
