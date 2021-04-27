@@ -284,21 +284,74 @@ static void leave_modexpr(Expression* expr, Visitor* visitor) {
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_gtexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GT_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GT_DOUBLE);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }
 }
 
 static void enter_geexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_geexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GE_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_GE_DOUBLE);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }
+    
 }
 
 static void enter_ltexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_ltexpr(Expression* expr, Visitor* visitor) {
+static void leave_ltexpr(Expression* expr, Visitor* visitor) {    
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LT_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LT_DOUBLE);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }
 }
 
 static void enter_leexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_leexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LE_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_LE_DOUBLE);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }
 }
 
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {

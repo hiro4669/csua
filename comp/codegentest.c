@@ -54,7 +54,7 @@ static void delete_function(CS_Function* func) {
     }
     MEM_free(func->parameter);
     
-    fprintf(stderr, "local val count = %d\n", func->local_variable_count);
+    //fprintf(stderr, "local val count = %d\n", func->local_variable_count);
     for (int i = 0; i < func->local_variable_count; ++i) {
         MEM_free(func->local_variable[i].name);
         MEM_free(func->local_variable[i].type);
@@ -66,7 +66,7 @@ static void delete_function(CS_Function* func) {
 
 static void delete_functions(CS_Executable* exec) {
     for (int i = 0; i < exec->function_count; ++i) {
-        fprintf(stderr, "f count = %d\n", i);
+        //fprintf(stderr, "f count = %d\n", i);
         delete_function(&exec->function[i]);        
     }
     if (exec->function_count > 0) {
@@ -170,6 +170,11 @@ static void add_functions(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
                 fprintf(stderr, "%02x ", cvisitor->code[i]);
             }
             */
+            fprintf(stderr, "-- function:%s --\n", cvisitor->exec->function[i].name);
+            for (int j = 0; j < cvisitor->exec->function[i].code_size; ++j) {
+                fprintf(stderr, "%02x ", cvisitor->exec->function[i].code[j]);
+            }
+            fprintf(stderr, "\n");
 
             disasm(cvisitor->exec->function[i].code, cvisitor->exec->function[i].code_size);                        
         }
