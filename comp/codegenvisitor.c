@@ -409,12 +409,34 @@ static void leave_lorexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_incexpr(Expression* expr, Visitor* visitor) {
+static void leave_incexpr(Expression* expr, Visitor* visitor) {    
+    switch (expr->u.inc_dec->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_INCREMENT);
+            break;
+        }        
+        default: {
+            fprintf(stderr, "unknown type in incexpr\n");
+            exit(1);
+            break;
+        }
+    }
 }
 
 static void enter_decexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_decexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->u.inc_dec->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_DECREMENT);
+            break;
+        }        
+        default: {
+            fprintf(stderr, "unknown type in decexpr\n");
+            exit(1);
+            break;
+        }
+    }
 }
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {

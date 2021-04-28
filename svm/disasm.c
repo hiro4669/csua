@@ -56,6 +56,14 @@ void disasm(uint8_t* code, uint32_t len) {
                 i += 2;
                 break;
             }
+            case SVM_INCREMENT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_INCREMENT].opname);
+                break;
+            }
+            case SVM_DECREMENT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_DECREMENT].opname);
+                break;
+            }
             case SVM_MINUS_INT: {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_MINUS_INT].opname);
                 break;
