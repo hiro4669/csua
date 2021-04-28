@@ -56,6 +56,30 @@ void disasm(uint8_t* code, uint32_t len) {
                 i += 2;
                 break;
             }
+            case SVM_MINUS_INT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_MINUS_INT].opname);
+                break;
+            }
+            case SVM_MINUS_DOUBLE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_MINUS_DOUBLE].opname);
+                break;
+            }
+            case SVM_EQ_INT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_EQ_INT].opname);
+                break;
+            }
+            case SVM_EQ_DOUBLE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_EQ_DOUBLE].opname);
+                break;
+            }
+            case SVM_NE_INT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_NE_INT].opname);
+                break;
+            }
+            case SVM_NE_DOUBLE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_NE_DOUBLE].opname);
+                break;
+            }
             case SVM_GT_INT: {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_GT_INT].opname);
                 break;

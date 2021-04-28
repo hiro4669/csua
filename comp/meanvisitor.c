@@ -343,6 +343,7 @@ static void check_compare_expression(Expression* expr, Visitor* visitor) {
         Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
         cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
         expr->u.binary_expression.left = cast_expr;
+        expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
         return;
     }
 
@@ -350,6 +351,7 @@ static void check_compare_expression(Expression* expr, Visitor* visitor) {
         Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, left);
         cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
         expr->u.binary_expression.right = cast_expr;
+        expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
         return;
     }
     unacceptable_type_binary_expr(expr, visitor);   

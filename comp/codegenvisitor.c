@@ -294,6 +294,7 @@ static void leave_gtexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
+            fprintf(stderr, "unknown type in gtexpr\n");
             exit(1);
         }
     }
@@ -312,6 +313,7 @@ static void leave_geexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
+            fprintf(stderr, "unknown type in geexpr\n");
             exit(1);
         }
     }
@@ -331,6 +333,7 @@ static void leave_ltexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
+            fprintf(stderr, "unknown type in ltexpr\n");
             exit(1);
         }
     }
@@ -349,6 +352,7 @@ static void leave_leexpr(Expression* expr, Visitor* visitor) {
             break;
         }
         default: {
+            fprintf(stderr, "unknown type in leexpr\n");
             exit(1);
         }
     }
@@ -357,11 +361,40 @@ static void leave_leexpr(Expression* expr, Visitor* visitor) {
 static void enter_eqexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_eqexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_EQ_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_EQ_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "unknown type in eqexpr\n");
+            exit(1);
+        }
+    }    
 }
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_neexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "ne \n");
+    switch (expr->u.binary_expression.left->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_NE_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_NE_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "unknown type in neexpr\n");
+            exit(1);
+        }
+    }    
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
@@ -386,12 +419,27 @@ static void leave_decexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_minusexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_minusexpr(Expression* expr, Visitor* visitor) {
+static void leave_minusexpr(Expression* expr, Visitor* visitor) {    
+    switch (expr->u.minus_expression->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MINUS_INT);
+            break;
+        }
+        case CS_DOUBLE_TYPE: {            
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MINUS_DOUBLE);
+            break;
+        }
+        default: {
+            exit(1);
+        }
+    }    
 }
 
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "log not expr\n");
+    exit(1);
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {
