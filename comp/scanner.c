@@ -266,6 +266,7 @@ retry:
             if ((c = read()) == '=') {
                 return MUL_ASSIGN_T;
             } else {
+                pushback();
                 return MUL;
             }
         }
@@ -273,6 +274,7 @@ retry:
             if ((c = read()) == '=') {
                 return DIV_ASSIGN_T;
             } else {
+                pushback();
                 return DIV;
             }
         }
@@ -280,6 +282,7 @@ retry:
             if ((c = read()) == '=') {
                 return MOD_ASSIGN_T;
             } else {
+                pushback();
                 return MOD;
             }
         }
