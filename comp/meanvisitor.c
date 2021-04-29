@@ -478,6 +478,7 @@ static void check_logical_and_or(Expression* expr, Visitor* visitor) {
 
         add_check_log(messages, (MeanVisitor*)visitor);
     }
+    expr->type = cs_create_type_specifier(CS_BOOLEAN_TYPE);
 }
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {

@@ -485,14 +485,14 @@ static void leave_neexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_landexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "logical and\n");
+static void leave_landexpr(Expression* expr, Visitor* visitor) {    
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_AND);
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "logical or\n");
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_OR);
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
@@ -548,8 +548,9 @@ static void leave_minusexpr(Expression* expr, Visitor* visitor) {
 static void enter_lognotexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lognotexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "log not expr\n");
-    exit(1);
+    gen_byte_code((CodegenVisitor*)visitor, SVM_LOGICAL_NOT);
+    //fprintf(stderr, "log not expr\n");
+    //exit(1);
 }
 
 static void enter_assignexpr(Expression* expr, Visitor* visitor) {

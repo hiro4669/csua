@@ -170,6 +170,18 @@ void disasm(uint8_t* code, uint32_t len) {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_LE_DOUBLE].opname);
                 break;
             }
+            case SVM_LOGICAL_AND: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_LOGICAL_AND].opname);
+                break;
+            }
+            case SVM_LOGICAL_OR: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_LOGICAL_OR].opname);
+                break;
+            }
+            case SVM_LOGICAL_NOT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_LOGICAL_NOT].opname);
+                break;
+            }
             case SVM_POP: {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_POP].opname);
                 break;
