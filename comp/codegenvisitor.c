@@ -89,7 +89,14 @@ static void leave_castexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_boolexpr(Expression* expr, Visitor* visitor) {    
+static void leave_boolexpr(Expression* expr, Visitor* visitor) {        
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+    CS_ConstantPool cp;
+    cp.type = CS_CONSTANT_INT;
+    cp.u.c_int = expr->u.boolean_value;
+    int idx = add_constant(cvisitor->exec, &cp);
+
+    gen_byte_code(cvisitor, SVM_PUSH_INT, idx);    
 }
 
 static void enter_intexpr(Expression* expr, Visitor* visitor) {
@@ -124,8 +131,6 @@ static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
     //fprintf(stderr, "idx = %d\n", idx);
 
     gen_byte_code(cvisitor, SVM_PUSH_DOUBLE, idx);
-
-    
 }
 
 
@@ -461,8 +466,7 @@ static void leave_eqexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_neexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_neexpr(Expression* expr, Visitor* visitor) {
-    fprintf(stderr, "ne \n");
+static void leave_neexpr(Expression* expr, Visitor* visitor) {    
     switch (expr->u.binary_expression.left->type->basic_type) {
         case CS_INT_TYPE: {
             gen_byte_code((CodegenVisitor*)visitor, SVM_NE_INT);
@@ -482,11 +486,13 @@ static void leave_neexpr(Expression* expr, Visitor* visitor) {
 static void enter_landexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_landexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "logical and\n");
 }
 
 static void enter_lorexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_lorexpr(Expression* expr, Visitor* visitor) {
+    fprintf(stderr, "logical or\n");
 }
 
 static void enter_incexpr(Expression* expr, Visitor* visitor) {
