@@ -309,16 +309,58 @@ static void leave_subexpr(Expression* expr, Visitor* visitor) {
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_mulexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_INT);
+            break;
+        }        
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MUL_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type \n", expr->line_number);
+            break;
+        }        
+    }    
 }
 
 static void enter_divexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_divexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_INT);
+            break;
+        }        
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_DIV_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type \n", expr->line_number);
+            break;
+        }        
+    }
 }
 
 static void enter_modexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_modexpr(Expression* expr, Visitor* visitor) {
+    switch (expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MOD_INT);
+            break;
+        }        
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_MOD_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type \n", expr->line_number);
+            break;
+        }        
+    }    
 }
 
 static void enter_gtexpr(Expression* expr, Visitor* visitor) {
