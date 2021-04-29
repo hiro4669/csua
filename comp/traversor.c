@@ -110,12 +110,13 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             break;
         }
         case FUNCTION_CALL_EXPRESSION: {
-            traverse_expr(expr->u.function_call_expression.function, visitor);
+            
             ArgumentList* arg_list = expr->u.function_call_expression.args;
             while(arg_list) {
                 traverse_expr(arg_list->expression, visitor);
                 arg_list = arg_list->next;
             }
+            traverse_expr(expr->u.function_call_expression.function, visitor);
             break;
         }
         case CAST_EXPRESSION: {

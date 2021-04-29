@@ -186,6 +186,16 @@ void disasm(uint8_t* code, uint32_t len) {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_POP].opname);
                 break;
             }
+            case SVM_PUSH_FUNCTION: {
+                uint16_t idx = fetch2(&code[i+1]);                
+                fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_PUSH_FUNCTION].opname, idx);
+                i += 2;
+                break;
+            }
+            case SVM_INVOKE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_INVOKE].opname);
+                break;
+            }
             case SVM_JUMP: {
                 uint16_t idx = fetch2(&code[i+1]);
                 fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_JUMP].opname, idx);

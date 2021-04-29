@@ -221,9 +221,10 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
     
     CS_Boolean is_function = expr->u.identifier.is_function;
 
-    if (is_function) {
-
-
+    if (is_function) {        
+        FunctionDefinition* func = expr->u.identifier.u.func;
+        fprintf(stderr, "func idx = %d\n", func->index);        
+        gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_FUNCTION, func->index);        
         // not yet
     } else {
         Declaration* decl = expr->u.identifier.u.decl;
@@ -563,6 +564,9 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 static void enter_funccallexpr(Expression* expr, Visitor* visitor) {
 }
 static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
+    //fprintf(stderr, "func call\n");
+    gen_byte_code((CodegenVisitor*)visitor, SVM_INVOKE);
+    //exit(1);
 }
 
 static void notify_assignexpr(Expression* expr, Visitor* visitor) {
