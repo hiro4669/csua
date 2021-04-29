@@ -55,7 +55,19 @@ void disasm(uint8_t* code, uint32_t len) {
             case SVM_ADD_INT: {
                 fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_ADD_INT].opname);
                 break;
-            }            
+            }
+            case SVM_ADD_DOUBLE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_ADD_DOUBLE].opname);
+                break;
+            }
+            case SVM_SUB_INT: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_SUB_INT].opname);
+                break;
+            }
+            case SVM_SUB_DOUBLE: {
+                fprintf(stderr, "%02x:%s\n", i, svm_opcode_info[SVM_SUB_DOUBLE].opname);
+                break;
+            }
             case SVM_POP_STACK_INT: {
                 uint16_t idx = fetch2(&code[i+1]);
                 fprintf(stderr, "%02x:%s %04x\n", i, svm_opcode_info[SVM_POP_STACK_INT].opname, idx);

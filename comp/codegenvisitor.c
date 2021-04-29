@@ -289,7 +289,21 @@ static void leave_addexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_subexpr(Expression* expr, Visitor* visitor) {
 }
-static void leave_subexpr(Expression* expr, Visitor* visitor) {
+static void leave_subexpr(Expression* expr, Visitor* visitor) {    
+    switch (expr->type->basic_type) {
+        case CS_INT_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_SUB_INT);
+            break;
+        }        
+        case CS_DOUBLE_TYPE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_SUB_DOUBLE);
+            break;
+        }
+        default: {
+            fprintf(stderr, "%d: unknown type \n", expr->line_number);
+            break;
+        }        
+    }    
 }
 
 static void enter_mulexpr(Expression* expr, Visitor* visitor) {
