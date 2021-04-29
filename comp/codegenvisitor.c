@@ -70,7 +70,21 @@ static void gen_byte_code(CodegenVisitor* cvisitor, SVM_Opcode op, ...) {
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {    
 }
-static void leave_castexpr(Expression* expr, Visitor* visitor) {    
+static void leave_castexpr(Expression* expr, Visitor* visitor) {     
+    switch (expr->u.cast_expression.ctype) {
+        case CS_INT_TO_DOUBLE: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_CAST_INT_TO_DOUBLE);
+            break;
+        }
+        case CS_DOUBLE_TO_INT: {
+            gen_byte_code((CodegenVisitor*)visitor, SVM_CAST_DOUBLE_TO_INT);
+            break;            
+        }
+        default: {
+            fprintf(stderr, "unknown cast type in castexpr\n");
+            exit(1);
+        }
+    }    
 }
 
 static void enter_boolexpr(Expression* expr, Visitor* visitor) {
@@ -99,7 +113,19 @@ static void leave_intexpr(Expression* expr, Visitor* visitor) {
 
 static void enter_doubleexpr(Expression* expr, Visitor* visitor) {    
 }
-static void leave_doubleexpr(Expression* expr, Visitor* visitor) {        
+static void leave_doubleexpr(Expression* expr, Visitor* visitor) {    
+    CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
+
+    CS_ConstantPool cp;
+    cp.type = CS_CONSTANT_DOUBLE;
+    cp.u.c_double = expr->u.double_value;
+    //fprintf(stderr, "d value = %f\n", cp.u.c_double);
+    int idx = add_constant(cvisitor->exec, &cp);
+    //fprintf(stderr, "idx = %d\n", idx);
+
+    gen_byte_code(cvisitor, SVM_PUSH_DOUBLE, idx);
+
+    
 }
 
 
