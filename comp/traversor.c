@@ -26,7 +26,7 @@ void traverse_stmt(Statement* stmt, Visitor* visitor) {
     
     if (stmt) {
         if (visitor->enter_stmt_list[stmt->type] == NULL) {
-            fprintf(stderr, "enter->type(%d) is null\n", stmt->type);
+            fprintf(stderr, "enter->stmttype(%d) is null\n", stmt->type);
             exit(1);
         }
                 
@@ -70,6 +70,10 @@ static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
                 stmt_list = stmt_list->next;
             }
             if (visitor->end_block_func) visitor->end_block_func(stmt, visitor, WHILE_STATEMENT);
+            break;
+        }
+        case RETURN_STATEMENT: {
+            traverse_expr(stmt->u.return_s.return_expr, visitor);
             break;
         }
         default: {

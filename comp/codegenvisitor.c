@@ -600,6 +600,11 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
 static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 }
 
+static void enter_returnstmt(Statement* stmt, Visitor* visitor) {    
+}
+static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
+}
+
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
     CodegenVisitor* cvisitor = (CodegenVisitor*)visitor;
     //fprintf(stderr, "enter while statement\n");
@@ -790,6 +795,7 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
+    enter_stmt_list[RETURN_STATEMENT]         = enter_returnstmt;
 
 
     notify_expr_list[ASSIGN_EXPRESSION]       = notify_assignexpr;
@@ -827,6 +833,7 @@ CodegenVisitor* create_codegen_visitor(CS_Compiler* compiler, CS_Executable* exe
     leave_stmt_list[EXPRESSION_STATEMENT]     = leave_exprstmt;
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
     leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
+    leave_stmt_list[RETURN_STATEMENT]         = leave_returnstmt;
 
     ((Visitor*)cvisitor)->enter_expr_list = enter_expr_list;
     ((Visitor*)cvisitor)->leave_expr_list = leave_expr_list;

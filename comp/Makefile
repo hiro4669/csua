@@ -34,7 +34,8 @@ memt: $(MEMORY) memtest.o
 
 prst: $(OBJS) parsetest.o $(MEMORY)
 	make -C ../memory
-	$(CC) -c $(CFLAGS) -DSTORAGE create.c
+#	$(CC) -c $(CFLAGS) -DSTORAGE create.c
+	$(CC) -c $(CFLAGS) create.c
 	$(CC) -o $@ $^
 
 scant: $(OBJS) $(MEMORY) scantest.o

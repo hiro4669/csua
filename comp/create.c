@@ -184,7 +184,12 @@ Statement* cs_create_while_statement(Expression *cond, Block *block) {
     block->parent.statement.statement = stmt;
 
     return stmt;
+}
 
+Statement* cs_create_return_statement(Expression* ret_expr) {
+    Statement* stmt = cs_create_statement(RETURN_STATEMENT);
+    stmt->u.return_s.return_expr = ret_expr;
+    return stmt;
 }
 
 

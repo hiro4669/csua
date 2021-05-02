@@ -202,6 +202,7 @@ typedef enum {
     EXPRESSION_STATEMENT = 1,
     DECLARATION_STATEMENT,
     WHILE_STATEMENT,
+    RETURN_STATEMENT,
     STATEMENT_TYPE_COUNT_PLUS_ONE
 } StatementType;
 
@@ -211,14 +212,19 @@ typedef struct {
     Block      *block;    
 } WhileStatement;
 
+typedef struct {
+    Expression* return_expr;
+} ReturnStatement;
+
 
 struct Statement_tag {
     StatementType type;
     int           line_number;
     union {
-        Expression     *expression_s;
-        Declaration    *declaration_s;
-        WhileStatement while_s; // shold not be pointer
+        Expression      *expression_s;
+        Declaration     *declaration_s;
+        WhileStatement  while_s; // shold not be pointer
+        ReturnStatement return_s;
     }u;
 
 };
@@ -274,6 +280,7 @@ char* cs_create_identifier(const char* str);
 Statement* cs_create_expression_statement(Expression* expr);
 Statement* cs_create_declaration_statement(CS_BasicType type, char* name, Expression* initializer);
 Statement* cs_create_while_statement(Expression *cond, Block *block);
+Statement* cs_create_return_statement(Expression* ret_expr);
 StatementList* cs_create_statement_list(Statement* stmt);
 StatementList* cs_chain_statement_list(StatementList* stmt_list, Statement* stmt);
 ParameterList* cs_create_parameter(CS_BasicType type, char *identifier);

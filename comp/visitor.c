@@ -328,6 +328,18 @@ static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "leave whilestatement\n");
 }
 
+static void enter_returnstmt(Statement* stmt, Visitor* visitor) {
+    print_depth();
+    fprintf(stderr, "enter returnstatement\n");
+    increment();
+}
+
+static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave returnstatement\n");
+}
+
 
 static void enter_func(FunctionDefinition* func, Visitor* visitor) {
     print_depth();
@@ -418,6 +430,7 @@ Visitor* create_treeview_visitor() {
     enter_stmt_list[EXPRESSION_STATEMENT]     = enter_exprstmt;
     enter_stmt_list[DECLARATION_STATEMENT]    = enter_declstmt;
     enter_stmt_list[WHILE_STATEMENT]          = enter_whilestmt;
+    enter_stmt_list[RETURN_STATEMENT]         = enter_returnstmt;
     
 
     
@@ -452,6 +465,7 @@ Visitor* create_treeview_visitor() {
     leave_stmt_list[EXPRESSION_STATEMENT]     = leave_exprstmt;
     leave_stmt_list[DECLARATION_STATEMENT]    = leave_declstmt;
     leave_stmt_list[WHILE_STATEMENT]          = leave_whilestmt;
+    leave_stmt_list[RETURN_STATEMENT]         = leave_returnstmt;
     
 
     visitor->enter_expr_list = enter_expr_list;

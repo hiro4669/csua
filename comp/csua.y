@@ -71,7 +71,7 @@
 %type <expression> expression assignment_expression logical_or_expression
                  logical_and_expression equality_expression relational_expression
                  additive_expression multiplicative_expression unary_expression
-                 postfix_expression primary_expression
+                 postfix_expression primary_expression expression_opt
                  
 %type <argument_list> argument_list                 
 %type <block> block
@@ -79,7 +79,7 @@
 %type <parameter_list> parameter_list                 
 %type <assignment_operator> assignment_operator
 %type <type_specifier> type_specifier
-%type <statement> statement declaration_statement while_statement
+%type <statement> statement declaration_statement while_statement return_statement
 
 %%
 translation_unit
@@ -147,6 +147,7 @@ statement
                 $$ = $1;
         }
         | while_statement
+        | return_statement
 
 	;
         
@@ -170,7 +171,17 @@ while_statement
         }
         ;
 
+expression_opt 
+        : { $$ = NULL; }
+        | expression
+        ;
 
+return_statement
+        : RETURN expression_opt SEMICOLON
+        {
+                $$ = cs_create_return_statement($2);
+        }
+        ;
         
 type_specifier
         : BOOLEAN_T { $$ = CS_BOOLEAN_TYPE; }
