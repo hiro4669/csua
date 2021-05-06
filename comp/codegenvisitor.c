@@ -603,6 +603,9 @@ static void leave_declstmt(Statement* stmt, Visitor* visitor) {
 static void enter_returnstmt(Statement* stmt, Visitor* visitor) {    
 }
 static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
+    //fprintf(stderr, "enter returnstmt\n");
+    gen_byte_code((CodegenVisitor*)visitor, SVM_RETURN);
+    //exit(1);
 }
 
 static void enter_whilestmt(Statement* stmt, Visitor* visitor) {
