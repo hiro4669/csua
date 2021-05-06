@@ -53,6 +53,8 @@ struct MeanVisitor_tag {
     Visitor       visitor;
     CS_Compiler  *compiler;
     MeanCheckLog *mean_log;
+
+    FunctionDefinition *func;
     Block        *block;
 };
 

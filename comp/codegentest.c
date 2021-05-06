@@ -246,7 +246,7 @@ int main(int argc, char* argv[]) {
         delete_codegen_visitor(cvisitor);
         
         delete_executable(exec);
-    }
+    }        
 
     fclose(fin);
     CS_delete_compiler(compiler);

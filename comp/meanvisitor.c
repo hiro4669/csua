@@ -63,9 +63,9 @@ static void add_check_log(const char *str, MeanVisitor* mvisitor) {
     strcpy(log->log_str, str);
     MeanCheckLog *p;
     if (mvisitor->mean_log == NULL) {
-        mvisitor->mean_log = log;
+        mvisitor->mean_log = log;       
         return;
-    } else {
+    } else {        
         for (p = mvisitor->mean_log; p->next; p = p->next);
         p->next = log;
     }
@@ -636,9 +636,15 @@ static Expression* assignment_type_check(TypeSpecifier *ltype, Expression *expr,
         Expression *cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, expr);
         cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
         return cast_expr;
-    } else {
-        fprintf(stderr, "cast error\n");
-        exit(1);
+    } else {        
+        char messages[100];
+        sprintf(messages, "%d: cast mismatch left = %s, right = %s",
+        expr->line_number,
+        get_type_name(ltype->basic_type),
+        get_type_name(expr->type->basic_type));
+        add_check_log(messages, (MeanVisitor*)visitor);     
+
+        //exit(1);
     }
 
     return expr;
@@ -754,6 +760,7 @@ static void add_decl_to_function(FunctionDefinition* func, Declaration* decl) {
     func->local_variable[func->local_variable_count] = decl;
     decl->index = func->local_variable_count;
     func->local_variable_count++;
+    //fprintf(stderr, "-------- local val count = %s: %d\n", decl->name, func->local_variable_count);
 }
 
 
@@ -791,6 +798,7 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
         //fprintf(stderr, "block type = %d\n", mvisitor->block->type);
 
         if (mvisitor->block->type == FUNCTION_BLOCK) {
+            fprintf(stderr, "add decl from declstmt\n");
             add_decl_to_function(mvisitor->block->parent.function.function, stmt->u.declaration_s);
         } else {
             char messages[100];
@@ -846,6 +854,77 @@ static void enter_returnstmt(Statement* stmt, Visitor* visitor) {
 }
 static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
     fprintf(stderr, "leave returnstmt\n");
+
+    Expression* ret_expr = stmt->u.return_s.return_expr;
+    FunctionDefinition* func = ((MeanVisitor*)visitor)->func;
+    if (ret_expr == NULL) {
+        fprintf(stderr, "return value is null\n");
+        if (func) {
+            fprintf(stderr, "func exists\n");
+            switch(func->type->basic_type) {
+                case CS_BOOLEAN_TYPE: {
+                    ret_expr = cs_create_boolean_expression(CS_FALSE);
+                    break;
+                }
+                case CS_INT_TYPE: {
+                    ret_expr = cs_create_int_expression(0);
+                    break;
+                }
+                case CS_DOUBLE_TYPE: {
+                    ret_expr = cs_create_double_expression(0.0);
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "undefined type in leave_stmt\n");
+                    exit(1);
+                }
+            }
+            stmt->u.return_s.return_expr = ret_expr;
+        } else {
+            // error
+            char messages[100];
+            sprintf(messages, "%d: Cannot declare return in global\n", stmt->line_number);
+            add_check_log(messages, (MeanVisitor*)visitor);            
+        }
+    } else {
+        fprintf(stderr, "return value is not null\n");
+
+        if (func) {
+            if (cs_same_type(ret_expr->type, func->type)) {
+                fprintf(stderr, "nothing to do\n");
+                return;
+            }
+
+            if (cs_is_int(func->type) && cs_is_double(ret_expr->type)) {
+                //fprintf(stderr, "cast to int\n");
+                Expression* cast_expr = cs_create_cast_expression(CS_DOUBLE_TO_INT, ret_expr);
+                cast_expr->type = cs_create_type_specifier(CS_INT_TYPE);
+                stmt->u.return_s.return_expr = cast_expr;
+                
+            } else if (cs_is_double(func->type) && cs_is_int(ret_expr->type)) {
+                //fprintf(stderr, "cast to double\n");
+                Expression* cast_expr = cs_create_cast_expression(CS_INT_TO_DOUBLE, ret_expr);
+                cast_expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+                stmt->u.return_s.return_expr = cast_expr;
+
+            } else {
+                //fprintf(stderr, "type mismatch\n");
+                char messages[100];
+                sprintf(messages, "%d: cast mismatch left = %s, right = %s",
+                stmt->line_number,
+                get_type_name(func->type->basic_type),
+                get_type_name(ret_expr->type->basic_type));
+                add_check_log(messages, (MeanVisitor*)visitor);            
+            }
+        } else {
+            // error
+            char messages[100];
+            sprintf(messages, "%d: Cannot declare return in global\n", stmt->line_number);
+            add_check_log(messages, (MeanVisitor*)visitor);     
+        }
+    }
+
+    //exit(1);
 }
 
 
@@ -857,6 +936,7 @@ static void enter_func(FunctionDefinition* func, Visitor* visitor) {
     fprintf(stderr, "enter function:");
     fprintf(stderr, "name(%s), type(%d) ", func->name, func->type->basic_type);
     */
+   ((MeanVisitor*)visitor)->func = func;
     if (func->parameter) {
         //fprintf(stderr, "args = ");
         ParameterList* param = func->parameter;
@@ -866,7 +946,6 @@ static void enter_func(FunctionDefinition* func, Visitor* visitor) {
                 Declaration* decl = cs_create_declaration(param->type->basic_type, param->name, NULL);
                 func->block->declaration_list = cs_chain_declaration(func->block->declaration_list, decl);
                 add_decl_to_function(func, decl);
-                //fprintf(stderr, "\nchain decl\n");
             }
 
             param = param->next;
@@ -895,6 +974,7 @@ static void leave_func(FunctionDefinition* func, Visitor* visitor) {
     if (func->block) {
         ((MeanVisitor*)visitor)->block = func->block->outer_block;
     }
+    ((MeanVisitor*)visitor)->func = NULL;
 }
 
 static void init_visit_stmt_functions(visit_stmt *func_list, size_t size) {
@@ -917,6 +997,7 @@ MeanVisitor* create_mean_visitor() {
     visitor->compiler = cs_get_current_compiler();
     visitor->block = NULL;
     visitor->mean_log = NULL;
+    visitor->func = NULL;
 
     if (!visitor->compiler) {
         fprintf(stderr, "Compiler is NULL\n");

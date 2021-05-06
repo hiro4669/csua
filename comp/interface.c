@@ -53,9 +53,18 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
 
     if (mvisitor->mean_log) {
         result = CS_FALSE;
-    } else {
+        MeanCheckLog* mlog;
+        for (mlog = mvisitor->mean_log; mlog; mlog = mlog->next) {
+            fprintf(stderr, "%s\n", mlog->log_str);
+        }
+    } else {        
         result = CS_TRUE;
     }
+
+    printf("result = %d\n", result);
+
+
+    
 
     delete_mean_visitor(mvisitor);
 
