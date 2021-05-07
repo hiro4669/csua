@@ -223,7 +223,7 @@ static void leave_identexpr(Expression* expr, Visitor* visitor) {
 
     if (is_function) {        
         FunctionDefinition* func = expr->u.identifier.u.func;
-        fprintf(stderr, "func idx = %d\n", func->index);        
+        //fprintf(stderr, "func idx = %d\n", func->index);        
         gen_byte_code((CodegenVisitor*)visitor, SVM_PUSH_FUNCTION, func->index);        
         // not yet
     } else {
@@ -676,7 +676,8 @@ static uint16_t fetch2(uint8_t *code, uint32_t pos) {
 }
 
 void backpatch(CodegenVisitor* cvisitor) {    
-    fprintf(stderr, "--- backpatch --\n");
+    //fprintf(stderr, "--- backpatch --\n");
+    
     for (int i = 0; i < cvisitor->pos; ++i) {
         //fprintf(stderr, "%02x ", cvisitor->code[i]);
         switch (cvisitor->code[i]) {
@@ -711,7 +712,7 @@ void backpatch(CodegenVisitor* cvisitor) {
 
 
     }
-    fprintf(stderr, "\n");
+    //fprintf(stderr, "\n");
 
 
 

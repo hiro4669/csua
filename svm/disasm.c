@@ -10,10 +10,34 @@ static uint16_t fetch2(uint8_t* code) {
     return (upper << 8 | lower) & 0xffff;
 }
 
+
+static const char* get_type_name(CS_BasicType type) {
+    switch(type) {
+        case CS_BOOLEAN_TYPE: {
+            return "boolean";            
+        }
+        case CS_INT_TYPE: {
+            return "int";
+        }
+        case CS_DOUBLE_TYPE: {
+            return "double";            
+        }
+        default: {
+            return "untyped";
+        }
+    }
+}
+
+void show_local_variables(CS_LocalVariable* variables, int size) {
+    for (int i = 0; i < size; ++i) {        
+        fprintf(stderr, "name=%s, type=%s\n", variables[i].name, get_type_name(variables[i].type->basic_type));
+    }
+}
+
 void show_variables(CS_Variable* variables, int size) {
     fprintf(stderr, "-- variables --\n");    
     for (int i = 0; i < size; ++i) {
-        fprintf(stderr, "name=%s, type=%d\n", variables[i].name, variables[i].type->basic_type);
+        fprintf(stderr, "name=%s, type=%s\n", variables[i].name, get_type_name(variables[i].type->basic_type));
     }
 }
 

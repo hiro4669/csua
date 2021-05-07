@@ -671,7 +671,6 @@ static void leave_assignexpr(Expression* expr, Visitor* visitor) {
 static Expression* check_argument(TypeSpecifier* def_type, Expression* arg, Visitor* visitor) {
     if (def_type->basic_type == arg->type->basic_type) {
         // nothing to do
-        fprintf(stderr, "nothing to do\n");
         return arg;
     }
 
@@ -711,22 +710,22 @@ static void leave_funccallexpr(Expression* expr, Visitor* visitor) {
     */
     expr->type = expr->u.function_call_expression.function->type;
 
-    fprintf(stderr, "type = %d\n", expr->u.function_call_expression.function->kind);
+    //fprintf(stderr, "type = %d\n", expr->u.function_call_expression.function->kind);
 
     if (expr->u.function_call_expression.function->kind == IDENTIFIER_EXPRESSION) {
         Expression* ident_expr = expr->u.function_call_expression.function;
         FunctionDefinition* func = ident_expr->u.identifier.u.func;
-        fprintf(stderr, "func name = %s\n", func->name);
+        //fprintf(stderr, "func name = %s\n", func->name);
         ParameterList* pos;
         ArgumentList* arg_pos;
         int param_count = 0;
         for (pos = func->parameter; pos; pos = pos->next) {        
-            fprintf(stderr, "name = %s, type=%d \n", pos->name, pos->type->basic_type);
+            //fprintf(stderr, "name = %s, type=%d \n", pos->name, pos->type->basic_type);
             param_count++;
         }
         int arg_count = 0;
         for (arg_pos = expr->u.function_call_expression.args; arg_pos; arg_pos = arg_pos->next) {
-            fprintf(stderr, "expr type = %d\n", arg_pos->expression->type->basic_type);
+            //fprintf(stderr, "expr type = %d\n", arg_pos->expression->type->basic_type);
             arg_count++;
         }
 
@@ -794,11 +793,8 @@ static void enter_declstmt(Statement* stmt, Visitor* visitor) {
         //fprintf(stderr, "add decl in a block\n");
         mvisitor->block->declaration_list = cs_chain_declaration(mvisitor->block->declaration_list,
             stmt->u.declaration_s); 
-        // kokokara
-        //fprintf(stderr, "block type = %d\n", mvisitor->block->type);
-
+        
         if (mvisitor->block->type == FUNCTION_BLOCK) {
-            fprintf(stderr, "add decl from declstmt\n");
             add_decl_to_function(mvisitor->block->parent.function.function, stmt->u.declaration_s);
         } else {
             char messages[100];
@@ -850,17 +846,14 @@ static void leave_whilestmt(Statement* stmt, Visitor* visitor) {
 }
 
 static void enter_returnstmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "enter returnstmt\n");
 }
 static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
-    fprintf(stderr, "leave returnstmt\n");
-
     Expression* ret_expr = stmt->u.return_s.return_expr;
     FunctionDefinition* func = ((MeanVisitor*)visitor)->func;
     if (ret_expr == NULL) {
-        fprintf(stderr, "return value is null\n");
+        //fprintf(stderr, "return value is null\n");
         if (func) {
-            fprintf(stderr, "func exists\n");
+            //fprintf(stderr, "func exists\n");
             switch(func->type->basic_type) {
                 case CS_BOOLEAN_TYPE: {
                     ret_expr = cs_create_boolean_expression(CS_FALSE);
@@ -887,11 +880,11 @@ static void leave_returnstmt(Statement* stmt, Visitor* visitor) {
             add_check_log(messages, (MeanVisitor*)visitor);            
         }
     } else {
-        fprintf(stderr, "return value is not null\n");
+        //fprintf(stderr, "return value is not null\n");
 
         if (func) {
             if (cs_same_type(ret_expr->type, func->type)) {
-                fprintf(stderr, "nothing to do\n");
+                //fprintf(stderr, "nothing to do\n");
                 return;
             }
 

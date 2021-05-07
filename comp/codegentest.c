@@ -176,6 +176,14 @@ static void add_functions(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
             }
             fprintf(stderr, "\n");
 
+            fprintf(stderr, "--- parameters ---\n");
+            show_local_variables(cvisitor->exec->function[i].parameter, 
+                                cvisitor->exec->function[i].parameter_count);
+
+            fprintf(stderr, "--- local_variables ---\n");
+            show_local_variables(cvisitor->exec->function[i].local_variable, 
+                                cvisitor->exec->function[i].local_variable_count);
+
             disasm(cvisitor->exec->function[i].code, cvisitor->exec->function[i].code_size);                        
         }
     }

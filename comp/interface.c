@@ -60,12 +60,7 @@ static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     } else {        
         result = CS_TRUE;
     }
-
-    printf("result = %d\n", result);
-
-
     
-
     delete_mean_visitor(mvisitor);
 
     DeclarationList* decls;
