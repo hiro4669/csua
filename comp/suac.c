@@ -140,6 +140,16 @@ static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
             cvisitor->exec->function[i].code = cvisitor->code;
             cvisitor->exec->function[i].code_size = cvisitor->pos;
 
+            /*
+            if (disasm_flg) {
+                fprintf(stderr, "--- function: %s ---\n", cvisitor->exec->function[i].name);
+                fprintf(stderr, "--- arguments ---\n");
+                show_local_variables(cvisitor->exec->function[i].parameter, 
+                                cvisitor->exec->function[i].parameter_count);
+
+                fprintf(stderr, "\n");
+            }
+            */
             reset_gencode(cvisitor);
         }
     }
@@ -150,9 +160,20 @@ static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
 
 int main(int argc, char* argv[]) {
 
+    int disasm_flg = 0;
+
     FILE *fin;
-    if (argc == 2) {        
-        fin = fopen(argv[1], "r");
+    if (argc >= 2) {
+
+        for (int i = 1; i < argc-1; ++i) {
+            //fprintf(stderr, "op = %s\n", argv[i]);
+            if (strcmp("-d", argv[i]) == 0) {
+                disasm_flg = 1;
+            }
+        }
+
+        fin = fopen(argv[argc - 1], "r");
+
     } else {
         fprintf(stderr, "Usage ./suac filename\n");
         exit(1);
@@ -180,7 +201,27 @@ int main(int argc, char* argv[]) {
         exec->code_size = cvisitor->pos;
         reset_gencode(cvisitor);
 
-        //disasm(exec->code, exec->code_size);
+        if (disasm_flg) {
+            fprintf(stderr, "func count = %d\n", exec->function_count);
+            for (int i = 0; i < exec->function_count; ++i) {
+                fprintf(stderr, "--- function: %s ---\n", exec->function[i].name);
+                fprintf(stderr, "\n--- parameters ---\n");
+                show_local_variables(exec->function[i].parameter, exec->function[i].parameter_count);
+                
+                fprintf(stderr, "\n--- local variables ---\n");
+                show_local_variables(exec->function[i].local_variable, exec->function[i].local_variable_count);
+                fprintf(stderr, "\n");
+                disasm(exec->function[i].code, exec->function[i].code_size);
+
+
+
+            }
+
+
+            fprintf(stderr, "\n--- main ---\n");
+            show_variables(exec->global_variable, exec->global_variable_count);
+            disasm(exec->code, exec->code_size);
+        }
 
         delete_codegen_visitor(cvisitor);
         delete_executable(exec);

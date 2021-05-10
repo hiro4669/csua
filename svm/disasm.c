@@ -42,7 +42,7 @@ void show_variables(CS_Variable* variables, int size) {
 }
 
 void disasm(uint8_t* code, uint32_t len) {
-    fprintf(stderr, "-- Disassemblee --\n");
+    fprintf(stderr, "-- Disassemble --\n");
     fprintf(stderr, "-- code len(%d) --\n", len);
     for (uint32_t i = 0; i < len; ++i) {        
         switch(code[i]) {
