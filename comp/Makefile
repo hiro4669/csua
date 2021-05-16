@@ -14,7 +14,7 @@ YACC = csua.y
 #	#make -C ../svm
 #	$(CC) -o $@ $^
 
-suac: $(MEMORY) $(OBJS) $(CODEGEN) suac.o codegenvisitor.o
+suac: $(MEMORY) $(OBJS) $(CODEGEN) suac.o codegenvisitor.o serialize.o
 	make -C ../memory
 	make -C ../svm
 	$(CC) -o $@ $^

@@ -140,16 +140,6 @@ static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
             cvisitor->exec->function[i].code = cvisitor->code;
             cvisitor->exec->function[i].code_size = cvisitor->pos;
 
-            /*
-            if (disasm_flg) {
-                fprintf(stderr, "--- function: %s ---\n", cvisitor->exec->function[i].name);
-                fprintf(stderr, "--- arguments ---\n");
-                show_local_variables(cvisitor->exec->function[i].parameter, 
-                                cvisitor->exec->function[i].parameter_count);
-
-                fprintf(stderr, "\n");
-            }
-            */
             reset_gencode(cvisitor);
         }
     }
@@ -201,6 +191,7 @@ int main(int argc, char* argv[]) {
         exec->code_size = cvisitor->pos;
         reset_gencode(cvisitor);
 
+        /* Disassemble */
         if (disasm_flg) {
             fprintf(stderr, "func count = %d\n", exec->function_count);
             for (int i = 0; i < exec->function_count; ++i) {
@@ -216,12 +207,16 @@ int main(int argc, char* argv[]) {
 
 
             }
-
-
             fprintf(stderr, "\n--- main ---\n");
             show_variables(exec->global_variable, exec->global_variable_count);
             disasm(exec->code, exec->code_size);
         }
+
+        /* Serialize Code */
+        serialize(exec);
+
+
+
 
         delete_codegen_visitor(cvisitor);
         delete_executable(exec);

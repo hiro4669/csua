@@ -314,6 +314,9 @@ DeclarationList* cs_chain_declaration(DeclarationList* decl_list, Declaration* d
 /* meanvisitor.c */
 void show_mean_error(MeanVisitor *mvisitor);
 
+/* serialize.c */
+void serialize(CS_Executable* exec);
+
 
 
 #endif /* CSUA_H */
