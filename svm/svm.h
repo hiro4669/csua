@@ -135,6 +135,11 @@ typedef struct {
     uint8_t s_size;
 } OpcodeInfo;
 
+typedef enum {
+    SVM_INT = 1,
+    SVM_DOUBLE,
+} SVM_CONSTANT_TYPE;
+
 extern OpcodeInfo svm_opcode_info[];
 
 /* disasm.c */
