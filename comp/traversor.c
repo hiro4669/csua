@@ -53,9 +53,9 @@ void traverse_func(FunctionDefinition* function, Visitor* visitor) {
 
 static void traverse_stmt_children(Statement* stmt, Visitor* visitor) {
     switch(stmt->type) {
-        case EXPRESSION_STATEMENT: {
+        case EXPRESSION_STATEMENT: {            
             traverse_expr(stmt->u.expression_s, visitor);
-          break;  
+            break;  
         }
         case DECLARATION_STATEMENT: {
             traverse_expr(stmt->u.declaration_s->initializer, visitor);
