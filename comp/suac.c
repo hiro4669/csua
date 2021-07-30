@@ -95,8 +95,6 @@ static void copy_function(FunctionDefinition* src_fd, CS_Function* dest_fd) {
     int param_count = 0;
     ParameterList* param;
     for (param = src_fd->parameter; param; param = param->next) param_count++;
-        //param_count++;
-    //}
 
     /* parameteres are arguments */
     dest_fd->parameter = MEM_malloc(sizeof(CS_LocalVariable) * param_count);
