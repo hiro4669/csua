@@ -144,28 +144,34 @@ static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
 }
 
 
-
-
 int main(int argc, char* argv[]) {
 
-    int disasm_flg = 0;
+    int verbose = 0;
+    int deser_flg = 0;
 
     FILE *fin;
     if (argc >= 2) {
 
         for (int i = 1; i < argc-1; ++i) {
             //fprintf(stderr, "op = %s\n", argv[i]);
-            if (strcmp("-d", argv[i]) == 0) {
-                disasm_flg = 1;
+            if (strcmp("-v", argv[i]) == 0) {
+                verbose = 1;
+            } else if (strcmp("-d", argv[i]) == 0) {
+                deser_flg = 1;
             }
         }
-
-        fin = fopen(argv[argc - 1], "r");
-
     } else {
         fprintf(stderr, "Usage ./suac filename\n");
         exit(1);
     }
+
+
+    if (deser_flg) {
+        deserialize(argv[argc - 1]);
+        exit(1);
+    }
+
+    fin = fopen(argv[argc - 1], "r");
 
     CS_Compiler* compiler = CS_create_compiler();
     CS_Boolean result = CS_compile(compiler, fin); // until mean check
@@ -190,7 +196,7 @@ int main(int argc, char* argv[]) {
         reset_gencode(cvisitor);
 
         /* Disassemble */
-        if (disasm_flg) {
+        if (verbose) {
             fprintf(stderr, "func count = %d\n", exec->function_count);
             for (int i = 0; i < exec->function_count; ++i) {
                 fprintf(stderr, "--- function: %s ---\n", exec->function[i].name);
@@ -201,9 +207,6 @@ int main(int argc, char* argv[]) {
                 show_local_variables(exec->function[i].local_variable, exec->function[i].local_variable_count);
                 fprintf(stderr, "\n");
                 disasm(exec->function[i].code, exec->function[i].code_size);
-
-
-
             }
             fprintf(stderr, "\n--- main ---\n");
             show_variables(exec->global_variable, exec->global_variable_count);
@@ -213,17 +216,15 @@ int main(int argc, char* argv[]) {
         /* Serialize Code */
         serialize(exec);
 
-
-
-
         delete_codegen_visitor(cvisitor);
         delete_executable(exec);
     } else {
         fprintf(stderr, "Error\n");
     }
-
+        
     fclose(fin);
     CS_delete_compiler(compiler);
-    MEM_dump_memory();
+    MEM_dump_memory();    
+    
     return 1;
 }

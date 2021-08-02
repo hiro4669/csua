@@ -4,6 +4,22 @@
 #include "csua.h"
 #include "../svm/svm.h"
 
+
+static CS_Boolean is_jump(uint8_t op) {
+    switch (op) {
+        case SVM_JUMP:
+        case SVM_JUMP_IF_FALSE:
+        case SVM_JUMP_IF_TRUE:
+        case SVM_INVOKE: {
+            return CS_TRUE;            
+        }
+        default: {
+            return CS_FALSE;
+        }
+    }
+    return CS_FALSE;
+}
+
 static void write_char(char c, FILE* fp) {
     fwrite(&c, 1, 1, fp);
 }

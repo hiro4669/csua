@@ -317,6 +317,8 @@ void show_mean_error(MeanVisitor *mvisitor);
 /* serialize.c */
 void serialize(CS_Executable* exec);
 
+/* deserialize.c */
+void deserialize(char* fname);
 
 
 #endif /* CSUA_H */
