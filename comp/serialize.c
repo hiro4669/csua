@@ -102,8 +102,11 @@ void serialize(CS_Executable* exec) {
         fprintf(stderr, "fname = %s\n", exec->function[i].name);
         fprintf(stderr, "parameter_count = %d\n", exec->function[i].parameter_count);
         fprintf(stderr, "local_val_count = %d\n", exec->function[i].local_variable_count);
-        fprintf(stderr, "val_count = %d\n", total_val_count);
-        write_int(total_val_count, fp);        
+        //fprintf(stderr, "val_count = %d\n", total_val_count);
+        write_int(exec->function[i].parameter_count, fp);
+        write_int(exec->function[i].local_variable_count, fp);
+
+        //write_int(total_val_count, fp);        
         for (int j = 0; j < exec->function[i].parameter_count; j++) {
             write_int(exec->function[i].parameter[j].type->basic_type, fp);
         }

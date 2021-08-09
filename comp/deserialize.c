@@ -46,6 +46,26 @@ static void read_header(const char* buf, int *idx) {
     fprintf(stderr, "%c\n", buf[(*idx)++]);
 }
 
+static void show_type(uint8_t type) {    
+    switch (type) {
+        case CS_BOOLEAN_TYPE: {
+            fprintf(stderr, "-- boolean\n");
+            break;
+        }
+        case CS_INT_TYPE: {
+            fprintf(stderr, "-- int\n");
+            break;
+        }
+        case CS_DOUBLE_TYPE: {
+            fprintf(stderr, "-- double\n");
+            break;
+        }
+        default: {
+            break;
+        }
+    }   
+}
+
 void deserialize(char* fname) {
 
     struct stat s_buf;
@@ -91,28 +111,21 @@ void deserialize(char* fname) {
 
     int function_count = read_int(buf, &idx);
     fprintf(stderr, "function count = %d\n", function_count);
+    
     for (int i = 0; i < function_count; ++i) {
-        int total_val_count = read_int(buf, &idx);
-        fprintf(stderr, "total_val_count = %d\n", total_val_count);
-        for (int j = 0; j < total_val_count; ++j) {
+        int parameter_count = read_int(buf, &idx);
+        int local_variable_count = read_int(buf, &idx);
+        
+        fprintf(stderr, "parameter_count = %d\n", parameter_count);        
+        //fprintf(stderr, "total_val_count = %d\n", total_val_count);
+        for (int j = 0; j < parameter_count; ++j) {
             int type = read_int(buf, &idx);
-            switch (type) {
-                case CS_BOOLEAN_TYPE: {
-                    fprintf(stderr, "-- boolean\n");
-                    break;
-                }
-                case CS_INT_TYPE: {
-                    fprintf(stderr, "-- int\n");
-                    break;
-                }
-                case CS_DOUBLE_TYPE: {
-                    fprintf(stderr, "-- double\n");
-                    break;
-                }
-                default: {
-                    break;
-                }
-            }
+            show_type(type);           
+        }
+        fprintf(stderr, "local_variable_count = %d\n", local_variable_count);
+        for (int j = 0; j < local_variable_count; ++j) {
+            int type = read_int(buf, &idx);
+            show_type(type); 
         }
     }
 
@@ -120,23 +133,7 @@ void deserialize(char* fname) {
     fprintf(stderr, "global_variable_count = %d\n", global_variable_count);
     for (int i = 0; i < global_variable_count; ++i) {
         int type = read_int(buf, &idx);
-        switch (type) {
-            case CS_BOOLEAN_TYPE: {
-                fprintf(stderr, "-- boolean\n");
-                break;
-            }
-            case CS_INT_TYPE: {
-                fprintf(stderr, "-- int\n");
-                break;
-            }
-            case CS_DOUBLE_TYPE: {
-                fprintf(stderr, "-- double\n");
-                break;
-            }
-            default: {
-                break;
-            }            
-        }   
+        show_type(type);        
     }
     int total_code_size = read_int(buf, &idx);
     fprintf(stderr, "total_code_size = %d\n", total_code_size);
@@ -150,14 +147,6 @@ void deserialize(char* fname) {
     fprintf(stderr, "\n");
     fprintf(stderr, "idx = %d\n", idx);
     disasm((uint8_t*)&buf[idx], total_code_size);
-
-
-
-
-
-    
-
-
 
     free(buf);
 }
