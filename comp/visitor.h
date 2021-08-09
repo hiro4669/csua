@@ -33,6 +33,11 @@ typedef struct {
     Table* tables;
 } JumpTable;
 
+typedef struct {
+    uint16_t idx;
+    Table* tables;
+} LinkTable;
+
 struct Visitor_tag {
     visit_expr* enter_expr_list;
     visit_expr* leave_expr_list;
@@ -101,5 +106,11 @@ void delete_jumptable(JumpTable* jtable);
 uint16_t get_index(JumpTable* jtable);
 void set_address(JumpTable* jtable, uint16_t idx, uint16_t addr);
 uint16_t get_address(JumpTable* jtable, uint16_t idx);
+
+/* linktable.c */
+LinkTable* create_linktable();
+void delete_linktable(LinkTable* ltable);
+void add_offset(LinkTable* ltable, uint16_t addr);
+uint16_t get_offset(LinkTable* ltable, uint16_t idx);
 
 #endif
