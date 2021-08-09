@@ -6,7 +6,6 @@
 
 #include "../svm/svm.h"
 
-
 static int read_int(const char* buf, int *idx) {
     uint8_t v1 = buf[(*idx)++];
     uint8_t v2 = buf[(*idx)++];

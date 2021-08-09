@@ -121,12 +121,13 @@ static void reset_gencode(CodegenVisitor* cvisitor) {
 }
 
 static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
+    //fprintf(stderr, "add function in suac.c\n");
     cvisitor->exec->function = MEM_malloc(sizeof(CS_Function) * compiler->function_count);
     cvisitor->exec->function_count = compiler->function_count;
 
     int i;
     FunctionDefinition* func;
-    for (i = 0, func = compiler->function_list; func; func = func->next) {
+    for (i = 0, func = compiler->function_list; func; func = func->next, ++i) {
         copy_function(func, &cvisitor->exec->function[i]);
         if (func->block) {
             StatementList* stmt_list = func->block->statement_list;
@@ -139,8 +140,17 @@ static void add_function(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
             cvisitor->exec->function[i].code_size = cvisitor->pos;
 
             reset_gencode(cvisitor);
-        }
+        }       
     }
+    /*
+    for (int j = 0; j < i; ++j) {
+        fprintf(stderr, "name = %s\n", cvisitor->exec->function[j].name);
+        fprintf(stderr, "parameter_cnt = %d\n", cvisitor->exec->function[j].parameter_count);
+        fprintf(stderr, "local_variable_cnt = %d\n", cvisitor->exec->function[j].local_variable_count);
+    }
+    */
+
+
 }
 
 

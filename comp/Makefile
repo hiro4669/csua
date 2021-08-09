@@ -4,7 +4,7 @@ CFLAGS = -g -DDEBUG
 MEMORY = ../memory/memory.o ../memory/storage.o
 CODEGEN = ../svm/opinfo.o ../svm/disasm.o
 OBJS = y.tab.o scanner.o keyword.o create.o visitor.o traversor.o util.o interface.o meanvisitor.o \
-jumptable.o
+jumptable.o linktable.o
 EXEC = scantest.o
 
 YACC = csua.y
