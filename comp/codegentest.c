@@ -189,7 +189,19 @@ static void add_functions(CS_Compiler* compiler, CodegenVisitor* cvisitor) {
     }
     
     //exit(1);
+}
 
+static void function_tree_view(FunctionDefinition* func) {
+    fprintf(stderr, "--- tree view ---\n");
+    FunctionDefinition* function = func;
+    Visitor* tvisitor = create_treeview_visitor();
+    while (function) {
+        traverse_func(function, tvisitor);
+        function = function->next;
+    }
+
+
+    delete_visitor(tvisitor);
 }
 
 int main(int argc, char* argv[]) {
@@ -207,6 +219,9 @@ int main(int argc, char* argv[]) {
 
     CS_Compiler* compiler = CS_create_compiler();
     CS_Boolean result = CS_compile(compiler, fin);
+
+    /* show function AST */
+    //function_tree_view(compiler->function_list);
 
     if (result) {
         printf("\nexecute code generate\n");

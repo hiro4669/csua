@@ -35,12 +35,38 @@ void CS_delete_compiler(CS_Compiler* compiler) {
     MEM_dispose(storage);
 }
 
+static void add_return_statement(FunctionDefinition* function) {
+    //fprintf(stderr, "-- add return statement --\n");
+    //fprintf(stderr, "function name = %s\n", function->name);
+
+    if (function->block) {
+        StatementList* stmt_list = function->block->statement_list;
+        if (stmt_list) {
+            for (; stmt_list->next; stmt_list = stmt_list->next)
+                ;       
+            if (stmt_list->stmt->type == RETURN_STATEMENT) {
+                //fprintf(stderr, "already return exists\n");
+                return; // do nothing
+            }
+            //fprintf(stderr, "add return to the end\n");
+            Statement* rstmt = cs_create_return_statement(NULL);
+            cs_chain_statement_list(stmt_list, rstmt);
+        } else {
+            //fprintf(stderr, "create and add\n");
+            Statement* rstmt = cs_create_return_statement(NULL);
+            function->block->statement_list = cs_create_statement_list(rstmt);
+        }
+    }
+    return;
+}
+
 
 static CS_Boolean do_mean_check(CS_Compiler* compiler) {
     CS_Boolean result;
     MeanVisitor* mvisitor = create_mean_visitor();
     FunctionDefinition* function = compiler->function_list;
     while (function) {
+        add_return_statement(function);
         traverse_func(function, (Visitor*)mvisitor);
         function = function->next;
     }
