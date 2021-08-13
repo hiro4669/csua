@@ -759,6 +759,7 @@ static void add_decl_to_function(FunctionDefinition* func, Declaration* decl) {
     func->local_variable[func->local_variable_count] = decl;
     decl->index = func->local_variable_count;
     func->local_variable_count++;
+    //fprintf(stderr, "func name = %s\n", func->name);
     //fprintf(stderr, "-------- local val count = %s: %d\n", decl->name, func->local_variable_count);
 }
 

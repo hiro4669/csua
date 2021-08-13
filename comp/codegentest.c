@@ -46,22 +46,31 @@ static CS_Executable* create_executable(CS_Compiler* compiler) {
 
 
 static void delete_function(CS_Function* func) {
+    fprintf(stderr, "delete function: %s\n", func->name);
     MEM_free(func->type);
     MEM_free(func->name);
     for (int i = 0; i < func->parameter_count; ++i) {
         MEM_free(func->parameter[i].name);
         MEM_free(func->parameter[i].type);
     }
-    MEM_free(func->parameter);
+
+    if (func->parameter) {
+        MEM_free(func->parameter);
+    }
     
-    //fprintf(stderr, "local val count = %d\n", func->local_variable_count);
+//    fprintf(stderr, "local val count = %d\n", func->local_variable_count);
     for (int i = 0; i < func->local_variable_count; ++i) {
         MEM_free(func->local_variable[i].name);
         MEM_free(func->local_variable[i].type);
     }
-    MEM_free(func->local_variable);
+    if (func->local_variable) {
+        MEM_free(func->local_variable);
+    }    
+    if (func->code) {
+        MEM_free(func->code);
+    }
 
-    MEM_free(func->code);
+    fprintf(stderr, "end of delete function\n");
 }
 
 static void delete_functions(CS_Executable* exec) {
@@ -75,19 +84,19 @@ static void delete_functions(CS_Executable* exec) {
     //exit(1);
 }
 
-static void delete_executable(CS_Executable* exec) {
+static void delete_executable(CS_Executable* exec) {    
     delete_functions(exec);
-
     for (int i = 0; i < exec->global_variable_count; ++i) {
         MEM_free(exec->global_variable[i].name);
         MEM_free(exec->global_variable[i].type);
     }
-
+    
     if (exec->global_variable) MEM_free(exec->global_variable);
     if (exec->constant_pool) MEM_free(exec->constant_pool);
     if (exec->code) MEM_free(exec->code);
 
     MEM_free(exec);
+    fprintf(stderr, "end of delete_executable\n");
 }
 
 static CS_TypeSpecifier* copy_type(TypeSpecifier *type) {
@@ -100,6 +109,13 @@ static void copy_function(FunctionDefinition* src_fd, CS_Function* dest_fd) {
 
     dest_fd->type = copy_type(src_fd->type);
     dest_fd->name = MEM_strdup(src_fd->name);
+    dest_fd->parameter_count = 0;
+    dest_fd->parameter = NULL;
+    dest_fd->local_variable_count = 0;
+    dest_fd->local_variable = NULL;
+    dest_fd->code_size = 0;
+    dest_fd->code = NULL;
+
 
     int i;
     int param_count = 0;
@@ -107,23 +123,29 @@ static void copy_function(FunctionDefinition* src_fd, CS_Function* dest_fd) {
     for (param = src_fd->parameter; param; param = param->next) {
         param_count++;
     }
-    dest_fd->parameter = MEM_malloc(sizeof(CS_LocalVariable) * param_count);
-    for (i = 0, param = src_fd->parameter; param; param = param->next, ++i) {
-        dest_fd->parameter[i].name = MEM_strdup(param->name);
-        dest_fd->parameter[i].type = copy_type(param->type);
-    }
-
     dest_fd->parameter_count = param_count;
-    //fprintf(stderr, "param_count = %d\n", param_count);
-    //fprintf(stderr, "val count   = %d\n", src_fd->local_variable_count);
-
-    int local_val_count = src_fd->local_variable_count - param_count;
-    dest_fd->local_variable = MEM_malloc(sizeof(CS_LocalVariable) * local_val_count);
-    dest_fd->local_variable_count = local_val_count;
-    for (i = 0; i < local_val_count; ++i) {
-        dest_fd->local_variable[i].name = MEM_strdup(src_fd->local_variable[i+param_count]->name);
-        dest_fd->local_variable[i].type = copy_type(src_fd->local_variable[i+param_count]->type);
+    if (dest_fd->parameter_count > 0) {
+        dest_fd->parameter = MEM_malloc(sizeof(CS_LocalVariable) * param_count);
+        for (i = 0, param = src_fd->parameter; param; param = param->next, ++i) {
+            dest_fd->parameter[i].name = MEM_strdup(param->name);
+            dest_fd->parameter[i].type = copy_type(param->type);
+        }
     }
+    
+    fprintf(stderr, "name        = %s\n", dest_fd->name);
+    fprintf(stderr, "param_count = %d\n", param_count);
+    fprintf(stderr, "val count   = %d\n", src_fd->local_variable_count);
+
+    if (src_fd->block) {
+        fprintf(stderr, "has block\n");
+        int local_val_count = src_fd->local_variable_count - param_count;
+        dest_fd->local_variable = MEM_malloc(sizeof(CS_LocalVariable) * local_val_count);
+        dest_fd->local_variable_count = local_val_count;
+        for (i = 0; i < local_val_count; ++i) {
+            dest_fd->local_variable[i].name = MEM_strdup(src_fd->local_variable[i+param_count]->name);
+            dest_fd->local_variable[i].type = copy_type(src_fd->local_variable[i+param_count]->type);
+        }
+    } 
 }
 
 static void reset_gencode(CodegenVisitor* cvisitor) {
@@ -263,13 +285,11 @@ int main(int argc, char* argv[]) {
         show_variables(exec->global_variable, exec->global_variable_count);
         disasm(exec->code, exec->code_size);
         //disasm(cvisitor->code, cvisitor->pos);
-        
-       
-       
-        delete_codegen_visitor(cvisitor);
-        
-        delete_executable(exec);
-    }        
+                
+        delete_codegen_visitor(cvisitor);                
+        delete_executable(exec);                
+    }
+
 
     fclose(fin);
     CS_delete_compiler(compiler);

@@ -29,10 +29,11 @@ void CS_delete_compiler(CS_Compiler* compiler) {
 
     FunctionDefinition *fpos;
     for (fpos = compiler->function_list; fpos; fpos = fpos->next) {
-        MEM_free(fpos->local_variable);
+        if (fpos->local_variable) MEM_free(fpos->local_variable);
     }
     MEM_Storage storage = compiler->storage;
     MEM_dispose(storage);
+    //fprintf(stderr, "end of delete_compiler\n");
 }
 
 static void add_return_statement(FunctionDefinition* function) {
