@@ -184,6 +184,13 @@ void serialize(CS_Executable* exec) {
                     case 'i': {
                         if (is_jump(op)) {
                             fprintf(stderr, "jump!!\n");
+                            uint16_t offset = get_offset(ltable, idx-1);
+                            if (offset != 0) {
+                                uint16_t jaddr = fetch2(&exec->function[i].code[j+1]);
+                                jaddr += offset;
+                                exec->function[i].code[j+1] = (jaddr >> 8) & 0xff;
+                                exec->function[i].code[j+2] = (jaddr >> 0) & 0xff;
+                            }                            
                         }
                         write_char(exec->function[i].code[++j], fp);
                         write_char(exec->function[i].code[++j], fp);
