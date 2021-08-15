@@ -64,28 +64,33 @@
 #b = true;
 #c = !b;
 
+int print(double p);
 
-int f1(int x) {
+
+
+
+
+int i;
+int j;
+
+int f1(int x) {    
     x = 10;
+    x += 1;
 }
 
-
-int func(int a, double d) {
-    int i;
+double func(int a, double d) {
+    int i;    
     i = 2;
+    while (i != 10) {
+        i = i + 1;
+    }
+    return i;
 }
-
-int a;
-int b;
-
-#while(true) {
-    #int b;
-    #a = 2;
-    #b = 3;
-    #a == b;
-#}
-
 
 func(1.5, 1);
-#print();
+
+while(i != 3) {
+    j = 1;    
+}
+
 
