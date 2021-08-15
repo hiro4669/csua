@@ -165,10 +165,14 @@ void serialize(CS_Executable* exec) {
     uint32_t total_code_size = 0;
     for (int i = 0; i < exec->function_count; ++i) 
         total_code_size += exec->function[i].code_size;
+
+    uint16_t entry_address = total_code_size;
+
     total_code_size += exec->code_size;
 
     fprintf(stderr, "total_code_size = %d\n", total_code_size);
-    write_int(total_code_size, fp);   
+    write_int(total_code_size, fp);
+    write_short(entry_address, fp);
 
     idx = 0;
     /* write byte code for function */    
@@ -207,6 +211,7 @@ void serialize(CS_Executable* exec) {
     }
 
     fprintf(stderr, "top code size = %d\n", exec->code_size);
+
     /* write toplevel byte code */
     for (int i = 0; i < exec->code_size; ++i) {
         SVM_Opcode op = exec->code[i];

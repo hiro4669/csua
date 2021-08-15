@@ -168,7 +168,10 @@ void deserialize(char* fname) {
     
 
     int total_code_size = read_int(buf, &idx);
+    uint16_t entry_address = read_short(buf, &idx);
+
     fprintf(stderr, "total_code_size = %d\n", total_code_size);
+    fprintf(stderr, "entry_address = %02x\n", entry_address);
     fprintf(stderr, "idx = %d\n", idx);
     // for test
     int l_idx = idx;
