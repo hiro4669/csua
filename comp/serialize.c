@@ -36,6 +36,10 @@ static void write_int(const uint32_t v, FILE* fp) {
     write_reverse(&v, sizeof(uint32_t), fp);
 }
 
+static void write_short(const uint16_t v, FILE* fp) {
+    write_reverse(&v, sizeof(uint16_t), fp);
+}
+
 static void write_double(const double dv, FILE *fp) {
     write_reverse(&dv, sizeof(double), fp);    
 }
@@ -99,9 +103,9 @@ void serialize(CS_Executable* exec) {
     for (int i = 0; i < exec->function_count; ++i) {
 
         uint32_t total_val_count = exec->function[i].parameter_count + exec->function[i].local_variable_count;
-        fprintf(stderr, "fname = %s\n", exec->function[i].name);
-        fprintf(stderr, "parameter_count = %d\n", exec->function[i].parameter_count);
-        fprintf(stderr, "local_val_count = %d\n", exec->function[i].local_variable_count);
+        //fprintf(stderr, "fname = %s\n", exec->function[i].name);
+        //fprintf(stderr, "parameter_count = %d\n", exec->function[i].parameter_count);
+        //fprintf(stderr, "local_val_count = %d\n", exec->function[i].local_variable_count);
         //fprintf(stderr, "val_count = %d\n", total_val_count);
         write_int(exec->function[i].parameter_count, fp);
         write_int(exec->function[i].local_variable_count, fp);
@@ -122,6 +126,41 @@ void serialize(CS_Executable* exec) {
         write_int(exec->global_variable[i].type->basic_type, fp);
     }
 
+    /* create link table */
+    LinkTable* ltable = create_linktable();
+    uint32_t idx = 0;
+    for (int i = 0; i < exec->function_count; ++i) {
+        if (exec->function[i].is_implemented) {
+            idx += exec->function[i].code_size;
+            add_offset(ltable, idx);
+        }
+        //fprintf(stderr, "table idx = %02x\n", idx);
+    }
+
+    int imp_idx = -1;
+    for (int i = 0; i < exec->function_count; ++i) {
+        fprintf(stderr, "name : index = %s : %d\n", exec->function[i].name, exec->function[i].index);
+
+        write_short((uint16_t)(exec->function[i].index & 0xffff), fp);
+        write_char((char)(exec->function[i].is_implemented & 0xff), fp);
+
+        if (exec->function[i].is_implemented) {
+            fprintf(stderr, "   implemented\n");
+            uint16_t f_addr = get_func_addr(ltable, imp_idx++);
+            fprintf(stderr, "　　f_addr = %02x\n", f_addr);
+            write_short(f_addr, fp);
+        } else {
+            fprintf(stderr, "   embedded\n");
+            fprintf(stderr, "   fname = %s\n", exec->function[i].name);
+            fprintf(stderr, "   len = %ld\n", strlen(exec->function[i].name));
+            uint8_t nlen = (uint8_t)(strlen(exec->function[i].name) & 0xff);
+            write_char(nlen, fp);
+            for (uint8_t si = 0; si < nlen; ++si) {
+                write_char(exec->function[i].name[si], fp);
+            } 
+        }
+    }
+
     /* count all code size */
     uint32_t total_code_size = 0;
     for (int i = 0; i < exec->function_count; ++i) 
@@ -129,16 +168,7 @@ void serialize(CS_Executable* exec) {
     total_code_size += exec->code_size;
 
     fprintf(stderr, "total_code_size = %d\n", total_code_size);
-    write_int(total_code_size, fp);
-
-    /* create link table */
-    LinkTable* ltable = create_linktable();
-    uint32_t idx = 0;
-    for (int i = 0; i < exec->function_count; ++i) {
-        idx += exec->function[i].code_size;
-        add_offset(ltable, idx);
-        //fprintf(stderr, "table idx = %02x\n", idx);
-    }
+    write_int(total_code_size, fp);   
 
     idx = 0;
     /* write byte code for function */    

@@ -15,6 +15,13 @@ static int read_int(const char* buf, int *idx) {
     return val;
 }
 
+static short read_short(const char* buf, int *idx) {
+    uint8_t v1 = buf[(*idx)++];
+    uint8_t v2 = buf[(*idx)++];
+    short val = (short)(v1 << 8 | v2);
+    return val;
+}
+
 static double read_double(const char* buf, int *idx) {
     uint8_t v1 = buf[(*idx)++];
     uint8_t v2 = buf[(*idx)++];
@@ -129,12 +136,37 @@ void deserialize(char* fname) {
         }
     }
 
+    /* read global variable count and types */
     int global_variable_count = read_int(buf, &idx);
     fprintf(stderr, "global_variable_count = %d\n", global_variable_count);
     for (int i = 0; i < global_variable_count; ++i) {
         int type = read_int(buf, &idx);
         show_type(type);        
     }
+
+    char name[100] = {0};
+    for (int i = 0; i < function_count; ++i) {
+        uint16_t index = read_short(buf, &idx);
+        fprintf(stderr, "index = %d\n", index);
+        CS_Boolean is_implemented = read_char(buf, &idx);
+        if (is_implemented) {
+            fprintf(stderr, "   implemented\n");
+            uint16_t f_addr = read_short(buf, &idx);
+            fprintf(stderr, "    f_addr = %02x\n", f_addr);
+
+        } else {
+            fprintf(stderr, "   embedded\n");
+            uint8_t nlen = (uint8_t)read_char(buf, &idx);
+            fprintf(stderr, "");
+            for (uint8_t si = 0; si < nlen; si++) {
+                name[si] = buf[idx++];
+            }
+            name[nlen] = 0;
+            fprintf(stderr, "   fname = %s\n", name);
+        }
+    }
+    
+
     int total_code_size = read_int(buf, &idx);
     fprintf(stderr, "total_code_size = %d\n", total_code_size);
     fprintf(stderr, "idx = %d\n", idx);

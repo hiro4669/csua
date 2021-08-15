@@ -17,6 +17,15 @@ void add_offset(LinkTable* ltable, uint16_t addr) {
     ltable->tables[ltable->idx++].address = addr;
 }
 
+uint16_t get_func_addr(LinkTable* ltable, int idx) {    
+    if (idx >= ltable->idx) {
+        fprintf(stderr, "idx is out of range in get_func_addr\n");
+        exit(1);
+    }
+    if (idx < 0) return 0;
+    return ltable->tables[idx].address;
+}
+
 uint16_t get_offset(LinkTable* ltable, uint16_t addr) {
     //fprintf(stderr, "get_offset: %02x\n", addr);
     //fprintf(stderr, "1: %02x\n", ltable->tables[0].address);

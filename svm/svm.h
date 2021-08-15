@@ -55,8 +55,7 @@ typedef struct {
     uint32_t            code_size;
     uint8_t             *code;
 
-    
-
+    int                 index;
 } CS_Function;
 
 

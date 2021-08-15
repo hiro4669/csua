@@ -112,5 +112,6 @@ LinkTable* create_linktable();
 void delete_linktable(LinkTable* ltable);
 void add_offset(LinkTable* ltable, uint16_t addr);
 uint16_t get_offset(LinkTable* ltable, uint16_t idx);
+uint16_t get_func_addr(LinkTable* ltable, int idx);
 
 #endif

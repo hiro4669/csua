@@ -92,12 +92,14 @@ static CS_TypeSpecifier* copy_type(TypeSpecifier *type) {
 static void copy_function(FunctionDefinition* src_fd, CS_Function* dest_fd) {
     dest_fd->type = copy_type(src_fd->type);
     dest_fd->name = MEM_strdup(src_fd->name);
+    dest_fd->index = src_fd->index;
     dest_fd->parameter_count = 0;
     dest_fd->parameter = NULL;
     dest_fd->local_variable_count = 0;
     dest_fd->local_variable = NULL;
     dest_fd->code_size = 0;
     dest_fd->code = NULL;
+    
 
     int i;
     int param_count = 0;
