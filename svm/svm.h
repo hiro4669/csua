@@ -5,6 +5,8 @@
 
 typedef struct CS_TypeSpecifier_tag CS_TypeSpecifier;
 
+typedef struct SVM_VirtualMachine_tag SVM_VirtualMachine;
+
 typedef enum {
     CS_FALSE = 0,
     CS_TRUE = 1    
@@ -137,7 +139,73 @@ typedef struct {
 typedef enum {
     SVM_INT = 1,
     SVM_DOUBLE,
-} SVM_CONSTANT_TYPE;
+} SVM_ConstantType;
+
+typedef enum {
+    SVM_FALSE = 0,
+    SVM_TRUE = 1    
+} SVM_Boolean;
+
+typedef struct {
+    SVM_ConstantType type;
+    union {
+        int c_int;
+        int c_double;
+    } u;
+} SVM_Constant;
+
+typedef union {
+    int ival;
+    double dval;
+} SVM_Value;
+
+typedef enum {
+    NATIVE_FUNCTION,
+    SVM_FUNCTION,
+} FunctionType;
+
+
+typedef SVM_Value (*SVM_NativeFunction)(SVM_VirtualMachine* svm, SVM_Value* values, int arg_count);
+
+typedef struct {
+    FunctionType type;
+    int          param_count;
+    int          local_variable_count;
+    int          *param_type;
+    int          *local_variable_type;
+    union {
+        struct {
+            uint16_t f_addr;
+        } svm_f;
+        struct {
+            uint8_t nlen;
+            char*   name;
+            SVM_NativeFunction n_func;
+        } native_f;
+
+    } u;
+} SVM_Function;
+
+
+
+struct SVM_VirtualMachine_tag {
+    uint32_t       constant_pool_count;
+    SVM_Constant  *constant_pool;
+    uint32_t       global_variable_count;
+    SVM_Value     *global_variables;
+    int           *global_variable_types;
+    uint32_t       code_size;
+    uint8_t       *code;
+    uint32_t       function_count;
+    SVM_Function  *functions;
+    
+    uint32_t       stack_size;
+    SVM_Value      *stack;
+    uint32_t       pc;
+    uint32_t       sp;
+};
+
+
 
 extern OpcodeInfo svm_opcode_info[];
 
