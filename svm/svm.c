@@ -201,23 +201,15 @@ static void parse_binary(SVM_VirtualMachine* svm, uint8_t* buf) {
     svm->code_size = total_code_size;
     svm->pc = entry_address;
 
-    printf("total code size = %02x\n", total_code_size);
-    printf("total code size = %d\n", total_code_size);
-    printf("entry_address   = %02x\n", entry_address);
-
     svm->code = (uint8_t*)MEM_malloc(total_code_size);
     memcpy(svm->code, pos, total_code_size);
 
+    /*
     for (int i = 0; i < total_code_size; ++i) {
         if (i % 16 == 0) printf("\n");
         printf("%02x ", svm->code[i]);
     }
-
-
-
-
-    
-
+    */
 
 }
 
@@ -232,6 +224,29 @@ static void svm_delete(SVM_VirtualMachine* svm) {
     delete_functions(svm);
 
     MEM_free(svm);
+}
+
+static void svm_init(SVM_VirtualMachine* svm) {
+    svm->stack_size = 100; // temporary
+    svm->stack = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->stack_size);
+    svm->sp = 0;
+
+    for (int i = 0; i < svm->global_variable_count; ++i) {
+        switch (svm->global_variable_types[i]) {
+            case SVM_INT: {
+                svm->global_variables[i].ival = 0;
+                break;
+            }
+            case SVM_DOUBLE: {
+                svm->global_variables[i].dval = 0.0;
+                break;
+            }
+            default: {
+                fprintf(stderr, "no such svm type\n");
+                exit(1);
+            }
+        }
+    }
 }
 
 
@@ -257,6 +272,10 @@ int main(int argc, char* argv[]) {
 
     SVM_VirtualMachine* svm = svm_create();
     parse_binary(svm, buf);
+    
+    svm_init(svm);
+
+    //disasm(svm->code, svm->code_size);
 
 
 
