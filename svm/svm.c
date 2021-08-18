@@ -262,12 +262,18 @@ static uint16_t fetch2(SVM_VirtualMachine* svm) {
     return (v1 << 8) | fetch(svm);
 }
 
+/* stack operations */
 static void push_i(SVM_VirtualMachine* svm, int iv) {
     svm->stack[svm->sp++].ival = iv;
 }
 
 static void push_d(SVM_VirtualMachine* svm, double dv) {
+    //fprintf(stderr, "push double: %f", dv);
     svm->stack[svm->sp++].dval = dv;
+}
+
+static double pop_d(SVM_VirtualMachine* svm) {
+    return svm->stack[--svm->sp].dval;
 }
 
 static SVM_Constant* get_constant(SVM_VirtualMachine* svm, uint16_t idx) {
@@ -278,6 +284,10 @@ static double read_constant_double(SVM_VirtualMachine* svm, uint16_t idx) {
     return get_constant(svm, idx)->u.c_double;    
 }
 
+static int read_constant_int(SVM_VirtualMachine* svm, uint16_t idx) {
+    return get_constant(svm, idx)->u.c_int;
+}
+
 static void svm_run(SVM_VirtualMachine* svm) {
     bool running = true;
 
@@ -286,12 +296,25 @@ static void svm_run(SVM_VirtualMachine* svm) {
         op = fetch(svm);
         printf("op = %02x\n", op);
         switch (op) {
+            case SVM_PUSH_INT: {
+                uint16_t c_idx = fetch2(svm);
+                int i_val = read_constant_int(svm, c_idx);
+                printf("i_val = %d\n", i_val);
+                push_i(svm, i_val);
+                break;
+            }
             case SVM_PUSH_DOUBLE: {
                 uint16_t c_idx = fetch2(svm);
                 //fprintf(stderr, "%04x\n", c_idx);
                 double d_val = read_constant_double(svm, c_idx);                
                 push_d(svm, d_val);
-                //fprintf(stderr, "%f\n", d_val);                
+                //fprintf(stderr, "%f\n", d_val); 
+                break;
+            }
+            case SVM_CAST_DOUBLE_TO_INT: {
+                //fprintf(stderr, "cast double to int\n");
+                double d_val = pop_d(svm);
+                push_i(svm, (int)d_val);
                 break;
             }
             default: {
