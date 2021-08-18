@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -127,11 +128,13 @@ static void parse_binary(SVM_VirtualMachine* svm, uint8_t* buf) {
             case SVM_INT: {
                 int iv = read_int(&pos);
                 svm->constant_pool[i].u.c_int = iv;
+                printf("%d: %d\n", i, iv);
                 break;
             }
             case SVM_DOUBLE: {
                 double dv = read_double(&pos);
                 svm->constant_pool[i].u.c_double = dv;
+                printf("%d: %f\n", i,svm->constant_pool[i].u.c_double);
                 break;
             }
             default: {
@@ -204,12 +207,12 @@ static void parse_binary(SVM_VirtualMachine* svm, uint8_t* buf) {
     svm->code = (uint8_t*)MEM_malloc(total_code_size);
     memcpy(svm->code, pos, total_code_size);
 
-    /*
+
     for (int i = 0; i < total_code_size; ++i) {
         if (i % 16 == 0) printf("\n");
         printf("%02x ", svm->code[i]);
     }
-    */
+
 
 }
 
@@ -250,6 +253,56 @@ static void svm_init(SVM_VirtualMachine* svm) {
 }
 
 
+static uint8_t fetch(SVM_VirtualMachine* svm) {
+    return svm->code[svm->pc++];
+}
+
+static uint16_t fetch2(SVM_VirtualMachine* svm) {
+    uint8_t v1 = fetch(svm);
+    return (v1 << 8) | fetch(svm);
+}
+
+static void push_i(SVM_VirtualMachine* svm, int iv) {
+    svm->stack[svm->sp++].ival = iv;
+}
+
+static void push_d(SVM_VirtualMachine* svm, double dv) {
+    svm->stack[svm->sp++].dval = dv;
+}
+
+static SVM_Constant* get_constant(SVM_VirtualMachine* svm, uint16_t idx) {
+    return &svm->constant_pool[idx];    
+}
+
+static double read_constant_double(SVM_VirtualMachine* svm, uint16_t idx) {
+    return get_constant(svm, idx)->u.c_double;    
+}
+
+static void svm_run(SVM_VirtualMachine* svm) {
+    bool running = true;
+
+    uint8_t op = 0;
+    while (running) {
+        op = fetch(svm);
+        printf("op = %02x\n", op);
+        switch (op) {
+            case SVM_PUSH_DOUBLE: {
+                uint16_t c_idx = fetch2(svm);
+                //fprintf(stderr, "%04x\n", c_idx);
+                double d_val = read_constant_double(svm, c_idx);                
+                push_d(svm, d_val);
+                //fprintf(stderr, "%f\n", d_val);                
+                break;
+            }
+            default: {
+                fprintf(stderr, "unrecognized operator %02x\n", op);
+                exit(1);
+            }
+        }
+    }
+}
+
+
 
 int main(int argc, char* argv[]) {
 
@@ -274,8 +327,9 @@ int main(int argc, char* argv[]) {
     parse_binary(svm, buf);
     
     svm_init(svm);
+    disasm(svm->code, svm->code_size);
 
-    //disasm(svm->code, svm->code_size);
+    svm_run(svm);
 
 
 

@@ -149,8 +149,8 @@ typedef enum {
 typedef struct {
     SVM_ConstantType type;
     union {
-        int c_int;
-        int c_double;
+        int    c_int;
+        double c_double;
     } u;
 } SVM_Constant;
 
