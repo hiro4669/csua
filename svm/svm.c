@@ -9,6 +9,23 @@
 #include "../memory/MEM.h"
 #include "svm.h"
 
+#define revalue_up_align(val)   ((val) ? (((val) - 1) / sizeof(SVM_Value) + 1) : 0)
+#define CALLINFO_SIZE revalue_up_align(sizeof(CallInfo))
+
+static bool use_stack(uint8_t op) {
+    switch (op) {
+        case SVM_PUSH_STACK_INT:
+        case SVM_PUSH_STACK_DOUBLE:
+        case SVM_POP_STACK_INT:
+        case SVM_POP_STACK_DOUBLE: {
+            return true;
+        }            
+        default: {
+            return false;
+        }
+    }    
+}
+
 static SVM_VirtualMachine* svm_create() {
     SVM_VirtualMachine* svm = (SVM_VirtualMachine*)MEM_malloc(sizeof(SVM_VirtualMachine));
     svm->constant_pool_count = 0;
@@ -184,9 +201,14 @@ static void parse_binary(SVM_VirtualMachine* svm, uint8_t* buf) {
         printf("index = %04x\n", index);
         SVM_Boolean is_implemented = read_byte(&pos);
         if (is_implemented) {
+            svm->functions[i].type = SVM_FUNCTION;
             uint16_t f_addr = read_short(&pos);
+            svm->functions[i].u.svm_f.f_addr = f_addr;
             printf("addr = %02x\n", f_addr);
+            printf("addr = %02x\n", svm->functions[i].u.svm_f.f_addr);
+
         } else {
+            svm->functions[i].type = NATIVE_FUNCTION;
             uint8_t nlen = (uint8_t)read_byte(&pos);
             svm->functions[i].u.native_f.nlen = nlen;
             svm->functions[i].u.native_f.name = (char*)MEM_malloc(nlen + 1);
@@ -288,6 +310,87 @@ static int read_constant_int(SVM_VirtualMachine* svm, uint16_t idx) {
     return get_constant(svm, idx)->u.c_int;
 }
 
+static int get_param_number(SVM_VirtualMachine* svm, uint16_t idx) {
+
+    int next_func_idx = -1;
+    int target_func_idx = -1;
+    for (int i = 0; i < svm->function_count; ++i) {
+        if (svm->functions[i].type == SVM_FUNCTION) {
+            if (svm->functions[i].u.svm_f.f_addr > idx) {
+                next_func_idx = i;
+                break;
+            }
+        }
+    }
+    /* target is the last function*/
+    if (next_func_idx == -1) {
+        next_func_idx = svm->function_count - 1;
+    }
+
+    //printf("next_func_idx = %d\n", next_func_idx);
+
+    for (int i = next_func_idx; i >= 0; --i) {
+        if (svm->functions[i].type == NATIVE_FUNCTION) {            
+            continue;
+        }
+        //printf("f_addr = %02x\n", svm->functions[i].u.svm_f.f_addr);
+        if (svm->functions[i].u.svm_f.f_addr <= idx) {
+            target_func_idx = i;
+            break;
+        }
+    }
+
+    /* Error */
+    if (target_func_idx == -1) {
+        fprintf(stderr, "cannot find function in get_param_number\n");
+        exit(1);
+    }
+
+    //printf("target_func_idx = %d\n", target_func_idx);
+
+    return svm->functions[target_func_idx].param_count;
+}
+
+static void adjust_stack_address(SVM_VirtualMachine* svm) {
+    printf("-- adjust stack address --\n");    
+    for (int i = 0; i < svm->code_size; ++i) {
+        SVM_Opcode op = svm->code[i];        
+        OpcodeInfo oInfo = svm_opcode_info[op];
+        for (int pidx = 0; pidx < strlen(oInfo.parameter); ++pidx) {
+            switch (oInfo.parameter[pidx]) {
+                case 'i': {
+                    if (use_stack(op)) {
+                        //printf("(%02x)op = %02x\n", i, op);
+                        uint8_t v1 = svm->code[i+1];
+                        uint8_t v2 = svm->code[i+2];
+                        uint16_t idx = (uint16_t)(v1 << 8 | v2);
+                        //printf("idx = %04x\n", idx);
+
+                        int param_count = get_param_number(svm, i);
+                        //printf("param_count = %d\n", param_count);
+
+                        // if local variables
+                        if (idx + 1 > param_count) {
+                            // update index
+                            //printf("---> update index\n");
+                            idx += CALLINFO_SIZE;
+                            //printf("new idx = %04x\n", idx);
+                            svm->code[i+1] = (idx >> 8) & 0xff;
+                            svm->code[i+2] = (idx >> 0) & 0xff;
+                        }
+                    }
+                    i += 2;
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "");
+                    exit(1);
+                }
+            }
+        }
+    }
+}
+
 static void svm_run(SVM_VirtualMachine* svm) {
     bool running = true;
 
@@ -351,9 +454,13 @@ int main(int argc, char* argv[]) {
     
     svm_init(svm);
     disasm(svm->code, svm->code_size);
+    //printf("align size = %ld\n", CALLINFO_SIZE);
+    adjust_stack_address(svm);
 
-    svm_run(svm);
+    printf("-- rewritten byte code --\n");
+    disasm(svm->code, svm->code_size);
 
+    //svm_run(svm);
 
 
     MEM_free(buf);

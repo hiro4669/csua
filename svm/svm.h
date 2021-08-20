@@ -186,7 +186,10 @@ typedef struct {
     } u;
 } SVM_Function;
 
-
+typedef struct {
+    uint16_t prev_base;
+    uint32_t ret_pc;
+} CallInfo;
 
 struct SVM_VirtualMachine_tag {
     uint32_t       constant_pool_count;
@@ -199,6 +202,7 @@ struct SVM_VirtualMachine_tag {
     uint32_t       function_count;
     SVM_Function  *functions;
     
+    uint16_t       base;    
     uint32_t       stack_size;
     SVM_Value      *stack;
     uint32_t       pc;
