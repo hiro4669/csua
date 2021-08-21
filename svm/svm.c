@@ -38,6 +38,8 @@ static SVM_VirtualMachine* svm_create() {
     svm->function_count = 0;
     svm->functions = NULL;
 
+    svm->ci_offset = 0;
+    svm->base = 0;
     svm->stack_size = 0;
     svm->stack = NULL;
     svm->pc = 0;
@@ -255,6 +257,8 @@ static void svm_init(SVM_VirtualMachine* svm) {
     svm->stack_size = 100; // temporary
     svm->stack = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->stack_size);
     svm->sp = 0;
+    svm->base = 0;
+    svm->ci_offset = 0;
 
     for (int i = 0; i < svm->global_variable_count; ++i) {
         switch (svm->global_variable_types[i]) {
@@ -296,6 +300,14 @@ static void push_d(SVM_VirtualMachine* svm, double dv) {
 
 static double pop_d(SVM_VirtualMachine* svm) {
     return svm->stack[--svm->sp].dval;
+}
+
+static int pop_i(SVM_VirtualMachine* svm) {
+    return svm->stack[--svm->sp].ival;
+}
+
+static SVM_Value* pop(SVM_VirtualMachine* svm) {
+    return &svm->stack[--svm->sp];
 }
 
 static SVM_Constant* get_constant(SVM_VirtualMachine* svm, uint16_t idx) {
@@ -392,17 +404,19 @@ static void adjust_stack_address(SVM_VirtualMachine* svm) {
 }
 
 static void svm_run(SVM_VirtualMachine* svm) {
+    printf("---- execute ----\n");
     bool running = true;
 
     uint8_t op = 0;
     while (running) {
         op = fetch(svm);
-        printf("op = %02x\n", op);
+        printf("%02x : %s\n", op, svm_opcode_info[op].opname);
+
         switch (op) {
             case SVM_PUSH_INT: {
                 uint16_t c_idx = fetch2(svm);
                 int i_val = read_constant_int(svm, c_idx);
-                printf("i_val = %d\n", i_val);
+                //printf("i_val = %d\n", i_val);
                 push_i(svm, i_val);
                 break;
             }
@@ -414,10 +428,97 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 //fprintf(stderr, "%f\n", d_val); 
                 break;
             }
+            case SVM_PUSH_STACK_INT: {
+                uint16_t s_idx = fetch2(svm);
+                //printf("s_idx = %d\n", s_idx);
+                int i_val = svm->stack[s_idx + svm->base].ival;
+                //printf("i_val = %d\n", i_val);
+                push_i(svm, i_val);
+                break;
+            }
+            case SVM_ADD_INT: {
+                int v1 = pop_i(svm);
+                int v2 = pop_i(svm);
+                //printf("v1:v2 = %d:%d\n", v1, v2);
+                push_i(svm, v1 + v2);
+                break;
+            }
+            case SVM_CAST_INT_TO_DOUBLE: {
+                int i_val = pop_i(svm);
+                //printf("i_val = %d\n", i_val);
+                push_i(svm, (int)i_val);
+                break;
+            }
             case SVM_CAST_DOUBLE_TO_INT: {
                 //fprintf(stderr, "cast double to int\n");
                 double d_val = pop_d(svm);
                 push_i(svm, (int)d_val);
+                break;
+            }
+            case SVM_POP: {
+                SVM_Value* pv = pop(svm);
+                printf("ival = %d\n", pv->ival);
+                exit(1);
+                break;
+            }
+            case SVM_PUSH_FUNCTION: {
+                uint16_t f_idx = fetch2(svm);
+                push_i(svm, f_idx);
+                break;
+            }
+            case SVM_INVOKE: { // difficult                
+                int f_idx = pop_i(svm);
+                printf("f_idx = %d\n", f_idx);
+                SVM_Function* func = &svm->functions[f_idx];
+                if (func->type == SVM_FUNCTION) {
+                    printf("svm function\n");
+                    printf("sp = %d\n", svm->sp);
+                    CallInfo* cInfo = (CallInfo*)&svm->stack[svm->sp];
+                    //CallInfo* cInfo = (CallInfo*)MEM_malloc(sizeof(CallInfo));
+                    cInfo->ret_pc = svm->pc;
+                    cInfo->prev_base = svm->base;
+                    cInfo->f_idx = f_idx;
+                    cInfo->prev_ci_offset = svm->ci_offset;
+
+                    printf("ret_pc = %02x\n", cInfo->ret_pc);
+                    printf("param_count = %d\n", func->param_count);
+                    svm->base = svm->sp - func->param_count;
+                    svm->ci_offset = svm->sp - svm->base;
+                    printf("ci_offset = %d\n", svm->ci_offset);
+
+                    printf("base = %d\n", svm->base);
+                    printf("prev_base = %d\n", cInfo->prev_base);
+                    svm->sp += CALLINFO_SIZE;
+                    printf("callinfo size = %ld\n", CALLINFO_SIZE);
+
+                    printf("sp = %d\n", svm->sp);
+                    svm->pc = func->u.svm_f.f_addr;
+                    printf("fpc = %02x\n", svm->pc);
+                    
+
+                } else if (func->type == NATIVE_FUNCTION) {
+                    printf("native function\n");
+                } else {
+                    printf("invalid function type\n");
+                    exit(1);
+                }
+                //printf("end of invoke\n");                
+                break;
+            }
+            case SVM_RETURN: {
+                SVM_Value ret_value = svm->stack[svm->sp-1];
+                printf("ret_value = %d\n", ret_value.ival);
+                CallInfo* cInfo = (CallInfo*)&svm->stack[svm->base + svm->ci_offset];
+                printf("ret_pc = %02x\n", cInfo->ret_pc);
+                svm->sp = svm->base;
+                svm->pc = cInfo->ret_pc;
+                svm->base = cInfo->prev_base;
+                svm->ci_offset = cInfo->prev_ci_offset;
+                svm->stack[svm->sp++] = ret_value;
+
+                printf("svm->sp = %d\n", svm->sp);
+                printf("ci_offset = %d\n", svm->ci_offset);
+
                 break;
             }
             default: {
@@ -460,7 +561,7 @@ int main(int argc, char* argv[]) {
     printf("-- rewritten byte code --\n");
     disasm(svm->code, svm->code_size);
 
-    //svm_run(svm);
+    svm_run(svm);
 
 
     MEM_free(buf);

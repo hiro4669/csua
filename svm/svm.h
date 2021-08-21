@@ -187,6 +187,8 @@ typedef struct {
 } SVM_Function;
 
 typedef struct {
+    int      f_idx;
+    uint16_t prev_ci_offset;
     uint16_t prev_base;
     uint32_t ret_pc;
 } CallInfo;
@@ -202,7 +204,8 @@ struct SVM_VirtualMachine_tag {
     uint32_t       function_count;
     SVM_Function  *functions;
     
-    uint16_t       base;    
+    uint16_t       ci_offset;
+    uint16_t       base;
     uint32_t       stack_size;
     SVM_Value      *stack;
     uint32_t       pc;
