@@ -418,6 +418,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int i_val = read_constant_int(svm, c_idx);
                 //printf("i_val = %d\n", i_val);
                 push_i(svm, i_val);
+                //printf("sp = %d\n", svm->sp);
                 break;
             }
             case SVM_PUSH_DOUBLE: {
@@ -434,6 +435,17 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 int i_val = svm->stack[s_idx + svm->base].ival;
                 //printf("i_val = %d\n", i_val);
                 push_i(svm, i_val);
+                break;
+            }
+            case SVM_POP_STACK_INT: {
+                uint16_t s_idx = fetch2(svm);
+                //printf("s_val = %d\n", s_idx);
+                int i_val = pop_i(svm);
+                //printf("i_val = %d\n", i_val);
+                //printf("sp = %d\n", svm->sp);
+                svm->stack[svm->base + s_idx].ival = i_val;
+                
+                //exit(1);
                 break;
             }
             case SVM_ADD_INT: {
@@ -458,6 +470,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
             case SVM_POP: {
                 SVM_Value* pv = pop(svm);
                 printf("ival = %d\n", pv->ival);
+                printf("sp   = %d\n", svm->sp);
                 exit(1);
                 break;
             }
@@ -468,11 +481,11 @@ static void svm_run(SVM_VirtualMachine* svm) {
             }
             case SVM_INVOKE: { // difficult                
                 int f_idx = pop_i(svm);
-                printf("f_idx = %d\n", f_idx);
+                //printf("f_idx = %d\n", f_idx);
                 SVM_Function* func = &svm->functions[f_idx];
                 if (func->type == SVM_FUNCTION) {
-                    printf("svm function\n");
-                    printf("sp = %d\n", svm->sp);
+                    //printf("svm function\n");
+                    //printf("sp = %d\n", svm->sp);
                     CallInfo* cInfo = (CallInfo*)&svm->stack[svm->sp];
                     //CallInfo* cInfo = (CallInfo*)MEM_malloc(sizeof(CallInfo));
                     cInfo->ret_pc = svm->pc;
@@ -480,20 +493,22 @@ static void svm_run(SVM_VirtualMachine* svm) {
                     cInfo->f_idx = f_idx;
                     cInfo->prev_ci_offset = svm->ci_offset;
 
-                    printf("ret_pc = %02x\n", cInfo->ret_pc);
-                    printf("param_count = %d\n", func->param_count);
+                    //printf("ret_pc = %02x\n", cInfo->ret_pc);
+                    //printf("param_count = %d\n", func->param_count);
                     svm->base = svm->sp - func->param_count;
                     svm->ci_offset = svm->sp - svm->base;
-                    printf("ci_offset = %d\n", svm->ci_offset);
+                    //printf("ci_offset = %d\n", svm->ci_offset);
 
-                    printf("base = %d\n", svm->base);
-                    printf("prev_base = %d\n", cInfo->prev_base);
-                    svm->sp += CALLINFO_SIZE;
-                    printf("callinfo size = %ld\n", CALLINFO_SIZE);
+                    //printf("base = %d\n", svm->base);
+                    //printf("prev_base = %d\n", cInfo->prev_base);
+                    
+                    //printf("callinfo size = %ld\n", CALLINFO_SIZE);
+                    //printf("local_variable_size = %d\n", func->local_variable_count);
+                    svm->sp += CALLINFO_SIZE + func->local_variable_count;
 
-                    printf("sp = %d\n", svm->sp);
+                    //printf("sp = %d\n", svm->sp);
                     svm->pc = func->u.svm_f.f_addr;
-                    printf("fpc = %02x\n", svm->pc);
+                    //printf("fpc = %02x\n", svm->pc);
                     
 
                 } else if (func->type == NATIVE_FUNCTION) {
@@ -507,17 +522,17 @@ static void svm_run(SVM_VirtualMachine* svm) {
             }
             case SVM_RETURN: {
                 SVM_Value ret_value = svm->stack[svm->sp-1];
-                printf("ret_value = %d\n", ret_value.ival);
+                //printf("ret_value = %d\n", ret_value.ival);
                 CallInfo* cInfo = (CallInfo*)&svm->stack[svm->base + svm->ci_offset];
-                printf("ret_pc = %02x\n", cInfo->ret_pc);
+                //printf("ret_pc = %02x\n", cInfo->ret_pc);
                 svm->sp = svm->base;
                 svm->pc = cInfo->ret_pc;
                 svm->base = cInfo->prev_base;
                 svm->ci_offset = cInfo->prev_ci_offset;
                 svm->stack[svm->sp++] = ret_value;
 
-                printf("svm->sp = %d\n", svm->sp);
-                printf("ci_offset = %d\n", svm->ci_offset);
+                //printf("svm->sp = %d\n", svm->sp);
+                //printf("ci_offset = %d\n", svm->ci_offset);
 
                 break;
             }
