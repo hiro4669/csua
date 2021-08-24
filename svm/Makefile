@@ -4,7 +4,7 @@ TARGET = svm
 CFLAGS = -c -g -DDEBUG
 
 MEMORY = ../memory/memory.o ../memory/storage.o
-OBJS = disasm.o opinfo.o svm.o
+OBJS = disasm.o opinfo.o svm.o native.o
 
 all: $(TARGET)
 
