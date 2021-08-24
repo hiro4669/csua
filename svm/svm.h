@@ -220,4 +220,9 @@ extern OpcodeInfo svm_opcode_info[];
 void show_local_variables(CS_LocalVariable* variables, int size);
 void show_variables(CS_Variable* variables, int size);
 void disasm(uint8_t* code, uint32_t len);
+
+/* native.c */
+SVM_Value print(SVM_VirtualMachine* svm, SVM_Value* values, int svm_count);
+
+
 #endif

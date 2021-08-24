@@ -363,6 +363,22 @@ static int get_param_number(SVM_VirtualMachine* svm, uint16_t idx) {
     return svm->functions[target_func_idx].param_count;
 }
 
+static void add_native_function(SVM_VirtualMachine* svm, SVM_NativeFunction func, const char* name) {
+    for (int i = 0; i < svm->function_count; ++i) {
+        if (svm->functions[i].type == NATIVE_FUNCTION) {
+            if (strcmp(svm->functions[i].u.native_f.name, name) == 0) {
+                svm->functions[i].u.native_f.n_func = func;
+                //printf("arg_count = %d\n", svm->functions[i].param_count);
+            }
+        }
+    }
+}
+
+
+static void add_native_functions(SVM_VirtualMachine* svm) {
+    add_native_function(svm, print, "print");
+}
+
 static void adjust_stack_address(SVM_VirtualMachine* svm) {
     printf("-- adjust stack address --\n");    
     for (int i = 0; i < svm->code_size; ++i) {
@@ -599,6 +615,9 @@ int main(int argc, char* argv[]) {
 
     SVM_VirtualMachine* svm = svm_create();
     parse_binary(svm, buf);
+    add_native_functions(svm);
+
+
     
     svm_init(svm);
     disasm(svm->code, svm->code_size);
