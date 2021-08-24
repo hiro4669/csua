@@ -467,6 +467,20 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_i(svm, (int)d_val);
                 break;
             }
+            case SVM_LT_INT: {                
+                int v1 = pop_i(svm);
+                int v2 = pop_i(svm);
+                printf("v1   = %d\n", v1);
+                printf("v2   = %d\n", v2);
+                if (v2 < v1) {
+                    printf("true\n");
+                    push_i(svm, SVM_TRUE);
+                } else {
+                    printf("false\n");
+                    push_i(svm, SVM_FALSE);
+                }                                 
+                break;
+            }
             case SVM_POP: {
                 SVM_Value* pv = pop(svm);
                 printf("ival = %d\n", pv->ival);
@@ -534,6 +548,24 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 //printf("svm->sp = %d\n", svm->sp);
                 //printf("ci_offset = %d\n", svm->ci_offset);
 
+                break;
+            }
+            case SVM_JUMP: {
+                uint16_t j_addr = fetch2(svm);
+                //printf("j_addr = %02x\n", j_addr);
+                svm->pc = j_addr;
+                break;
+            }
+            case SVM_JUMP_IF_FALSE: {
+                SVM_Boolean result = pop_i(svm);
+                //printf("result = %d\n", result);
+                //printf("sp = %d\n", svm->sp);
+                uint16_t addr = fetch2(svm);
+                //printf("addr = %02x\n", addr);
+                if (!result) {
+                    //printf("jump if false!!\n");
+                    svm->pc = addr;                    
+                }                
                 break;
             }
             default: {
