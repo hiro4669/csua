@@ -322,6 +322,15 @@ static int read_constant_int(SVM_VirtualMachine* svm, uint16_t idx) {
     return get_constant(svm, idx)->u.c_int;
 }
 
+/* global operation */
+static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
+    svm->global_variables[idx].ival = iv;
+    svm->global_variable_types[idx] = SVM_INT;
+}
+
+
+
+
 static int get_param_number(SVM_VirtualMachine* svm, uint16_t idx) {
 
     int next_func_idx = -1;
@@ -464,6 +473,13 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 //exit(1);
                 break;
             }
+            case SVM_POP_STATIC_INT: {
+                uint16_t s_idx = fetch2(svm);
+                int i_val = pop_i(svm);
+                printf("ival = %d\n", i_val);
+                write_global_i(svm, s_idx, i_val);
+                break;
+            }
             case SVM_ADD_INT: {
                 int v1 = pop_i(svm);
                 int v2 = pop_i(svm);
@@ -501,7 +517,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 SVM_Value* pv = pop(svm);
                 printf("ival = %d\n", pv->ival);
                 printf("sp   = %d\n", svm->sp);
-                exit(1);
+                //exit(1);
                 break;
             }
             case SVM_PUSH_FUNCTION: {
@@ -511,7 +527,7 @@ static void svm_run(SVM_VirtualMachine* svm) {
             }
             case SVM_INVOKE: { // difficult                
                 int f_idx = pop_i(svm);
-                //printf("f_idx = %d\n", f_idx);
+                printf("f_idx = %d\n", f_idx);
                 SVM_Function* func = &svm->functions[f_idx];
                 if (func->type == SVM_FUNCTION) {
                     //printf("svm function\n");
@@ -542,7 +558,21 @@ static void svm_run(SVM_VirtualMachine* svm) {
                     
 
                 } else if (func->type == NATIVE_FUNCTION) {
-                    printf("native function\n");
+                    //printf("native function\n");
+                    if (func->u.native_f.n_func) {                        
+                        int param_count = func->param_count;
+                        //printf("param count = %d\n", param_count);
+                        SVM_Value* args = &svm->stack[svm->sp - param_count];
+
+                        SVM_Value ret_value = func->u.native_f.n_func(svm, args, param_count);
+                        svm->sp -= param_count;                        
+                        svm->stack[svm->sp++] = ret_value;                        
+                        //printf("sp = %d\n", svm->sp);
+                    } else {
+                        fprintf(stderr, "cannot invoke native function %s\n", func->u.native_f.name);
+                        exit(1);                        
+                    }
+                    
                 } else {
                     printf("invalid function type\n");
                     exit(1);
@@ -589,7 +619,11 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 exit(1);
             }
         }
+
+        running = svm->pc < svm->code_size;
     }
+
+    fprintf(stderr, "End of SVM\n");
 }
 
 
