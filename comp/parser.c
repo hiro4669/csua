@@ -80,16 +80,21 @@ static void expression();
 static void factor() {
     increment();
     debug("factor");
+    char buf[10];
 
     switch (t_type) {
         case INT_LITERAL: {
             t_type = yylex();
+	    sprintf(buf, ":%d", yylval.iv);
+	    debug(buf);
             break;
         }
         case LP: {
-            t_type = yylex();
+	    debug("(");
+            t_type = yylex();	    
             expression();
             if (t_type == RP) {
+		debug(")");
                 t_type = yylex();
             } else {
                 EFLG = ERR;
