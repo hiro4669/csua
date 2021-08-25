@@ -80,7 +80,6 @@ static void expression();
 static void factor() {
     increment();
     debug("factor");
-    //printf("factor\n");
 
     switch (t_type) {
         case INT_LITERAL: {
@@ -102,23 +101,14 @@ static void factor() {
             break;
         }
     }
-    decrement();
-    /*
-    if (t_type == INT_LITERAL) {        
-        t_type = yylex();
-        return;
-    }
-    */
-    
+    decrement();    
 }
 
 static void term() {
     increment();
-    //printf("term\n");
     debug("term");
     factor();
     if (t_type == MUL | t_type == DIV) {
-        //printf("* | /\n");
         debug("* | /");
         t_type = yylex();
         factor();
@@ -128,7 +118,6 @@ static void term() {
 
 static void expression() {
     increment();
-    //printf("expression\n");
     debug("expression");
     term();
     if (t_type == ADD | t_type == DIV) {
@@ -143,7 +132,8 @@ static void expression() {
 
 
 static void statement() {
-    printf("statement\n");
+    //    printf("statement\n");
+    debug("statement");
     expression();
     //t_type = yylex();
     if (t_type == SEMICOLON) {
@@ -167,9 +157,6 @@ int main(void) {
         fprintf(stderr, "cannot open file\n");
         exit(1);
     }
-    //printf("Hello World\n");
-    debug("Hello World");
-    //token_test();
     
     t_type = yylex();
     statement();

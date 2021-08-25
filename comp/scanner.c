@@ -78,28 +78,14 @@ static void error() {
 
 int yylex() {
     char c;
-//    c = read();    
+
     ytp = 0;
-    /*
-    for (int i = 0; i < 5; ++i) {
-        c = read();        
-        printf("c = %c\n", c);
-    }
-    c = read();
-    printf("c = %c\n", c);    
-    printf("ptr = %d\n", (int)ptr);
-    pushback();
-    c = read();
-    printf("c = %c\n", c);    
-    printf("ptr = %d\n", (int)ptr);
-    */
 
 
 retry:
     switch(c = read()) {
         case '#': { // skip comment
             while ((c = read()) != '\n');
-//            printf("skip\n");
             goto retry;
         }
         case ' ':
@@ -123,31 +109,11 @@ retry:
             while(isdigit(c = read())) {
                 addText(c);
             }
-            if (c == '.') { // double value
-                addText(c);
-                uint8_t dbl_flg = 0;
-                while(isdigit(c = read())) {
-                    dbl_flg = 1;
-                    addText(c);
-                }
-                if (dbl_flg) {
-                    pushback();                    
-                    double d_value;
-                    sscanf(yytext, "%lf", &d_value);
-                    yylval.dv = d_value;
-                    return DOUBLE_LITERAL;                    
-                } else {// error
-                    fprintf(stderr, "double error\n");
-                    exit(1);
-                }                
-            } else {  // int value
-                pushback();
-                int i_value;
-                sscanf(yytext, "%d", &i_value);
-                yylval.iv = i_value;
-                return INT_LITERAL;
-            }            
-            break;
+	    pushback();
+	    int i_value;
+	    sscanf(yytext, "%d", &i_value);
+	    yylval.iv = i_value;
+	    return INT_LITERAL;
         }
         case ';': {
             return SEMICOLON;
@@ -158,114 +124,18 @@ retry:
         case ')': {
             return RP;
         }
-        case '{': {
-            return LC;
-        }
-        case '}': {
-            return RC;
-        }
-        case ',': {
-            return COMMA;
-        }
-        case '&': {
-            addText(c);
-            if ((c = read()) == '&') {
-                return LOGICAL_AND;
-            } else {
-                addText(c);
-                error();
-            }
-        }
-        case '|': {
-            addText(c);
-            if ((c = read()) == '|') {
-                return LOGICAL_OR;
-            } else {
-                addText(c);
-                error();
-            }
-        }
-        case '=': {
-            if ((c = read()) == '=') {
-                return EQ;
-            } else {
-                pushback();
-                return ASSIGN_T;
-            }
-        }
-        case '!': {
-            if ((c = read()) == '=') {
-                return NE;
-            } else {
-                pushback();
-                return EXCLAMATION;
-            }
-        }
-        case '>': {
-            if ((c = read()) == '=') {
-                return GE;
-            } else {
-                pushback();
-                return GT;
-            }
-        }
-        case '<': {
-            if ((c = read()) == '=') {
-                return LE;
-            } else {
-                pushback();
-                return LT;
-            }
-        }
         case '+': {
-            c = read();
-            if (c == '+') {
-                return INCREMENT;
-            } else if(c == '=') {
-                return ADD_ASSIGN_T;
-            } else {
-                pushback();
-                return ADD;
-            }
+	    return ADD;
         }
         case '-': {
-            c = read();
-            if (c == '-') {
-                return DECREMENT;
-            } else if (c == '=') {
-                return SUB_ASSIGN_T;
-            } else {
-                pushback();
-                return SUB;
-            }
+	    return SUB;
         }
         case '*': {
-            if ((c = read()) == '=') {
-                return MUL_ASSIGN_T;
-            } else {
-                pushback();
-                return MUL;
-            }
+	    return MUL;
         }
         case '/': {
-            if ((c = read()) == '=') {
-                return DIV_ASSIGN_T;
-            } else {
-                pushback();
-                return DIV;
-            }
+	    return DIV;
         }
-        case '%': {
-            if ((c = read()) == '=') {
-                return MOD_ASSIGN_T;
-            } else {
-                return MOD;
-            }
-        }
-        case '.': {
-            return DOT;
-        }
-
         case EOF: {
             return EOF;
         }
@@ -273,20 +143,5 @@ retry:
             break;
         }
     }
-    
-    while (is_identchar(c)) {
-        addText(c);
-        c = read();
-    }
-    pushback();    
-    struct OPE *op = in_word_set(yytext, strlen(yytext));
-    if (op != NULL) {
-        return op->type;
-    } 
-    
-    yylval.name = yytext;
-    return IDENTIFIER;
-    
-
     return EOF;
 }
