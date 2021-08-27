@@ -320,6 +320,11 @@ void serialize(CS_Executable* exec);
 /* deserialize.c */
 void deserialize(char* fname);
 
+/* csua.y*/
+int yyerror(char const *str);
+
+/* scanner.c */
+int yylex();
 
 #endif /* CSUA_H */
 
