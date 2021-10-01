@@ -44,12 +44,12 @@ static uint8_t read_char(const char* buf, int *idx) {
 
 
 static void read_header(const char* buf, int *idx) {
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
-    fprintf(stderr, "%c\n", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
+    fprintf(stderr, "%c", buf[(*idx)++]);
     fprintf(stderr, "%c\n", buf[(*idx)++]);
 }
 
@@ -81,20 +81,25 @@ void deserialize(char* fname) {
     int size;
     int idx = 0;
     
-    fprintf(stderr, "deserialize = %s\n", fname);
+    //fprintf(stderr, "deserialize = %s\n", fname);
     int status = stat(fname, &s_buf);
-    fprintf(stderr, "size = %lld\n", s_buf.st_size);
     buf = (char*)malloc(s_buf.st_size);
     fd = open(fname, O_RDONLY);
     size = read(fd, buf, s_buf.st_size);
-    fprintf(stderr, "size = %d\n", size);
+    //fprintf(stderr, "file size = %d byte\n", size);
     close(fd);
+
+    fprintf(stderr, "-- deserialized result --\n");
+    fprintf(stderr, "%s (%d bytes)\n", fname, size);
+
 
     read_header(buf, &idx);
     int const_size = read_int(buf, &idx);
 
     /* constant pool count */
-    fprintf(stderr, "constant_pool_size = %x\n", const_size);
+    fprintf(stderr, "--------------------------------------\n");
+    fprintf(stderr, "constant_pool_size: %d\n", const_size);
+    fprintf(stderr, "--\n");
 
     /* constant pool type and value */
     for (int i = 0; i < const_size; ++i) {
@@ -102,12 +107,12 @@ void deserialize(char* fname) {
         switch (type) {
             case SVM_INT: {
                 int iv = read_int(buf, &idx);
-                fprintf(stderr, "ival = %d\n", iv);
+                fprintf(stderr, "%d,", iv);
                 break;
             }
             case SVM_DOUBLE: {                
                 double dv = read_double(buf, &idx);
-                fprintf(stderr, "dval = %f\n", dv);                
+                fprintf(stderr, "%f,", dv);                
                 break;
             }
             default: {
@@ -115,44 +120,54 @@ void deserialize(char* fname) {
             }
         }
     }
+    fprintf(stderr, "\n--------------------------------------\n");
 
     int function_count = read_int(buf, &idx);
-    fprintf(stderr, "function count = %d\n", function_count);
+    fprintf(stderr, "--------------------------------------\n");
+    fprintf(stderr, "[function count]: %d\n", function_count);
     
     for (int i = 0; i < function_count; ++i) {
         int parameter_count = read_int(buf, &idx);
         int local_variable_count = read_int(buf, &idx);
+        fprintf(stderr, "function[%d]:\n", i);
         
-        fprintf(stderr, "parameter_count = %d\n", parameter_count);        
+        fprintf(stderr, "  parameter_count = %d\n", parameter_count);        
         //fprintf(stderr, "total_val_count = %d\n", total_val_count);
         for (int j = 0; j < parameter_count; ++j) {
             int type = read_int(buf, &idx);
+            fprintf(stderr, "    ");
             show_type(type);           
         }
-        fprintf(stderr, "local_variable_count = %d\n", local_variable_count);
+        fprintf(stderr, "  local_variable_count = %d\n", local_variable_count);
         for (int j = 0; j < local_variable_count; ++j) {
             int type = read_int(buf, &idx);
+            fprintf(stderr, "    ");
             show_type(type); 
         }
     }
+    fprintf(stderr, "--------------------------------------\n");
 
     /* read global variable count and types */
     int global_variable_count = read_int(buf, &idx);
-    fprintf(stderr, "global_variable_count = %d\n", global_variable_count);
+    fprintf(stderr, "--------------------------------------\n");
+    fprintf(stderr, "[global_variable_count]: %d\n", global_variable_count);
     for (int i = 0; i < global_variable_count; ++i) {
         int type = read_int(buf, &idx);
+        fprintf(stderr, "  ");
         show_type(type);        
     }
 
+    fprintf(stderr, "--------------------------------------\n");
+    fprintf(stderr, "[function type]\n");
     char name[100] = {0};
     for (int i = 0; i < function_count; ++i) {
         uint16_t index = read_short(buf, &idx);
-        fprintf(stderr, "index = %d\n", index);
+        fprintf(stderr, "function[%d]\n", index);
         CS_Boolean is_implemented = read_char(buf, &idx);
         if (is_implemented) {
             fprintf(stderr, "   implemented\n");
             uint16_t f_addr = read_short(buf, &idx);
-            fprintf(stderr, "    f_addr = %02x\n", f_addr);
+            fprintf(stderr, "   address = %02x\n", f_addr);
 
         } else {
             fprintf(stderr, "   embedded\n");
@@ -166,21 +181,22 @@ void deserialize(char* fname) {
         }
     }
     
-
+    fprintf(stderr, "--------------------------------------\n");
     int total_code_size = read_int(buf, &idx);
     uint16_t entry_address = read_short(buf, &idx);
 
-    fprintf(stderr, "total_code_size = %d\n", total_code_size);
-    fprintf(stderr, "entry_address = %02x\n", entry_address);
-    fprintf(stderr, "idx = %d\n", idx);
+    fprintf(stderr, "[total_code_size]: %d\n", total_code_size);
+    fprintf(stderr, "[entry_address] 0x%02x\n", entry_address);
+    //fprintf(stderr, "idx = %d\n", idx);
     // for test
     int l_idx = idx;
+    fprintf(stderr, "\n[row bytecode]");
     for (int i = 0; i < total_code_size; ++i) {
         if (i % 16 == 0) fprintf(stderr, "\n");
         fprintf(stderr, "%02x ", buf[l_idx++]);
     }
     fprintf(stderr, "\n");
-    fprintf(stderr, "idx = %d\n", idx);
+    //fprintf(stderr, "idx = %d\n", idx);
     disasm((uint8_t*)&buf[idx], total_code_size);
 
     free(buf);
