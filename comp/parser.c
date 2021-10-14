@@ -29,52 +29,6 @@ static void debug(const char* str) {
     printf("%s\n", str);
 }
 
-static void token_test() {    
-
-    while (1) {
-        t_type = yylex();
-        switch (t_type) {
-            case SEMICOLON: {
-                printf("SEMICOLON(;)\n");
-                break;
-            }
-            case INT_LITERAL: {
-                printf("INT: %d\n", yylval.iv);
-                break;            
-            }
-            case ADD: {
-                printf("ADD(+)\n");
-                break;
-            }
-            case SUB: {
-                printf("SUB(-)\n");
-                break;
-            }
-            case MUL: {
-                printf("MUL(*)\n");
-                break;
-            }
-            case DIV: {
-                printf("DIV(/)\n");
-                break;
-            }
-            case LP: {
-                printf("(\n");
-                break;
-            }
-            case RP: {
-                printf(")\n");
-                break;
-            }
-            case EOF: {
-                printf("END OF FILE\n");
-                exit(1);
-                break;
-            }
-        }
-    }    
-}
-
 static void expression();
 
 static void factor() {
@@ -109,40 +63,45 @@ static void factor() {
     decrement();    
 }
 
+
+static void term_d() {
+    if (t_type == MUL || t_type == DIV) {
+	debug("* | /");
+	t_type = yylex();
+	factor();
+	term_d();
+    }
+}
+
 static void term() {
     increment();
     debug("term");
     factor();
-    if (t_type == MUL | t_type == DIV) {
-        debug("* | /");
-        t_type = yylex();
-        factor();
-    }
+    term_d();
     decrement();
+}
+
+static void expression_d() {
+    if (t_type == ADD || t_type == SUB) {
+        debug("+ | -");
+	t_type = yylex();
+	term();
+	expression_d();
+    }
 }
 
 static void expression() {
     increment();
     debug("expression");
     term();
-    if (t_type == ADD | t_type == DIV) {
-        //printf("+ | -\n");
-        debug("+ | -");
-        t_type = yylex();
-        term();
-    }
-
-    decrement();
+    expression_d();
+    decrement();		
 }
 
-
 static void statement() {
-    //    printf("statement\n");
     debug("statement");
     expression();
-    //t_type = yylex();
     if (t_type == SEMICOLON) {
-        //printf("semicolon\n");
         return;
     } 
     t_type = yylex();
