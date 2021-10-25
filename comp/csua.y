@@ -1,12 +1,18 @@
 %{
 #include <stdio.h>
 #define YYDEBUG 1
+
+int yyerror(char const *str);
+int yylex();
+
+
 %}
 %union{
     int iv;
     double dv;
     char *name;
 }
+
 
 %token LP
 %token RP
