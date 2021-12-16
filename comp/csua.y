@@ -81,10 +81,13 @@
 
 %%
 translation_unit
-        : definition_or_statement  
-        | translation_unit definition_or_statement 
-	;
-definition_or_statement
+        : definition_or_statement_list
+        | translation_unit definition_or_statement_list
+        ;
+
+
+
+definition_or_statement_list
         : function_definition
         {
            CS_Compiler* compiler = cs_get_current_compiler();
@@ -92,14 +95,36 @@ definition_or_statement
                compiler->func_list = cs_chain_function_declaration_list(compiler->func_list, $1);
            }
         }
-        | statement  
+        | statement_list
+        ;
+
+statement_list
+        : statement_list if_statement
+        | if_statement
+        ;
+
+if_statement
+        : statement
         {
            CS_Compiler* compiler = cs_get_current_compiler();
            if (compiler) {
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
            }
         }
+        | IF LP expression RP LC statement_list RC elsif_statement_list ELSE LC statement_list RC
+        | IF LP expression RP LC statement_list RC                      ELSE LC statement_list RC
+        | IF LP expression RP LC statement_list RC
         ;
+
+elsif_statement_list
+        : elsif_statement_list elsif_statement
+        | elsif_statement
+        ;
+
+elsif_statement
+        : ELSIF LP expression RP LC statement_list RC
+        ;
+
 
 function_definition
         : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    
