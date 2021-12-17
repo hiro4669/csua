@@ -99,11 +99,11 @@ definition_or_statement_list
         ;
 
 statement_list
-        : statement_list if_statement
-        | if_statement
+        : statement_list broad_statement
+        | broad_statement
         ;
 
-if_statement
+broad_statement
         : statement
         {
            CS_Compiler* compiler = cs_get_current_compiler();
@@ -111,19 +111,20 @@ if_statement
                compiler->stmt_list = cs_chain_statement_list(compiler->stmt_list, $1);
            }
         }
-        | IF LP expression RP LC statement_list RC elsif_statement_list ELSE LC statement_list RC
-        | IF LP expression RP LC statement_list RC                      ELSE LC statement_list RC
+        | if_statement
+        ;
+
+if_statement
+        : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
+        | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
         | IF LP expression RP LC statement_list RC
         ;
 
-elsif_statement_list
-        : elsif_statement_list elsif_statement
-        | elsif_statement
+elsif_list
+        : elsif_list ELSIF LP expression RP LC statement_list RC
+        |            ELSIF LP expression RP LC statement_list RC
         ;
 
-elsif_statement
-        : ELSIF LP expression RP LC statement_list RC
-        ;
 
 
 function_definition
