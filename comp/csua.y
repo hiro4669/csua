@@ -116,6 +116,7 @@ broad_statement
 
 if_statement
         : IF LP expression RP LC statement_list RC elsif_list ELSE LC statement_list RC
+        | IF LP expression RP LC statement_list RC elsif_list
         | IF LP expression RP LC statement_list RC            ELSE LC statement_list RC
         | IF LP expression RP LC statement_list RC
         ;
