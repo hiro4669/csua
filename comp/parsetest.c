@@ -5,7 +5,7 @@ int main(void) {
 
     extern int yyparse(void);
     extern FILE *yyin;
-    yyin = fopen("tests/prog1.cs", "r");
+    yyin = fopen("tests/print.cs", "r");
     if (yyin == NULL) {
         fprintf(stderr, "cannot open file\n");
         exit(1);

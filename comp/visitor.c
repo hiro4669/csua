@@ -90,6 +90,18 @@ static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
     fprintf(stderr, "leave doubleexpr(type:%s)\n", get_type_name(get_type(expr)));            
 }
 
+static void enter_stringexpr(Expression* expr, Visitor* visitor) {
+    print_depth();
+    fprintf(stderr, "enter stringexpr : %s\n", expr->u.string_value);
+    increment();
+}
+
+static void leave_stringexpr(Expression* expr, Visitor* visitor) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave stringexpr(type:%s)\n", get_type_name(get_type(expr)));
+}
+
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
     print_depth();
     fprintf(stderr, "enter identifierexpr : %s\n", expr->u.identifier.name);
@@ -357,6 +369,7 @@ Visitor* create_treeview_visitor() {
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
     enter_expr_list[DOUBLE_EXPRESSION]        = enter_doubleexpr;
+    enter_expr_list[STRING_EXPRESSION]        = enter_stringexpr;
     enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;    
     enter_expr_list[ADD_EXPRESSION]           = enter_addexpr;
     enter_expr_list[SUB_EXPRESSION]           = enter_subexpr;

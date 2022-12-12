@@ -30,6 +30,7 @@ typedef enum {
     CS_BOOLEAN_TYPE,
     CS_INT_TYPE,
     CS_DOUBLE_TYPE,
+    CS_STRING_TYPE,
     CS_BASIC_TYPE_PLUS_ONE,
 } CS_BasicType;
 
@@ -59,6 +60,7 @@ typedef enum {
     BOOLEAN_EXPRESSION = 1,
     DOUBLE_EXPRESSION,
     INT_EXPRESSION,
+    STRING_EXPRESSION,
     IDENTIFIER_EXPRESSION,
     INCREMENT_EXPRESSION,
     DECREMENT_EXPRESSION,
@@ -131,6 +133,7 @@ struct Expression_tag {
     union {
         double                 double_value;
         int                    int_value;
+        char                   *string_value;
         CS_Boolean             boolean_value;
         IdentifierExpression   identifier;
         Expression             *inc_dec;

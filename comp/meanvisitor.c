@@ -33,6 +33,9 @@ char* get_type_name(CS_BasicType type) {
         case CS_DOUBLE_TYPE: {
             return "double";            
         }
+        case CS_STRING_TYPE: {
+            return "string";
+        }
         default: {
             return "untyped";
         }
@@ -92,6 +95,14 @@ static void enter_doubleexpr(Expression* expr, Visitor* visitor) {
 static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
 //    fprintf(stderr, "leave doubleexpr\n");            
     expr->type = cs_create_type_specifier(CS_DOUBLE_TYPE);
+}
+
+static void enter_stringexpr(Expression* expr, Visitor* visitor) {
+
+}
+
+static void leave_stringexpr(Expression* expr, Visitor* visitor) {
+    expr->type = cs_create_type_specifier(CS_STRING_TYPE);
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
@@ -566,6 +577,7 @@ MeanVisitor* create_mean_visitor() {
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
     enter_expr_list[DOUBLE_EXPRESSION]        = enter_doubleexpr;
+    enter_expr_list[STRING_EXPRESSION]        = enter_stringexpr;
     enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;    
     enter_expr_list[ADD_EXPRESSION]           = enter_addexpr;
     enter_expr_list[SUB_EXPRESSION]           = enter_subexpr;

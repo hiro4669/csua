@@ -136,6 +136,7 @@ type_specifier
         : BOOLEAN_T { $$ = CS_BOOLEAN_TYPE; }
         | INT_T     { $$ = CS_INT_TYPE;     }
         | DOUBLE_T  { $$ = CS_DOUBLE_TYPE;  }
+        | STRING_T  { $$ = CS_STRING_TYPE;  }
         ;
 
 expression

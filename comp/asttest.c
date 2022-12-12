@@ -7,7 +7,7 @@
 
 int main(void) {
     
-    FILE *fin = fopen("tests/prog1.cs", "r");
+    FILE *fin = fopen("tests/print.cs", "r");
     CS_Compiler* compiler = CS_create_compiler();
     CS_compile(compiler, fin);
     
