@@ -238,6 +238,16 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
                 svm->constant_pool[i].u.c_double = dv;                
                 break;
             }
+            //追加ここから
+            case SVM_STRING: {
+                char sv[4] = read_string(&pos); //read_stringは後で実装
+                svm->constant_pool[i].type = SVM_STRING;
+                for (int j = 0; j < 4; ++j) {
+                    svm->constant_pool[i].u.sval[j] = sv[j];
+                } 
+                break;
+            }
+            //追加ここまで    
             default: {
                 fprintf(stderr, "undefined constant type\n in parse");
                 exit(1);
@@ -421,6 +431,12 @@ static void init_svm(SVM_VirtualMachine* svm) {
                 svm->global_variables[i].dval = 0.0;
                 break;
             }
+            //追加ここから
+            case SVM_STRING: {
+                svm->global_variables[i].sval[4] = "0000"
+                break;
+            }
+            //追加ここまで
             default: {
                 fprintf(stderr, "no such svm type\n");
                 exit(1);
