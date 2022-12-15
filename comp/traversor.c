@@ -54,6 +54,7 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
     switch(expr->kind) {
         case BOOLEAN_EXPRESSION:
         case IDENTIFIER_EXPRESSION:
+        case STRING_EXPRESSION:
         case DOUBLE_EXPRESSION:
         case INT_EXPRESSION: {
             break;

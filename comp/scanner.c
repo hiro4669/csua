@@ -130,6 +130,29 @@ retry:
             increment_line();
             goto retry;
         }
+        case '"': {
+            uint8_t str_end_flg = 0;
+            for (int i = 0; i < 4; i++) {
+                switch (c = read()) {
+                    case '"': {
+                        str_end_flg = 1;
+                        break;
+                    }
+                    case '\n':
+                    case '\t': {
+                        i--;
+                        break;
+                    }
+                    default:
+                        addText(c);
+                }
+            }
+            if (!str_end_flg) {
+                while ((c = read()) == '"');
+            }
+            yylval.str = cs_create_string(yytext);
+            return STRING_LITERAL;
+        }
         case '0':
         case '1':
         case '2':

@@ -9,6 +9,7 @@ int yylex();
 %union{
     int                  iv;
     double               dv;
+    char                *str;
     char                *name;
     Expression          *expression;
     Statement           *statement;
@@ -50,6 +51,7 @@ int yylex();
 
 %token <iv>   INT_LITERAL
 %token <dv>   DOUBLE_LITERAL
+%token <str>  STRING_LITERAL
 %token <name> IDENTIFIER
 
 
@@ -219,6 +221,7 @@ primary_expression
 	| IDENTIFIER       { $$ = cs_create_identifier_expression($1); }
 	| INT_LITERAL      { $$ = cs_create_int_expression($1); }
 	| DOUBLE_LITERAL   { $$ = cs_create_double_expression($1); }
+        | STRING_LITERAL   { $$ = cs_create_string_expression($1); }
 	| TRUE_T           { $$ = cs_create_boolean_expression(CS_TRUE); }
 	| FALSE_T          { $$ = cs_create_boolean_expression(CS_FALSE); }
 	;

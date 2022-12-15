@@ -400,12 +400,13 @@ Visitor* create_treeview_visitor() {
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
-    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;    
+    leave_expr_list[STRING_EXPRESSION]        = leave_stringexpr;
+    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;
     leave_expr_list[ADD_EXPRESSION]           = leave_addexpr;
     leave_expr_list[SUB_EXPRESSION]           = leave_subexpr;
     leave_expr_list[MUL_EXPRESSION]           = leave_mulexpr;
     leave_expr_list[DIV_EXPRESSION]           = leave_divexpr;
-    leave_expr_list[MOD_EXPRESSION]           = leave_modexpr;    
+    leave_expr_list[MOD_EXPRESSION]           = leave_modexpr;
     leave_expr_list[GT_EXPRESSION]            = leave_gtexpr;
     leave_expr_list[GE_EXPRESSION]            = leave_geexpr;
     leave_expr_list[LT_EXPRESSION]            = leave_ltexpr;

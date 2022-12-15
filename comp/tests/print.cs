@@ -1,4 +1,4 @@
 int a;
-a = 3;
 string s;
-s = hoge;
+a = 3;
+"hoe";
