@@ -8,14 +8,19 @@ typedef struct SVM_VirtualMachine_tag SVM_VirtualMachine;
 typedef enum {
     SVM_PUSH_INT = 1,
     SVM_PUSH_DOUBLE,
+    SVM_PUSH_STRING, //追加
     SVM_PUSH_STACK_INT,
     SVM_PUSH_STACK_DOUBLE,
+    SVM_PUSH_STACK_STRING, //追加
     SVM_POP_STACK_INT,
     SVM_POP_STACK_DOUBLE,
+    SVM_POP_STACK_STRING, //追加
     SVM_PUSH_STATIC_INT,
     SVM_PUSH_STATIC_DOUBLE,
+    SVM_PUSH_STATIC_STRING, //追加
     SVM_POP_STATIC_INT,
     SVM_POP_STATIC_DOUBLE,
+    SVM_POP_STATIC_STRING,　//追加
     SVM_ADD_INT,
     SVM_ADD_DOUBLE,
     SVM_SUB_INT,
@@ -56,6 +61,7 @@ typedef enum {
 typedef enum {
     SVM_INT = 1,
     SVM_DOUBLE,
+    SVM_STRING //追加
 } SVM_ConstantType;
 
 
@@ -64,12 +70,14 @@ typedef struct {
     union {
         int c_int;
         double c_double;
+        char[4] c_string; //追加
     } u;
 } SVM_Constant;
 
 typedef union {
     int    ival;
     double dval;
+    char[4] sval; //追加
 } SVM_Value;
 
 typedef struct {
