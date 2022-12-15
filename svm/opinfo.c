@@ -7,17 +7,23 @@ OpcodeInfo svm_opcode_info[] = {
     {"dummy", "", 0},
     {"push_int", "i", 1},
     {"push_double", "i", 1},
+    {"push_string", "i", 1}, //追加string
+
     {"push_stack_int", "i", 1},
     {"push_stack_double", "i", 1},
+    {"push_stack_string", "i", 1}, //追加string
 
     {"pop_stack_int", "i", -1},
     {"pop_stack_double", "i", -1},
+    {"pop_stack_string", "i", -1}, //追加string
     
     {"push_static_int", "i", 1},
     {"push_static_double", "i", 1},
-    
+    {"push_static_string", "i", 1}, //追加string
+
     {"pop_static_int", "i", -1},
     {"pop_static_double", "i", -1},
+    {"pop_static_string", "i", -1}, //追加string
     
     {"add_int", "", -1}, 
     {"add_double", "", -1},
