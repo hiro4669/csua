@@ -7,7 +7,7 @@ int main(void) {
     
     extern FILE *yyin;
     extern int yylex();
-    yyin = fopen("tests/test.cs", "r");
+    yyin = fopen("tests/print.cs", "r");
     if (yyin == NULL) {
         fprintf(stderr, "cannot open file\n");
         exit(1);
@@ -25,6 +25,10 @@ int main(void) {
             }
             case DOUBLE_LITERAL: {
                 printf("DOUBLE_LITERAL: %lf\n", yylval.dv);
+                break;
+            }
+            case STRING_LITERAL: {
+                printf("STRING_LITERAL: %s\n", yylval.str);
                 break;
             }
             case SEMICOLON: {

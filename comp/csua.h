@@ -30,6 +30,7 @@ typedef enum {
     CS_BOOLEAN_TYPE,
     CS_INT_TYPE,
     CS_DOUBLE_TYPE,
+    CS_STRING_TYPE,
     CS_BASIC_TYPE_PLUS_ONE,
 } CS_BasicType;
 
@@ -75,6 +76,7 @@ typedef enum {
     BOOLEAN_EXPRESSION = 1,
     DOUBLE_EXPRESSION,
     INT_EXPRESSION,
+    STRING_EXPRESSION,
     IDENTIFIER_EXPRESSION,
     INCREMENT_EXPRESSION,
     DECREMENT_EXPRESSION,
@@ -148,6 +150,7 @@ struct Expression_tag {
     union {
         double                 double_value;
         int                    int_value;
+        char                   *string_value;
         CS_Boolean             boolean_value;
         IdentifierExpression   identifier;
         Expression             *inc_dec;
@@ -251,6 +254,7 @@ Expression* cs_create_int_expression(int v);
 Expression* cs_create_double_expression(double v);
 Expression* cs_create_boolean_expression(CS_Boolean v);
 Expression* cs_create_identifier_expression(char* identifier);
+Expression* cs_create_string_expression(char* str);
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec);
 Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args);
 Expression* cs_create_minus_expression(Expression* operand);
@@ -260,6 +264,7 @@ Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator
 Expression* cs_create_cast_expression(CS_CastType ctype, Expression* operand);
 void delete_storage();
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
+char* cs_create_string(const char* str);
 char* cs_create_identifier(const char* str);
 
 Statement* cs_create_expression_statement(Expression* expr);

@@ -16,6 +16,7 @@ int main(int argc, char* argv[]) {
     FILE* fin = fopen(argv[1], "r");    
     
     
+    FILE *fin = fopen("tests/print.cs", "r");
     CS_Compiler* compiler = CS_create_compiler();
     CS_compile(compiler, fin);
     

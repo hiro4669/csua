@@ -86,6 +86,12 @@ Expression* cs_create_identifier_expression(char* identifier) {
     return expr;
 }
 
+Expression* cs_create_string_expression(char* str) {
+    Expression* expr = cs_create_expression(STRING_EXPRESSION);
+    expr->u.string_value = str;
+    return expr;
+}
+
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec) {
     Expression* expr = cs_create_expression(inc_dec);
     expr->u.inc_dec = id_expr;
@@ -133,7 +139,13 @@ Expression* cs_create_cast_expression(CS_CastType ctype, Expression* operand) {
     expr->u.cast_expression.expr = operand;
     return expr;
 }
-        
+
+char* cs_create_string(const char* str) {
+    char* new_char;
+    new_char = (char*)cs_malloc(8);
+    strcpy(new_char, str);
+    return new_char;
+}
         
 char* cs_create_identifier(const char* str) {
     char* new_char;
