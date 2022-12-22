@@ -70,14 +70,14 @@ typedef struct {
     union {
         int c_int;
         double c_double;
-        char c_string[4]; //追加
+        char c_string[8]; //追加
     } u;
 } SVM_Constant;
 
 typedef union {
     int    ival;
     double dval;
-    char sval[4]; //追加
+    char sval[8]; //追加
 } SVM_Value;
 
 typedef struct {
