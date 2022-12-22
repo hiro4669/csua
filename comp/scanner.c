@@ -146,9 +146,10 @@ retry:
                     default:
                         addText(c);
                 }
+                if (c == '"') break;
             }
             if (!str_end_flg) {
-                while ((c = read()) == '"');
+                while ((c = read()) != '"');
             }
             yylval.str = cs_create_string(yytext);
             return STRING_LITERAL;
