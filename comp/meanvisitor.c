@@ -608,6 +608,7 @@ MeanVisitor* create_mean_visitor() {
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
+    leave_expr_list[STRING_EXPRESSION]        = leave_stringexpr;
     leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;    
     leave_expr_list[ADD_EXPRESSION]           = leave_addexpr;
     leave_expr_list[SUB_EXPRESSION]           = leave_subexpr;
