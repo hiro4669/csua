@@ -5,6 +5,7 @@
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <math.h>
 #include "svm.h"
 #include "../memory/MEM.h"
 
@@ -42,10 +43,10 @@ static uint8_t read_byte(uint8_t **p) {
 
 static void parse_header(uint8_t **p) {
     for(int i = 0; i < 8; ++i) {
-        printf("%c ", (char)(**p));
+//        printf("%c ", (char)(**p));
         (*p)++;
     }
-    printf("\n");        
+//    printf("\n");        
 }
 
 typedef struct {
@@ -92,21 +93,92 @@ static void add_rowcode(DInfo *info, uint8_t op) {
 
 
 static void disasm(SVM_VirtualMachine* svm) {
-//static void disasm(uint8_t *code, size_t size) {
+    
+    printf("-- constant pool --\n");
+    printf("constant_count = %d\n", svm->constant_pool_count);
+    for (int i = 0; i < svm->constant_pool_count; ++i) {
+        printf("constant[%d] = ", i);
+        switch(svm->constant_pool[i].type) {
+            case SVM_INT: {
+                printf("%d\n", svm->constant_pool[i].u.c_int);
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("%f\n", svm->constant_pool[i].u.c_double);
+                break;
+            }
+            default: {
+                exit(1);
+            }
+        }
+    }
+    
+    printf("\n-- variables --\n");
+    printf("variable_count = %d\n", (int)svm->global_variable_count);    
+    for(int i = 0; i < svm->global_variable_count; ++i) {
+        printf("v[%d]: ", i);
+        switch(svm->global_variable_types[i]) {
+            case SVM_INT: {
+                printf("INT\n");
+                break;
+            }
+            case SVM_DOUBLE: {
+                printf("DOUBLE\n");                
+                break;
+            }
+            default: {
+                exit(1);
+            }
+        }
+    }
+    printf("\n-- code --\n");
+        
     uint8_t *p = svm->code;
     DInfo dinfo = {0};
-    int param_len = 0;
-    
+    int param_len = 0;    
     for (int i = 0; i < svm->code_size; ++i, p++) {
         OpcodeInfo *oinfo = &svm_opcode_info[*p];
         add_rowcode(&dinfo, *p);
         switch(*p) {
+            case SVM_CAST_DOUBLE_TO_INT:
+            case SVM_CAST_INT_TO_DOUBLE:
+            case SVM_PUSH_DOUBLE:
+            case SVM_POP_STATIC_DOUBLE:            
             case SVM_PUSH_INT:
             case SVM_POP_STATIC_INT: 
             case SVM_PUSH_STATIC_INT:
+            case SVM_PUSH_STATIC_DOUBLE:
             case SVM_PUSH_FUNCTION:
             case SVM_POP:
             case SVM_ADD_INT:
+            case SVM_ADD_DOUBLE:
+            case SVM_SUB_INT:
+            case SVM_SUB_DOUBLE:
+            case SVM_MUL_INT:
+            case SVM_MUL_DOUBLE:
+            case SVM_DIV_INT:
+            case SVM_DIV_DOUBLE:
+            case SVM_MOD_INT:
+            case SVM_MOD_DOUBLE:
+            case SVM_LT_INT:
+            case SVM_LT_DOUBLE:
+            case SVM_LE_INT:
+            case SVM_LE_DOUBLE:
+            case SVM_GT_INT:
+            case SVM_GT_DOUBLE:
+            case SVM_GE_INT:
+            case SVM_GE_DOUBLE:
+            case SVM_EQ_INT:
+            case SVM_EQ_DOUBLE:
+            case SVM_NE_INT:
+            case SVM_NE_DOUBLE:
+            case SVM_LOGICAL_AND:
+            case SVM_LOGICAL_OR:
+            case SVM_LOGICAL_NOT:
+            case SVM_MINUS_INT:
+            case SVM_MINUS_DOUBLE:
+            case SVM_INCREMENT:
+            case SVM_DECREMENT:
             case SVM_INVOKE: {
 //                printf("%s\n", oinfo->opname);
                 add_opname(&dinfo, oinfo->opname);
@@ -146,7 +218,7 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     uint8_t* pos = buf;
     parse_header(&pos);
     svm->constant_pool_count = read_int(&pos);
-    printf("constant_pool_count = %d\n", svm->constant_pool_count);
+//    printf("constant_pool_count = %d\n", svm->constant_pool_count);
     svm->constant_pool = (SVM_Constant*)MEM_malloc(sizeof(SVM_Constant) * svm->constant_pool_count);
     
     uint8_t type;
@@ -154,12 +226,14 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
         switch(type = read_byte(&pos)) {
             case SVM_INT: {
                 int v = read_int(&pos);
+//                printf("constant[%d] = %d\n", i, v);
                 svm->constant_pool[i].type = SVM_INT;
                 svm->constant_pool[i].u.c_int = v;
                 break;
             }
             case SVM_DOUBLE: {
                 double dv = read_double(&pos);
+//                printf("constant[%d] = %f\n", i, dv);
                 svm->constant_pool[i].type = SVM_DOUBLE;
                 svm->constant_pool[i].u.c_double = dv;                
                 break;
@@ -174,17 +248,17 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     svm->global_variable_count = read_int(&pos);
     svm->global_variables = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->global_variable_count);
     svm->global_variable_types = (uint8_t*)MEM_malloc(sizeof(uint8_t) * svm->global_variable_count);
-    printf("global_variable_count = %d\n", svm->global_variable_count);
+//    printf("global_variable_count = %d\n", svm->global_variable_count);
     for (int i = 0; i < svm->global_variable_count; ++i) {        
 //        uint8_t type = read_byte(&pos);
         svm->global_variable_types[i] = read_byte(&pos);
         switch (svm->global_variable_types[i]) {
             case SVM_INT: {
-                printf("INT\n");
+//                printf("INT\n");
                 break;
             }
             case SVM_DOUBLE: {
-                printf("DOUBLE\n");                
+//                printf("DOUBLE\n");                
                 break;
             }
             defulat: {
@@ -194,16 +268,10 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
     }
     
     svm->code_size = read_int(&pos);
-    printf("code_size = %d\n", svm->code_size);
     svm->code = (uint8_t*)MEM_malloc(svm->code_size);
     memcpy(svm->code, pos, svm->code_size);
     pos += svm->code_size;
-    svm->stack_size = read_int(&pos);
-    printf("stack_size = %d\n", svm->stack_size);    
-    
-//    svm->code = pos;
- //   disasm(pos, svm->code_size);
- 
+    svm->stack_size = read_int(&pos); 
 }
 
 
@@ -280,15 +348,30 @@ static int read_static_int(SVM_VirtualMachine* svm, uint16_t idx) {
     return read_static(svm, idx)->u.c_int;
 }
 
+static double read_static_double(SVM_VirtualMachine* svm, uint16_t idx) {
+    return read_static(svm, idx)->u.c_double;
+}
+
 static void push_i(SVM_VirtualMachine* svm, int iv) {
     svm->stack[svm->sp].ival = iv;
     svm->stack_value_type[svm->sp] = SVM_INT;
     svm->sp++;
 }
 
+static void push_d(SVM_VirtualMachine* svm, double dv) {
+    svm->stack[svm->sp].dval = dv;
+    svm->stack_value_type[svm->sp] = SVM_DOUBLE;
+    svm->sp++;
+}
+
 static int pop_i(SVM_VirtualMachine *svm) {
     --svm->sp;
     return svm->stack[svm->sp].ival;
+}
+
+static double pop_d(SVM_VirtualMachine* svm) {
+    --svm->sp;
+    return svm->stack[svm->sp].dval;
 }
 
 static void write_i(SVM_Value* head, uint32_t offset, uint32_t idx, int iv) {
@@ -298,11 +381,26 @@ static int read_i(SVM_Value* head, uint32_t offset, uint32_t idx) {
     return head[offset+idx].ival;
 }
 
+static void write_d(SVM_Value* head, uint32_t offset, uint32_t idx, double dv) {
+    head[offset+idx].dval = dv;
+}
+static double read_d(SVM_Value* head, uint32_t offset, uint32_t idx) {
+    return head[offset+idx].dval;
+}
+
+
 static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
     write_i(svm->global_variables, 0, idx, iv);
 }
 static int read_global_i(SVM_VirtualMachine* svm, uint32_t idx) {
     return read_i(svm->global_variables, 0, idx);
+}
+
+static void write_global_d(SVM_VirtualMachine* svm, uint32_t idx, double dv) {
+    write_d(svm->global_variables, 0, idx, dv);
+}
+static double read_global_d(SVM_VirtualMachine* svm, uint32_t idx) {
+    return read_d(svm->global_variables, 0, idx);
 }
 
 
@@ -332,7 +430,7 @@ static void init_svm(SVM_VirtualMachine* svm) {
 }
 
 static void show_status(SVM_VirtualMachine* svm) {
-    printf("< show SVM status >\n");
+    printf("\n< show SVM status >\n");
     printf("-- global variable ---\n");
     for (int i = 0; i < svm->global_variable_count; ++i) {
 
@@ -383,11 +481,24 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_i(svm, v);
                 break;
             }
-            case SVM_POP_STATIC_INT: { // save val to global variable
+            case SVM_PUSH_DOUBLE: {
+                uint16_t s_idx = fetch2(svm);
+                double dv = read_static_double(svm, s_idx);
+                push_d(svm, dv);                
+                break;
+            }
+            case SVM_POP_STATIC_INT: { // save i_val to global variable
                 uint16_t s_idx = fetch2(svm); 
                 int iv = pop_i(svm);
                 write_global_i(svm, s_idx, iv);
 //                show_status(svm);
+//                exit(1);
+                break;
+            }
+            case SVM_POP_STATIC_DOUBLE: { // save d_val to global variable
+                uint16_t s_idx = fetch2(svm); 
+                double dv = pop_d(svm);
+                write_global_d(svm, s_idx, dv);
 //                exit(1);
                 break;
             }
@@ -398,30 +509,203 @@ static void svm_run(SVM_VirtualMachine* svm) {
                 push_i(svm, iv);
                 break;
             }
+            case SVM_PUSH_STATIC_DOUBLE: {
+                uint16_t s_idx = fetch2(svm);
+                double dv = read_global_d(svm, s_idx);
+                push_d(svm, dv);
+                break;
+            }
             case SVM_ADD_INT: {
                 int iv1 = pop_i(svm);
                 int iv2 = pop_i(svm);
-                push_i(svm, (iv1+iv2));
+                push_i(svm, (iv2+iv1));
+                break;
+            }
+            case SVM_ADD_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv2+dv1));
+                break;
+            }
+            case SVM_SUB_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2-iv1));                
+                break;
+            }
+            case SVM_SUB_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv2-dv1));                
+                break;
+            }
+            case SVM_MUL_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2*iv1));
+                break;
+            }
+            case SVM_MUL_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv2*dv1));
+                break;
+            }            
+            case SVM_DIV_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2/iv1));
+                break;
+            }
+            case SVM_DIV_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, (dv2/dv1));
+                break;
+            }
+            case SVM_MOD_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2%iv1));
+                break;
+            }
+            case SVM_MOD_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_d(svm, fmod(dv2, dv1));
+                break;
+            }
+            case SVM_LT_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 < iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_LT_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 < dv1) ? 1 : 0 );                
+                break;
+            }
+            case SVM_LE_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 <= iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_LE_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 <= dv1) ? 1 : 0 );                
+                break;
+            }
+            case SVM_GT_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 > iv1) ? 1 : 0 );
+                break;
+                break;
+            }
+            case SVM_GT_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 > dv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_GE_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 >= iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_GE_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 >= dv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_EQ_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 == iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_EQ_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 == dv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_NE_INT: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv2 != iv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_NE_DOUBLE: {
+                double dv1 = pop_d(svm);
+                double dv2 = pop_d(svm);
+                push_i(svm, (dv2 != dv1) ? 1 : 0 );
+                break;
+            }
+            case SVM_CAST_DOUBLE_TO_INT: {
+                double dv = pop_d(svm);
+                push_i(svm, (int)dv);
+                break;
+            }
+            case SVM_INCREMENT: {
+                int iv = pop_i(svm);
+                push_i(svm, ++iv);
+                break;
+            }
+            case SVM_DECREMENT: {
+                int iv = pop_i(svm);
+                push_i(svm, --iv);                
+                break;
+            }
+            case SVM_LOGICAL_AND: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv1 == 1 && iv2 == 1) ? 1 : 0);
+                break;
+            }
+            case SVM_LOGICAL_OR: {
+                int iv1 = pop_i(svm);
+                int iv2 = pop_i(svm);
+                push_i(svm, (iv1 == 1 || iv2 == 1) ? 1 : 0);
+                break;
+            }
+            case SVM_LOGICAL_NOT: {
+                int iv = pop_i(svm);
+                push_i(svm, (iv == 1) ? 0 : 1);
+                break;
+            }
+            case SVM_MINUS_INT: {
+                int iv = pop_i(svm);
+                push_i(svm, -iv);
+                break;
+            }
+            case SVM_MINUS_DOUBLE: {
+                double dv = pop_d(svm);
+                push_d(svm, -dv);
+                break;
+            }
+            case SVM_CAST_INT_TO_DOUBLE: {
+                int i = pop_i(svm);
+                push_d(svm, (double)i);
                 break;
             }
             case SVM_PUSH_FUNCTION: {
                 uint16_t idx = fetch2(svm);
                 push_i(svm, idx);
                 break;
-            }
+            }            
             case SVM_INVOKE: {
                 uint16_t f_idx = pop_i(svm);
-                /*
-                printf("function id = %d\n", f_idx);
-                printf("function count = %d\n", svm->function_count);
-                printf("name = %s\n", svm->functions[f_idx].name);
-                printf("sp = %d\n", svm->sp);
-                printf("arg_count = %d\n", svm->functions[f_idx].arg_count);
-                 */
                 switch (svm->functions[f_idx].f_type) {
                     case NATIVE_FUNCTION: {
                         SVM_Value val = svm->functions[f_idx].u.n_func(svm, 
-                                &svm->stack[svm->sp], 
+                                &svm->stack[svm->sp - svm->functions[f_idx].arg_count], 
                                 svm->functions[f_idx].arg_count);
                         svm->sp -= svm->functions[f_idx].arg_count;
                         svm->stack[svm->sp++] = val;                        
@@ -432,14 +716,10 @@ static void svm_run(SVM_VirtualMachine* svm) {
                         exit(1);
                     }
                 }
-
-
                 break;
             }
             case SVM_POP: {
-//                printf("sp = %d\n", svm->sp);
                 pop_i(svm);
-//                exit(1);
                 break;
             }
             default: {

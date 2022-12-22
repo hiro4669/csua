@@ -63,7 +63,7 @@ typedef struct {
     SVM_ConstantType type;
     union {
         int c_int;
-        int c_double;
+        double c_double;
     } u;
 } SVM_Constant;
 

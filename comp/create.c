@@ -99,9 +99,10 @@ Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc
 }
 
 // args is argument not yet
-Expression* cs_create_function_call_expression(Expression* function, void* args) {
+Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args) {
     Expression* expr = cs_create_expression(FUNCTION_CALL_EXPRESSION);
     expr->u.function_call_expression.function = function;
+    expr->u.function_call_expression.argument = args;
     return expr;
 }
 
@@ -176,6 +177,15 @@ TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     return ts;
 }
 
+ParameterList* cs_create_parameter(CS_BasicType type, char* name) {
+    ParameterList* param = (ParameterList*)cs_malloc(sizeof(ParameterList));
+    param->type = cs_create_type_specifier(type);
+    param->name = name;
+    param->line_number = *linenum;
+    param->next = NULL;
+    return param;
+}
+
 static Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
     Declaration* decl = (Declaration*)cs_malloc(sizeof(Declaration));
     decl->type = cs_create_type_specifier(type);
@@ -207,10 +217,11 @@ DeclarationList* cs_create_declaration_list(Declaration* decl) {
 }
 
 
-FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name) {
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name, ParameterList* param) {
     FunctionDeclaration* decl = (FunctionDeclaration*)cs_malloc(sizeof(FunctionDeclaration));
     decl->type = cs_create_type_specifier(type);
     decl->name = name;
+    decl->param = param;
     decl->index = -1;
     return decl;
 }
@@ -220,5 +231,12 @@ FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration
     list->next = NULL;
     list->func = func;
     return list;
+}
+
+ArgumentList* cs_create_argument(Expression* expr) {
+    ArgumentList* argument = cs_malloc(sizeof(ArgumentList));
+    argument->expr = expr;
+    argument->next = NULL;
+    return argument;
 }
 
