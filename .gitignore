@@ -1,5 +1,6 @@
 *.o
 y.tab.*
+scant
 prst
 memt
 treet
