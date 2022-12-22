@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(int argc, char* argv[]) {
+int main(void) {
 
     extern int yyparse(void);
     extern FILE *yyin;
@@ -26,7 +26,5 @@ int main(int argc, char* argv[]) {
     
 
     fclose(yyin);
-    
-    fprintf(stderr, "prase OK\n");
     return 0;
 }

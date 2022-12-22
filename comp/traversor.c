@@ -90,14 +90,7 @@ static void traverse_expr_children(Expression* expr, Visitor *visitor) {
             break;
         }
         case FUNCTION_CALL_EXPRESSION: {
-//            printf("function call!\n");
-            ArgumentList* args = expr->u.function_call_expression.argument;
-            if (args) {
-                for (; args; args=args->next) {
-                    traverse_expr(args->expr, visitor);
-                }
-            }
-            traverse_expr(expr->u.function_call_expression.function, visitor);            
+            traverse_expr(expr->u.function_call_expression.function, visitor);
             break;
         }
         case LOGICAL_AND_EXPRESSION:

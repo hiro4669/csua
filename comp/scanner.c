@@ -133,23 +133,32 @@ retry:
         case '"': {
             uint8_t str_end_flg = 0;
             for (int i = 0; i < 4; i++) {
-                switch (c = read()) {
-                    case '"': {
-                        str_end_flg = 1;
-                        break;
-                    }
-                    case '\n':
-                    case '\t': {
-                        i--;
-                        break;
-                    }
-                    default:
-                        addText(c);
+                c = read();
+                if(c == '"'){
+                    str_end_flg = 1;
+                    break;
                 }
-                if (c == '"') break;
+                else if(isdigit(c)){
+                    addText(c);
+                }else if((c>='a' && c<='z')||(c>='A' && c<='Z')){
+                    addText(c);
+                }else if(c==' '){
+                    addText(c);
+                    i++;
+                    c = read();
+                    if (c != ' ')
+                    {
+                        addText(c);
+                    }
+                    else{
+                        i--;
+                    }
+                }else{
+                    i--;
+                }
             }
             if (!str_end_flg) {
-                while ((c = read()) != '"');
+                while ((c = read()) != '"');//"=="->"!="
             }
             yylval.str = cs_create_string(yytext);
             return STRING_LITERAL;

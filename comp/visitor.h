@@ -39,20 +39,14 @@ struct MeanVisitor_tag {
 typedef enum {
     VISIT_NORMAL,
     VISIT_NOMAL_ASSIGN,
-} VisitIdentState;
-
-typedef enum {
-    VISIT_F_NO,
-    VISIT_F_CALL,    
-} VisitFunCallState;
+} VisitState;
 
 struct CodegenVisitor_tag {
     Visitor        visitor;
     CS_Compiler   *compiler;
     CS_Executable *exec;
     
-    VisitIdentState     vi_state;
-    VisitFunCallState       vf_state;
+    VisitState     v_state;
     uint16_t       assign_depth;
     
     uint32_t       CODE_ALLOC_SIZE;
