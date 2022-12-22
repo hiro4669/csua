@@ -36,6 +36,31 @@ static double read_double(uint8_t **p) {
 
 }
 
+//ここから追加
+static char *read_string(uint8_t **p) {
+    uint8_t v1 = **p; (*p)++;
+    uint8_t v2 = **p; (*p)++;
+    uint8_t v3 = **p; (*p)++;
+    uint8_t v4 = **p; (*p)++;
+    uint8_t v5 = **p; (*p)++;
+    uint8_t v6 = **p; (*p)++;
+    uint8_t v7 = **p; (*p)++;
+    uint8_t v8 = **p; (*p)++;
+    
+    char sv[8];
+    sv[0] = (char)v1;
+    sv[1] = (char)v2;
+    sv[2] = (char)v3;
+    sv[3] = (char)v4;
+    sv[4] = (char)v5;
+    sv[5] = (char)v6;
+    sv[6] = (char)v7;
+    sv[7] = (char)v8;
+
+    return sv;
+}
+//ここまで追加
+
 static uint8_t read_byte(uint8_t **p) {
     uint8_t v = **p; (*p)++;
     return v;
@@ -240,14 +265,14 @@ static void parse(uint8_t* buf, SVM_VirtualMachine* svm) {
             }
             //追加ここから
             case SVM_STRING: {
-                char sv[4] = read_string(&pos); //read_stringは後で実装
+                char sv[8] = read_string(&pos); //read_stringは後で実装
                 svm->constant_pool[i].type = SVM_STRING;
-                for (int j = 0; j < 4; ++j) {
+                for (int j = 0; j < 8; ++j) {
                     svm->constant_pool[i].u.sval[j] = sv[j];
                 } 
                 break;
             }
-            //追加ここまで    
+            //追加ここまで  
             default: {
                 fprintf(stderr, "undefined constant type\n in parse");
                 exit(1);
@@ -362,6 +387,12 @@ static double read_static_double(SVM_VirtualMachine* svm, uint16_t idx) {
     return read_static(svm, idx)->u.c_double;
 }
 
+//ここから追加
+static char *read_static_string (SVM_VirtualMachine* svm, uint16_t idx) {
+    return read_static(svm, idx)->u.c_string;
+}
+//ここまで追加
+
 static void push_i(SVM_VirtualMachine* svm, int iv) {
     svm->stack[svm->sp].ival = iv;
     svm->stack_value_type[svm->sp] = SVM_INT;
@@ -374,6 +405,15 @@ static void push_d(SVM_VirtualMachine* svm, double dv) {
     svm->sp++;
 }
 
+//ここから追加
+static void push_s(SVM_VirtualMachine* svm, char* sv) {
+    for (int i = 0; i < 8; ++i) {
+        svm->stack[svm->sp].sval[i] = sv[i];
+    }
+    svm->sp++;
+}
+//ここまで追加
+
 static int pop_i(SVM_VirtualMachine *svm) {
     --svm->sp;
     return svm->stack[svm->sp].ival;
@@ -383,6 +423,13 @@ static double pop_d(SVM_VirtualMachine* svm) {
     --svm->sp;
     return svm->stack[svm->sp].dval;
 }
+
+//ここから追加
+static char *pop_s(SVM_VirtualMachine* svm) {
+    --svm->sp;
+    return svm->stack[svm->sp]
+}
+//ここまで追加
 
 static void write_i(SVM_Value* head, uint32_t offset, uint32_t idx, int iv) {
     head[offset+idx].ival = iv;
@@ -398,6 +445,17 @@ static double read_d(SVM_Value* head, uint32_t offset, uint32_t idx) {
     return head[offset+idx].dval;
 }
 
+//ここから追加
+static void write_s(SVM_Value* head, uint32_t offset, uint32_t idx, char* sv) {
+    for (int i = 0; i < 8; i++) {
+        head[offset+idx].sval[i] = sv[i];
+    }
+}
+
+static char *read_s(SVM_Value* head, uint32_t offset, uint32_t idx) {
+    return head[offset+idx].sval;
+}
+//ここまで追加
 
 static void write_global_i(SVM_VirtualMachine* svm, uint32_t idx, int iv) {
     write_i(svm->global_variables, 0, idx, iv);
@@ -413,6 +471,15 @@ static double read_global_d(SVM_VirtualMachine* svm, uint32_t idx) {
     return read_d(svm->global_variables, 0, idx);
 }
 
+//ここから追加
+static void write_global_s(SVM_VirtualMachine* svm, uint32_t idx, char *sv) {
+    write_s(svm->groval_variables, 0, idx, sv);
+} 
+
+static char *read_global_s(SVM_VirtualMachine* svm, uint32_t idx) {
+    return read_s(svm->global_variables, 0, idx);
+}
+//ここまで追加
 
 static void init_svm(SVM_VirtualMachine* svm) {
     svm->stack = (SVM_Value*)MEM_malloc(sizeof(SVM_Value) * svm->stack_size);
@@ -433,7 +500,7 @@ static void init_svm(SVM_VirtualMachine* svm) {
             }
             //追加ここから
             case SVM_STRING: {
-                svm->global_variables[i].sval[4] = "0000"
+                svm->global_variables[i].sval[8] = "00000000"
                 break;
             }
             //追加ここまで
