@@ -2,18 +2,20 @@
 #include <stdio.h>
 #define YYDEBUG 1
 #include "csua.h"    
+
+int yyerror(char const *str);
+int yylex();
 %}
 %union{
     int                  iv;
     double               dv;
+    char                *str;
     char                *name;
     Expression          *expression;
     Statement           *statement;
     FunctionDeclaration *function_declaration;
     AssignmentOperator   assignment_operator;
     CS_BasicType         type_specifier;
-    ParameterList       *parameter_list;
-    ArgumentList        *argument_list;
 }
 
 %token LP
@@ -49,6 +51,7 @@
 
 %token <iv>   INT_LITERAL
 %token <dv>   DOUBLE_LITERAL
+%token <str>  STRING_LITERAL
 %token <name> IDENTIFIER
 
 
@@ -76,8 +79,6 @@
 %type <type_specifier> type_specifier
 %type <statement> statement declaration_statement
 %type <function_declaration> function_definition
-%type <parameter_list> parameter_list
-%type <argument_list> argument_list
 
 %%
 translation_unit
@@ -102,18 +103,10 @@ definition_or_statement
         ;
 
 function_definition
-        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, NULL);}    
-        | type_specifier IDENTIFIER LP parameter_list RP SEMICOLON { $$ = cs_create_function_declaration($1, $2, $4);} 
+        : type_specifier IDENTIFIER LP RP SEMICOLON { $$ = cs_create_function_declaration($1, $2);}
+    
+
         ;
-        
-parameter_list
-        : type_specifier IDENTIFIER   { $$ = cs_create_parameter($1, $2); }
-        | parameter_list COMMA type_specifier IDENTIFIER {$$ = cs_chain_parameter_list($1, $3, $4);}
-        
-argument_list
-        : assignment_expression { $$ = cs_create_argument($1); }
-        | argument_list COMMA assignment_expression { $$ = cs_chain_argument_list($1, $3); }
-        
 
 statement
 	: expression SEMICOLON 
@@ -145,6 +138,7 @@ type_specifier
         : BOOLEAN_T { $$ = CS_BOOLEAN_TYPE; }
         | INT_T     { $$ = CS_INT_TYPE;     }
         | DOUBLE_T  { $$ = CS_DOUBLE_TYPE;  }
+        | STRING_T  { $$ = CS_STRING_TYPE;  }
         ;
 
 expression
@@ -217,7 +211,6 @@ unary_expression
 
 postfix_expression
         : primary_expression
-        | postfix_expression LP argument_list RP     { $$ = cs_create_function_call_expression($1, $3); }
         | postfix_expression LP RP     { $$ = cs_create_function_call_expression($1, NULL); }
         | postfix_expression INCREMENT { $$ = cs_create_inc_dec_expression($1, INCREMENT_EXPRESSION);}
         | postfix_expression DECREMENT { $$ = cs_create_inc_dec_expression($1, DECREMENT_EXPRESSION);}
@@ -228,6 +221,7 @@ primary_expression
 	| IDENTIFIER       { $$ = cs_create_identifier_expression($1); }
 	| INT_LITERAL      { $$ = cs_create_int_expression($1); }
 	| DOUBLE_LITERAL   { $$ = cs_create_double_expression($1); }
+        | STRING_LITERAL   { $$ = cs_create_string_expression($1); }
 	| TRUE_T           { $$ = cs_create_boolean_expression(CS_TRUE); }
 	| FALSE_T          { $$ = cs_create_boolean_expression(CS_FALSE); }
 	;

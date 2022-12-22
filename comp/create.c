@@ -86,6 +86,12 @@ Expression* cs_create_identifier_expression(char* identifier) {
     return expr;
 }
 
+Expression* cs_create_string_expression(char* str) {
+    Expression* expr = cs_create_expression(STRING_EXPRESSION);
+    expr->u.string_value = str;
+    return expr;
+}
+
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec) {
     Expression* expr = cs_create_expression(inc_dec);
     expr->u.inc_dec = id_expr;
@@ -93,10 +99,9 @@ Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc
 }
 
 // args is argument not yet
-Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args) {
+Expression* cs_create_function_call_expression(Expression* function, void* args) {
     Expression* expr = cs_create_expression(FUNCTION_CALL_EXPRESSION);
     expr->u.function_call_expression.function = function;
-    expr->u.function_call_expression.argument = args;
     return expr;
 }
 
@@ -133,7 +138,13 @@ Expression* cs_create_cast_expression(CS_CastType ctype, Expression* operand) {
     expr->u.cast_expression.expr = operand;
     return expr;
 }
-        
+
+char* cs_create_string(const char* str) {
+    char* new_char;
+    new_char = (char*)cs_malloc(8);
+    strcpy(new_char, str);
+    return new_char;
+}
         
 char* cs_create_identifier(const char* str) {
     char* new_char;
@@ -163,15 +174,6 @@ TypeSpecifier* cs_create_type_specifier(CS_BasicType type) {
     ts->basic_type = type;
 
     return ts;
-}
-
-ParameterList* cs_create_parameter(CS_BasicType type, char* name) {
-    ParameterList* param = (ParameterList*)cs_malloc(sizeof(ParameterList));
-    param->type = cs_create_type_specifier(type);
-    param->name = name;
-    param->line_number = *linenum;
-    param->next = NULL;
-    return param;
 }
 
 static Declaration* cs_create_declaration(CS_BasicType type, char* name, Expression* initializer) {
@@ -205,11 +207,10 @@ DeclarationList* cs_create_declaration_list(Declaration* decl) {
 }
 
 
-FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name, ParameterList* param) {
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name) {
     FunctionDeclaration* decl = (FunctionDeclaration*)cs_malloc(sizeof(FunctionDeclaration));
     decl->type = cs_create_type_specifier(type);
     decl->name = name;
-    decl->param = param;
     decl->index = -1;
     return decl;
 }
@@ -219,12 +220,5 @@ FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration
     list->next = NULL;
     list->func = func;
     return list;
-}
-
-ArgumentList* cs_create_argument(Expression* expr) {
-    ArgumentList* argument = cs_malloc(sizeof(ArgumentList));
-    argument->expr = expr;
-    argument->next = NULL;
-    return argument;
 }
 

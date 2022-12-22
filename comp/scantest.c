@@ -27,6 +27,10 @@ int main(void) {
                 printf("DOUBLE_LITERAL: %lf\n", yylval.dv);
                 break;
             }
+            case STRING_LITERAL: {
+                printf("STRING_LITERAL: %s\n", yylval.str);
+                break;
+            }
             case SEMICOLON: {
                 printf("SEMICOLON:\n");
                 break;

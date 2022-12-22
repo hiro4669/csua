@@ -38,20 +38,6 @@ static char* get_type_name(CS_BasicType type) {
 }
 */
 
-static const char* get_cast_type_name(CS_CastType type) {
-    switch(type) {
-        case CS_INT_TO_DOUBLE: {
-            return "int_to_double";
-        }
-        case CS_DOUBLE_TO_INT: {
-            return "double_to_int";
-        }
-        default: {
-            return "unknown cast";
-        }
-    }
-}
-
 static CS_BasicType get_type(Expression* expr) {
     if (expr->type) {
         return expr->type->basic_type;
@@ -61,7 +47,7 @@ static CS_BasicType get_type(Expression* expr) {
 
 static void enter_castexpr(Expression* expr, Visitor* visitor) {
     print_depth();
-    fprintf(stderr, "enter castexpr : %s\n", get_cast_type_name(expr->u.cast_expression.ctype));
+    fprintf(stderr, "enter castexpr : %d\n", expr->u.cast_expression.ctype);
     increment();
 }
 static void leave_castexpr(Expression* expr, Visitor* visitor) { 
@@ -102,6 +88,18 @@ static void leave_doubleexpr(Expression* expr, Visitor* visitor) {
     decrement();
     print_depth();
     fprintf(stderr, "leave doubleexpr(type:%s)\n", get_type_name(get_type(expr)));            
+}
+
+static void enter_stringexpr(Expression* expr, Visitor* visitor) {
+    print_depth();
+    fprintf(stderr, "enter stringexpr : %s\n", expr->u.string_value);
+    increment();
+}
+
+static void leave_stringexpr(Expression* expr, Visitor* visitor) {
+    decrement();
+    print_depth();
+    fprintf(stderr, "leave stringexpr(type:%s)\n", get_type_name(get_type(expr)));
 }
 
 static void enter_identexpr(Expression* expr, Visitor* visitor) {
@@ -371,6 +369,7 @@ Visitor* create_treeview_visitor() {
     enter_expr_list[BOOLEAN_EXPRESSION]       = enter_boolexpr;
     enter_expr_list[INT_EXPRESSION]           = enter_intexpr;
     enter_expr_list[DOUBLE_EXPRESSION]        = enter_doubleexpr;
+    enter_expr_list[STRING_EXPRESSION]        = enter_stringexpr;
     enter_expr_list[IDENTIFIER_EXPRESSION]    = enter_identexpr;    
     enter_expr_list[ADD_EXPRESSION]           = enter_addexpr;
     enter_expr_list[SUB_EXPRESSION]           = enter_subexpr;
@@ -401,12 +400,13 @@ Visitor* create_treeview_visitor() {
     leave_expr_list[BOOLEAN_EXPRESSION]       = leave_boolexpr;
     leave_expr_list[INT_EXPRESSION]           = leave_intexpr;
     leave_expr_list[DOUBLE_EXPRESSION]        = leave_doubleexpr;
-    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;    
+    leave_expr_list[STRING_EXPRESSION]        = leave_stringexpr;
+    leave_expr_list[IDENTIFIER_EXPRESSION]    = leave_identexpr;
     leave_expr_list[ADD_EXPRESSION]           = leave_addexpr;
     leave_expr_list[SUB_EXPRESSION]           = leave_subexpr;
     leave_expr_list[MUL_EXPRESSION]           = leave_mulexpr;
     leave_expr_list[DIV_EXPRESSION]           = leave_divexpr;
-    leave_expr_list[MOD_EXPRESSION]           = leave_modexpr;    
+    leave_expr_list[MOD_EXPRESSION]           = leave_modexpr;
     leave_expr_list[GT_EXPRESSION]            = leave_gtexpr;
     leave_expr_list[GE_EXPRESSION]            = leave_geexpr;
     leave_expr_list[LT_EXPRESSION]            = leave_ltexpr;
