@@ -17,3 +17,7 @@
 #double;
 #string;
 print();
+"moj"; #ok
+"moji"; # ok
+"\n\tmoji"; #moji
+"mojitiko"; # moji

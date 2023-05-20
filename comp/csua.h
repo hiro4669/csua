@@ -30,6 +30,7 @@ typedef enum {
     CS_BOOLEAN_TYPE,
     CS_INT_TYPE,
     CS_DOUBLE_TYPE,
+    CS_STRING_TYPE,
     CS_BASIC_TYPE_PLUS_ONE,
 } CS_BasicType;
 
@@ -49,25 +50,9 @@ typedef struct {
     int           index;    
 } Declaration;
 
-typedef struct ParameterList_tag {
-    TypeSpecifier            *type;
-    char                     *name;
-    int                       line_number;
-    struct ParameterList_tag *next;
-    
-} ParameterList;
-
-typedef struct ArgumentList_tag {
-    Expression* expr;
-    struct ArgumentList_tag* next;
-    
-} ArgumentList;
-
-
 typedef struct {
     char          *name;
     TypeSpecifier *type;
-    ParameterList *param;
     int            index;   
 } FunctionDeclaration;
 
@@ -75,6 +60,7 @@ typedef enum {
     BOOLEAN_EXPRESSION = 1,
     DOUBLE_EXPRESSION,
     INT_EXPRESSION,
+    STRING_EXPRESSION,
     IDENTIFIER_EXPRESSION,
     INCREMENT_EXPRESSION,
     DECREMENT_EXPRESSION,
@@ -102,8 +88,7 @@ typedef enum {
 
 
 typedef struct {
-    Expression   *function;    
-    ArgumentList *argument;
+    Expression  *function;    
 } FunctionCallExpression;
 
 typedef struct {
@@ -148,6 +133,7 @@ struct Expression_tag {
     union {
         double                 double_value;
         int                    int_value;
+        char                   *string_value;
         CS_Boolean             boolean_value;
         IdentifierExpression   identifier;
         Expression             *inc_dec;
@@ -251,8 +237,9 @@ Expression* cs_create_int_expression(int v);
 Expression* cs_create_double_expression(double v);
 Expression* cs_create_boolean_expression(CS_Boolean v);
 Expression* cs_create_identifier_expression(char* identifier);
+Expression* cs_create_string_expression(char* str);
 Expression* cs_create_inc_dec_expression(Expression* id_expr, ExpressionKind inc_dec);
-Expression* cs_create_function_call_expression(Expression* function, ArgumentList* args);
+Expression* cs_create_function_call_expression(Expression* function, void* args);
 Expression* cs_create_minus_expression(Expression* operand);
 Expression* cs_create_logical_not_expression(Expression* operand);
 Expression* cs_create_binary_expression(ExpressionKind kind, Expression* left, Expression* right);
@@ -260,6 +247,7 @@ Expression* cs_create_assignment_expression(Expression* left, AssignmentOperator
 Expression* cs_create_cast_expression(CS_CastType ctype, Expression* operand);
 void delete_storage();
 ExpressionList* cs_chain_expression_list(ExpressionList* list, Expression* expr);
+char* cs_create_string(const char* str);
 char* cs_create_identifier(const char* str);
 
 Statement* cs_create_expression_statement(Expression* expr);
@@ -270,11 +258,9 @@ StatementList* cs_create_statement_list(Statement* stmt);
 DeclarationList* cs_create_declaration_list(Declaration* decl);
 TypeSpecifier* cs_create_type_specifier(CS_BasicType type);
 
-FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name, ParameterList* param);
+FunctionDeclaration* cs_create_function_declaration(CS_BasicType type, char *name);
 FunctionDeclarationList* cs_create_function_declaration_list(FunctionDeclaration* func);
 
-ParameterList* cs_create_parameter(CS_BasicType type, char* name);
-ArgumentList* cs_create_argument(Expression* expr);
 
 /* interface.c */
 CS_Compiler* CS_create_compiler();
@@ -290,8 +276,7 @@ FunctionDeclarationList* cs_chain_function_declaration_list(FunctionDeclarationL
 Declaration* cs_search_decl_in_block();
 Declaration* cs_search_decl_global(const char* name);
 FunctionDeclaration* cs_search_function(const char* name);
-ParameterList* cs_chain_parameter_list(ParameterList* list, CS_BasicType type, char* name);
-ArgumentList* cs_chain_argument_list(ArgumentList* list, Expression* expr);
+
 
 /* scanner.c */
 int get_current_line();

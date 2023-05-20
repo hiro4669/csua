@@ -130,6 +130,39 @@ retry:
             increment_line();
             goto retry;
         }
+        case '"': {
+            uint8_t str_end_flg = 0;
+            for (int i = 0; i < 4; i++) {
+                c = read();
+                if(c == '"'){
+                    str_end_flg = 1;
+                    break;
+                }
+                else if(isdigit(c)){
+                    addText(c);
+                }else if((c>='a' && c<='z')||(c>='A' && c<='Z')){
+                    addText(c);
+                }else if(c==' '){
+                    addText(c);
+                    i++;
+                    c = read();
+                    if (c != ' ')
+                    {
+                        addText(c);
+                    }
+                    else{
+                        i--;
+                    }
+                }else{
+                    i--;
+                }
+            }
+            if (!str_end_flg) {
+                while ((c = read()) != '"');//"=="->"!="
+            }
+            yylval.str = cs_create_string(yytext);
+            return STRING_LITERAL;
+        }
         case '0':
         case '1':
         case '2':
