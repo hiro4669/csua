@@ -6,6 +6,7 @@
 #include "keyword.h"
 
 #include "scantest.h"
+#include "dlex.h"
 
 
 #define ISASCII(c) isascii((unsigned char)(c))

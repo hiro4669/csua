@@ -54,7 +54,7 @@
 
 
 
-
+/*
 typedef union {
     int iv;
     double dv;
@@ -62,5 +62,6 @@ typedef union {
 } YYSTYPE;
 
 YYSTYPE yylval;
+*/
 
 #endif
