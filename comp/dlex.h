@@ -7,6 +7,6 @@ typedef union {
     char *name;
 } YYSTYPE;
 
-YYSTYPE yylval;
+extern YYSTYPE yylval;
 
 #endif

@@ -8,6 +8,7 @@
 #include "scantest.h"
 #include "dlex.h"
 
+YYSTYPE yylval;
 
 #define ISASCII(c) isascii((unsigned char)(c))
 #define ISALNUM(c) (ISASCII(c) && isalnum((unsigned char)(c)))
